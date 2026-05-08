@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOOVI CRM — Gestão de Leads</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --red: #CC0000;
+  --red2: #FF2233;
+  --dark: #0A0A0A;
+  --mid: #141414;
+  --card: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #F0F0F0;
+  --muted: #666;
+  --green: #00C87A;
+  --gold: #F5A623;
+  --blue: #4488FF;
+  --white: #FFFFFF;
+  --sidebar: 220px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.sidebar {
+  width: var(--sidebar);
+  background: var(--mid);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+.sidebar-logo h1 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
+.sidebar-logo h1 span { color: var(--red); }
+.sidebar-logo p { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+.nav-section { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; padding: 12px 8px 6px; }
+
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
+.nav-item:hover { background: var(--card); color: var(--text); }
+.nav-item.active { background: var(--red); color: var(--white); }
+.nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
+
+.nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.25); }
+
+.sidebar-user { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 32px; height: 32px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+.user-info { flex: 1; overflow: hidden; }
+.user-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 10px; color: var(--muted); }
+
+.main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar { background: var(--mid); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.page-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.btn { padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.btn-primary { background: var(--red); color: white; }
+.btn-primary:hover { background: var(--red2); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+.btn-green { background: var(--green); color: var(--dark); }
+.btn-green:hover { opacity: 0.9; }
+
+.content { padding: 24px; flex: 1; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; position: relative; overflow: hidden; }
+.stat-card.highlight { border-color: var(--red); }
+.stat-card.highlight::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--red); }
+
+.stat-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--white); line-height: 1; }
+.stat-value.green { color: var(--green); }
+.stat-value.gold { color: var(--gold); }
+.stat-value.red { color: var(--red); }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.stat-trend { position: absolute; top: 18px; right: 16px; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.trend-up { background: rgba(0,200,122,0.15); color: var(--green); }
+.trend-down { background: rgba(204,0,0,0.15); color: var(--red); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+.card-body { padding: 16px 20px; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { padding: 10px 14px; text-align: left; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody tr:last-child { border-bottom: none; }
+tbody td { padding: 12px 14px; vertical-align: middle; }
+
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; white-space: nowrap; }
+.badge-new { background: rgba(68,136,255,0.15); color: var(--blue); }
+.badge-qual { background: rgba(245,166,35,0.15); color: var(--gold); }
+.badge-prop { background: rgba(204,0,0,0.15); color: var(--red); }
+.badge-neg { background: rgba(180,100,255,0.15); color: #CC88FF; }
+.badge-won { background: rgba(0,200,122,0.15); color: var(--green); }
+.badge-lost { background: rgba(255,255,255,0.08); color: var(--muted); }
+
+.pipeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 24px; }
+.pipeline-col { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.pipeline-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.pipeline-col-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.pipeline-count { font-size: 10px; color: var(--muted); background: var(--border); padding: 1px 6px; border-radius: 10px; }
+.pipeline-cards { padding: 8px; min-height: 200px; }
+.pipeline-card { background: var(--mid); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s; }
+.pipeline-card:hover { border-color: var(--red); transform: translateY(-1px); }
+.pc-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.pc-car { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.pc-value { font-size: 11px; color: var(--green); font-weight: 600; font-family: 'DM Mono', monospace; }
+.pc-time { font-size: 9px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+.pipeline-footer { padding: 8px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); text-align: center; font-family: 'DM Mono', monospace; }
+
+.follow-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.follow-item:last-child { border-bottom: none; }
+.follow-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.follow-info { flex: 1; }
+.follow-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.follow-detail { font-size: 11px; color: var(--muted); }
+.follow-time { font-size: 10px; font-family: 'DM Mono', monospace; white-space: nowrap; }
+.follow-urgent { color: var(--red); }
+.follow-today { color: var(--gold); }
+.follow-ok { color: var(--green); }
+
+.progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.progress-label { font-size: 12px; flex: 1; }
+.progress-bar-wrap { flex: 2; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 3px; background: var(--red); }
+.progress-val { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); width: 36px; text-align: right; }
+
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-svg { flex-shrink: 0; }
+.donut-legend { flex: 1; }
+.donut-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+.donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.donut-pct { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; color: var(--text); }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--mid); border: 1px solid var(--border); border-radius: 10px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+.modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 4px; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 24px; }
+.form-row { margin-bottom: 16px; }
+.form-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display: block; font-family: 'DM Mono', monospace; }
+.form-input, .form-select, .form-textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s; outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+.form-select option { background: var(--card); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+.hamburger { display: none; background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; padding: 4px; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+.sidebar-overlay.open { display: block; }
+
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 13px; color: var(--muted); transition: border-color 0.15s; min-width: 200px; }
+.search-box input { background: none; border: none; color: var(--text); font-size: 13px; outline: none; flex: 1; font-family: 'DM Sans', sans-serif; }
+.search-box input::placeholder { color: var(--muted); }
+.search-box:focus-within { border-color: var(--red); }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 8px; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
+
+.notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; display: inline-block; margin-left: 4px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.page.active .stat-card { animation: fadeUp 0.4s ease both; }
+.page.active .stat-card:nth-child(2) { animation-delay: 0.05s; }
+.page.active .stat-card:nth-child(3) { animation-delay: 0.1s; }
+.page.active .stat-card:nth-child(4) { animation-delay: 0.15s; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+#loadingBar { position: fixed; top: 0; left: 0; height: 2px; background: var(--red); z-index: 999; transition: width 0.3s ease, opacity 0.3s; width: 0; opacity: 0; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .hamburger { display: block; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .pipeline { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="loadingBar"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1>LOOVI<span>.</span></h1>
+    <p>CRM · Seguro Auto</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="nav('dashboard', this)"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="nav('leads', this)"><span class="icon">👥</span> Leads<span class="nav-badge" id="leadsBadge">0</span></div>
+    <div class="nav-item" onclick="nav('pipeline', this)"><span class="icon">🔀</span> Pipeline</div>
+    <div class="nav-section">Operação</div>
+    <div class="nav-item" onclick="nav('followup', this)"><span class="icon">⏰</span> Follow-up<span class="nav-badge" id="followBadge">0</span></div>
+    <div class="nav-item" onclick="nav('vendas', this)"><span class="icon">💰</span> Vendas</div>
+    <div class="nav-item" onclick="nav('relatorios', this)"><span class="icon">📈</span> Relatórios</div>
+    <div class="nav-section">Equipe</div>
+    <div class="nav-item" onclick="nav('equipe', this)"><span class="icon">🏆</span> Ranking</div>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar">CJ</div>
+    <div class="user-info">
+      <div class="user-name">Cássio Junior</div>
+      <div class="user-role">Executivo LOOVI</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="page-title" id="pageTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscar lead..." id="globalSearch" oninput="searchLeads()">
+      </div>
+      <button class="btn btn-ghost" onclick="openModal('importCSV')">📥 Importar</button>
+      <button class="btn btn-primary" onclick="openModal('addLead')">+ Novo Lead</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card highlight"><div class="stat-label">Leads Ativos</div><div class="stat-value" id="statLeads">—</div><div class="stat-sub">Total na base</div></div>
+        <div class="stat-card"><div class="stat-label">Propostas Enviadas</div><div class="stat-value gold" id="statProp">—</div><div class="stat-sub">Aguardando resposta</div></div>
+        <div class="stat-card"><div class="stat-label">Vendas do Mês</div><div class="stat-value green" id="statVendas">—</div><div class="stat-sub" id="statVendasSub"></div></div>
+        <div class="stat-card"><div class="stat-label">Follow-ups Hoje</div><div class="stat-value red" id="statFollow">—</div><div class="stat-sub">Pendentes agora</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-header"><span class="card-title">Funil de Conversão</span></div><div class="card-body"><div id="funnelBars"></div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Origem dos Leads</span></div><div class="card-body"><div class="donut-wrap"><svg class="donut-svg" width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="35" fill="none" stroke="#2A2A2A" stroke-width="14"/><circle cx="45" cy="45" r="35" fill="none" stroke="#CC0000" stroke-width="14" stroke-dasharray="88 132" stroke-dashoffset="0" transform="rotate(-90 45 45)"/><circle cx="45" cy="45" r="35" fill="none" stroke="#00C87A" stroke-width="14" stroke-dasharray="66 154" stroke-dashoffset="-88" transform="rotate(-90 45 45)"/><circle cx="45" cy="45" r="35" fill="none" stroke="#F5A623" stroke-width="14" stroke-dasharray="44 176" stroke-dashoffset="-154" transform="rotate(-90 45 45)"/></svg><div class="donut-legend"><div class="donut-item"><div class="donut-dot" style="background:#CC0000"></div>Site LOOVI<span class="donut-pct" id="pctSite">0%</span></div><div class="donut-item"><div class="donut-dot" style="background:#00C87A"></div>Indicação<span class="donut-pct" id="pctInd">0%</span></div><div class="donut-item"><div class="donut-dot" style="background:#F5A623"></div>WhatsApp<span class="donut-pct" id="pctWa">0%</span></div><div class="donut-item"><div class="donut-dot" style="background:#4488FF"></div>Outros<span class="donut-pct" id="pctOut">0%</span></div></div></div></div></div>
+      </div>
+      <div class="card" style="margin-bottom:24px"><div class="card-header"><span class="card-title">⏰ Próximos Follow-ups</span><button class="btn btn-ghost" onclick="nav('followup', document.querySelector('[onclick*=followup]'))">Ver todos</button></div><div class="card-body" id="dashFollowList"></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Últimos Leads</span><button class="btn btn-ghost" onclick="nav('leads', document.querySelector('[onclick*=leads]'))">Ver todos</button></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Carro</th><th>Status</th><th>Origem</th><th>Follow-up</th></tr></thead><tbody id="dashLeadTable"></tbody></table></div></div>
+    </div>
+
+    <div class="page" id="page-leads">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <select class="form-select" style="width:auto;padding:8px 12px" id="filterStatus" onchange="renderLeadsTable()"><option value="">Todos os status</option><option value="Novo">Novo</option><option value="Qualificado">Qualificado</option><option value="Proposta">Proposta</option><option value="Negociação">Negociação</option><option value="Ganho">Ganho</option><option value="Perdido">Perdido</option></select>
+        <select class="form-select" style="width:auto;padding:8px 12px" id="filterOrigem" onchange="renderLeadsTable()"><option value="">Todas as origens</option><option value="Site LOOVI">Site LOOVI</option><option value="Indicação">Indicação</option><option value="WhatsApp">WhatsApp</option><option value="Outros">Outros</option></select>
+        <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="leadsCount">0 leads</span>
+      </div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Carro</th><th>Cidade</th><th>Status</th><th>Follow-up</th><th>Ações</th></tr></thead><tbody id="leadsTable"></tbody></table></div></div>
+    </div>
+
+    <div class="page" id="page-pipeline"><div class="pipeline" id="pipelineBoard"></div></div>
+
+    <div class="page" id="page-followup">
+      <div class="grid-2" style="margin-bottom:16px">
+        <div class="stat-card"><div class="stat-label">Urgente (vencidos)</div><div class="stat-value red" id="fuUrgente">0</div></div>
+        <div class="stat-card"><div class="stat-label">Hoje</div><div class="stat-value gold" id="fuHoje">0</div></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">Lista de Follow-ups</span></div><div class="card-body" id="followList"></div></div>
+    </div>
+
+    <div class="page" id="page-vendas">
+      <div class="stats-row">
+        <div class="stat-card highlight"><div class="stat-label">Total Vendas</div><div class="stat-value" id="vTotalQtd">0</div><div class="stat-sub">Todos os meses</div></div>
+        <div class="stat-card"><div class="stat-label">Mês Atual</div><div class="stat-value green" id="vMesQtd">0</div><div class="stat-sub" id="vMesLabel"></div></div>
+        <div class="stat-card"><div class="stat-label">Conversão</div><div class="stat-value gold" id="vConversao">0%</div><div class="stat-sub">Leads → Vendas</div></div>
+        <div class="stat-card"><div class="stat-label">Melhor Mês</div><div class="stat-value" id="vMelhor">—</div><div class="stat-sub">Histórico</div></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">Vendas por Mês</span><button class="btn btn-green" onclick="openModal('addVenda')">+ Registrar Venda</button></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>Carro</th><th>Plano</th><th>Mensalidade</th><th>Origem</th></tr></thead><tbody id="vendasTable"></tbody></table></div></div>
+    </div>
+
+    <div class="page" id="page-relatorios">
+      <div class="grid-3">
+        <div class="card"><div class="card-header"><span class="card-title">Status dos Leads</span></div><div class="card-body" id="relStatus"></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Origem dos Leads</span></div><div class="card-body" id="relOrigem"></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Metas do Mês</span></div><div class="card-body" id="relMetas"></div></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">Performance por Executivo</span></div><div class="table-wrap"><table><thead><tr><th>Executivo</th><th>Leads</th><th>Propostas</th><th>Vendas</th><th>Conversão</th></tr></thead><tbody id="relExec"></tbody></table></div></div>
+    </div>
+
+    <div class="page" id="page-equipe">
+      <div class="card"><div class="card-header"><span class="card-title" id="rankingTitle">🏆 Ranking da Equipe</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Executivo</th><th>Leads</th><th>Vendas</th><th>Conversão</th><th>Performance</th></tr></thead><tbody id="rankingTable"></tbody></table></div></div>
+    </div>
+
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal-addLead"><div class="modal"><div class="modal-header"><span class="modal-title">Novo Lead</span><button class="modal-close" onclick="closeModal('addLead')">✕</button></div><div class="modal-body"><div class="form-grid"><div class="form-row"><label class="form-label">Nome *</label><input class="form-input" id="leadNome" placeholder="Nome do cliente"></div><div class="form-row"><label class="form-label">Telefone</label><input class="form-input" id="leadTel" placeholder="(00) 00000-0000"></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Modelo do Carro</label><input class="form-input" id="leadCarro" placeholder="Ex: HB20 2022"></div><div class="form-row"><label class="form-label">Cidade</label><input class="form-input" id="leadCidade" placeholder="Cidade / UF"></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Status</label><select class="form-select" id="leadStatus"><option>Novo</option><option>Qualificado</option><option>Proposta</option><option>Negociação</option><option>Ganho</option><option>Perdido</option></select></div><div class="form-row"><label class="form-label">Origem</label><select class="form-select" id="leadOrigem"><option>Site LOOVI</option><option>Indicação</option><option>WhatsApp</option><option>Outros</option></select></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Mensalidade (R$)</label><input class="form-input" id="leadValor" type="number" placeholder="0,00"></div><div class="form-row"><label class="form-label">Follow-up</label><input class="form-input" id="leadFollowup" type="date"></div></div><div class="form-row"><label class="form-label">Executivo</label><input class="form-input" id="leadExec" placeholder="Nome do executivo"></div><div class="form-row"><label class="form-label">Observações</label><textarea class="form-textarea" id="leadObs" placeholder="Notas sobre o lead..."></textarea></div></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('addLead')">Cancelar</button><button class="btn btn-primary" id="btnSaveLead" onclick="saveLead()">Salvar Lead</button></div></div></div>
+
+<div class="modal-overlay" id="modal-addVenda"><div class="modal"><div class="modal-header"><span class="modal-title">Registrar Venda</span><button class="modal-close" onclick="closeModal('addVenda')">✕</button></div><div class="modal-body"><div class="form-grid"><div class="form-row"><label class="form-label">Cliente *</label><input class="form-input" id="vendaCliente" placeholder="Nome do cliente"></div><div class="form-row"><label class="form-label">Data</label><input class="form-input" id="vendaData" type="date"></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Carro</label><input class="form-input" id="vendaCarro" placeholder="Modelo e ano"></div><div class="form-row"><label class="form-label">Plano</label><select class="form-select" id="vendaPlano"><option>Completo</option><option>Essencial</option><option>Básico</option></select></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Mensalidade (R$)</label><input class="form-input" id="vendaValor" type="number" placeholder="0,00"></div><div class="form-row"><label class="form-label">Origem</label><select class="form-select" id="vendaOrigem"><option>Site LOOVI</option><option>Indicação</option><option>WhatsApp</option><option>Outros</option></select></div></div><div class="form-row"><label class="form-label">Executivo</label><input class="form-input" id="vendaExec" placeholder="Nome do executivo"></div></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('addVenda')">Cancelar</button><button class="btn btn-green" id="btnSaveVenda" onclick="saveVenda()">Registrar Venda</button></div></div></div>
+
+<div class="modal-overlay" id="modal-editLead"><div class="modal"><div class="modal-header"><span class="modal-title">Editar Lead</span><button class="modal-close" onclick="closeModal('editLead')">✕</button></div><div class="modal-body"><input type="hidden" id="editLeadId"><div class="form-grid"><div class="form-row"><label class="form-label">Nome *</label><input class="form-input" id="editNome"></div><div class="form-row"><label class="form-label">Telefone</label><input class="form-input" id="editTel"></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Carro</label><input class="form-input" id="editCarro"></div><div class="form-row"><label class="form-label">Cidade</label><input class="form-input" id="editCidade"></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Status</label><select class="form-select" id="editStatus"><option>Novo</option><option>Qualificado</option><option>Proposta</option><option>Negociação</option><option>Ganho</option><option>Perdido</option></select></div><div class="form-row"><label class="form-label">Origem</label><select class="form-select" id="editOrigem"><option>Site LOOVI</option><option>Indicação</option><option>WhatsApp</option><option>Outros</option></select></div></div><div class="form-grid"><div class="form-row"><label class="form-label">Mensalidade (R$)</label><input class="form-input" id="editValor" type="number"></div><div class="form-row"><label class="form-label">Follow-up</label><input class="form-input" id="editFollowup" type="date"></div></div><div class="form-row"><label class="form-label">Executivo</label><input class="form-input" id="editExec"></div><div class="form-row"><label class="form-label">Observações</label><textarea class="form-textarea" id="editObs"></textarea></div></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('editLead')">Cancelar</button><button class="btn btn-primary" id="btnUpdateLead" onclick="updateLead()">Salvar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-importCSV"><div class="modal" style="width:540px"><div class="modal-header"><span class="modal-title">📥 Importar Leads</span><button class="modal-close" onclick="closeModal('importCSV')">✕</button></div><div class="modal-body"><div class="form-row"><label class="form-label">Arquivo Excel (.xlsx) ou CSV</label><div id="dropZone" style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer" onclick="document.getElementById('xlsxFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--red)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';document.getElementById('xlsxFileInput').files=event.dataTransfer.files;showFileName(event.dataTransfer.files[0])"><div style="font-size:28px;margin-bottom:8px">📂</div><div style="font-size:13px;color:var(--text);font-weight:600">Arraste o arquivo aqui ou clique para selecionar</div><div style="font-size:11px;color:var(--muted);margin-top:4px" id="xlsxFileName">Suporta: .xlsx, .xls, .csv</div></div><input type="file" id="xlsxFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="showFileName(this.files[0])"></div><div style="display:flex;align-items:center;gap:12px;margin:12px 0"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">OU COLE O TEXTO</span><div style="flex:1;height:1px;background:var(--border)"></div></div><div class="form-row"><textarea class="form-textarea" id="csvInput" style="min-height:90px;font-family:'DM Mono',monospace;font-size:12px" placeholder="Nathan&#9;5521991689945&#10;Carlos&#9;5524999986907"></textarea><div style="font-size:10px;color:var(--muted);margin-top:4px">Tab, Vírgula ou Ponto e vírgula entre nome e telefone</div></div><div class="form-grid"><div class="form-row"><label class="form-label">Origem padrão</label><select class="form-select" id="xlsxOrigem"><option value="Site LOOVI">🌐 Site LOOVI</option><option value="Indicação">👥 Indicação</option><option value="WhatsApp">📱 WhatsApp</option><option value="Outros">➕ Outros</option></select></div><div class="form-row"><label class="form-label">Status inicial</label><select class="form-select" id="xlsxStatus"><option value="Novo">Novo</option><option value="Qualificado">Qualificado</option><option value="Proposta">Proposta</option></select></div></div><div class="form-row"><label class="form-label">Executivo responsável</label><input class="form-input" id="xlsxExec" placeholder="Nome do executivo" value="Cássio"></div><div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:6px;padding:12px 14px;margin-top:4px"><div style="font-size:10px;font-weight:700;color:var(--red);margin-bottom:6px;font-family:'DM Mono',monospace;letter-spacing:1px">PLANILHA LOOVI DETECTA AUTOMATICAMENTE</div><div style="font-size:11px;color:var(--muted);line-height:1.7">✔ Nome, Telefone, Carro, Cidade<br>✔ Status, Origem, Mensalidade, Follow-up<br>✔ Executivo e Observações</div></div></div><div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('importCSV')">Cancelar</button><button class="btn btn-primary" id="btnImport" onclick="importCSV()">📥 Importar Leads</button></div></div></div>
+
+<script>
+let leads = [], vendas = [], currentPage = 'dashboard';
+
+async function api(url, method='GET', body=null) {
+  const opts = { method, headers: {} };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const res = await fetch(url, opts);
+  if (!res.ok) { const txt = await res.text(); throw new Error(txt || res.statusText); }
+  return res.json();
+}
+
+function showLoading() { const b = document.getElementById('loadingBar'); b.style.width='60%'; b.style.opacity='1'; }
+function hideLoading() { const b = document.getElementById('loadingBar'); b.style.width='100%'; setTimeout(()=>{ b.style.opacity='0'; b.style.width='0'; },300); }
+
+async function loadData() {
+  showLoading();
+  try { [leads, vendas] = await Promise.all([api('/api/leads'), api('/api/vendas')]); }
+  catch(e) { console.error(e); leads=[]; vendas=[]; }
+  hideLoading(); renderDashboard(); updateBadges();
+}
+
+const pageTitles = { dashboard:'Dashboard', leads:'Leads', pipeline:'Pipeline', followup:'Follow-up', vendas:'Vendas', relatorios:'Relatórios', equipe:'Ranking da Equipe' };
+
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[page]||page;
+  currentPage=page; renderPage(page); closeSidebar();
+}
+
+function renderPage(page) {
+  if(page==='dashboard') renderDashboard();
+  else if(page==='leads') renderLeadsTable();
+  else if(page==='pipeline') renderPipeline();
+  else if(page==='followup') renderFollowup();
+  else if(page==='vendas') renderVendas();
+  else if(page==='relatorios') renderRelatorios();
+  else if(page==='equipe') renderEquipe();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+function openModal(id) { document.getElementById('modal-'+id).classList.add('open'); if(id==='addVenda') document.getElementById('vendaData').value=new Date().toISOString().split('T')[0]; }
+function closeModal(id) { document.getElementById('modal-'+id).classList.remove('open'); }
+
+async function saveLead() {
+  const nome = document.getElementById('leadNome').value.trim();
+  if(!nome){alert('Nome é obrigatório');return;}
+  const btn=document.getElementById('btnSaveLead'); btn.disabled=true; btn.textContent='Salvando...';
+  try {
+    const lead = await api('/api/leads','POST',{nome,tel:document.getElementById('leadTel').value,carro:document.getElementById('leadCarro').value,cidade:document.getElementById('leadCidade').value,status:document.getElementById('leadStatus').value,origem:document.getElementById('leadOrigem').value,valor:parseFloat(document.getElementById('leadValor').value)||0,followup:document.getElementById('leadFollowup').value,exec:document.getElementById('leadExec').value||'Cássio',obs:document.getElementById('leadObs').value});
+    leads.unshift(lead); closeModal('addLead'); clearLeadForm(); renderPage(currentPage); updateBadges();
+  } catch(e){alert('Erro: '+e.message);} finally{btn.disabled=false;btn.textContent='Salvar Lead';}
+}
+
+function clearLeadForm() {
+  ['leadNome','leadTel','leadCarro','leadCidade','leadValor','leadFollowup','leadExec','leadObs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('leadFollowup').value=new Date().toISOString().split('T')[0];
+}
+
+function editLead(id) {
+  const l=leads.find(x=>x.id===id); if(!l) return;
+  document.getElementById('editLeadId').value=id;
+  document.getElementById('editNome').value=l.nome;
+  document.getElementById('editTel').value=l.tel||'';
+  document.getElementById('editCarro').value=l.carro||'';
+  document.getElementById('editCidade').value=l.cidade||'';
+  document.getElementById('editStatus').value=l.status;
+  document.getElementById('editOrigem').value=l.origem;
+  document.getElementById('editValor').value=l.valor||'';
+  document.getElementById('editFollowup').value=l.followup||'';
+  document.getElementById('editExec').value=l.exec||'';
+  document.getElementById('editObs').value=l.obs||'';
+  openModal('editLead');
+}
+
+async function updateLead() {
+  const id=parseInt(document.getElementById('editLeadId').value);
+  const idx=leads.findIndex(x=>x.id===id); if(idx===-1) return;
+  const btn=document.getElementById('btnUpdateLead'); btn.disabled=true; btn.textContent='Salvando...';
+  try {
+    const updated=await api(`/api/leads/${id}`,'PUT',{nome:document.getElementById('editNome').value,tel:document.getElementById('editTel').value,carro:document.getElementById('editCarro').value,cidade:document.getElementById('editCidade').value,status:document.getElementById('editStatus').value,origem:document.getElementById('editOrigem').value,valor:parseFloat(document.getElementById('editValor').value)||0,followup:document.getElementById('editFollowup').value,exec:document.getElementById('editExec').value,obs:document.getElementById('editObs').value});
+    leads[idx]=updated; closeModal('editLead'); renderPage(currentPage); updateBadges();
+  } catch(e){alert('Erro: '+e.message);} finally{btn.disabled=false;btn.textContent='Salvar';}
+}
+
+async function deleteLead(id) {
+  if(!confirm('Remover este lead?')) return;
+  try { await api(`/api/leads/${id}`,'DELETE'); leads=leads.filter(x=>x.id!==id); renderPage(currentPage); updateBadges(); }
+  catch(e){alert('Erro: '+e.message);}
+}
+
+async function saveVenda() {
+  const cliente=document.getElementById('vendaCliente').value.trim();
+  if(!cliente){alert('Cliente é obrigatório');return;}
+  const btn=document.getElementById('btnSaveVenda'); btn.disabled=true; btn.textContent='Salvando...';
+  try {
+    const venda=await api('/api/vendas','POST',{cliente,data:document.getElementById('vendaData').value||new Date().toISOString().split('T')[0],carro:document.getElementById('vendaCarro').value,plano:document.getElementById('vendaPlano').value,valor:parseFloat(document.getElementById('vendaValor').value)||0,origem:document.getElementById('vendaOrigem').value,exec:document.getElementById('vendaExec').value||'Cássio'});
+    vendas.unshift(venda); closeModal('addVenda');
+    ['vendaCliente','vendaCarro','vendaValor','vendaExec'].forEach(i=>document.getElementById(i).value='');
+    renderPage(currentPage); updateBadges();
+  } catch(e){alert('Erro: '+e.message);} finally{btn.disabled=false;btn.textContent='Registrar Venda';}
+}
+
+function badgeHtml(s){const m={'Novo':'badge-new','Qualificado':'badge-qual','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost'};return`<span class="badge ${m[s]||'badge-new'}">${s}</span>`;}
+function origemTag(o){const m={'Site LOOVI':'🌐','Indicação':'👥','WhatsApp':'📱','Outros':'➕'};return`${m[o]||'📌'} ${o}`;}
+function timeAgo(iso){if(!iso)return'—';const d=Math.floor((Date.now()-new Date(iso))/60000);if(d<60)return`${d}min atrás`;if(d<1440)return`${Math.floor(d/60)}h atrás`;return`${Math.floor(d/1440)}d atrás`;}
+function followStatus(ds){if(!ds)return{cls:'',text:'—'};const d=new Date(ds+'T00:00:00'),t=new Date();t.setHours(0,0,0,0);const df=Math.floor((d-t)/86400000);if(df<0)return{cls:'follow-urgent',text:`Vencido (${Math.abs(df)}d)`};if(df===0)return{cls:'follow-today',text:'Hoje'};if(df===1)return{cls:'follow-today',text:'Amanhã'};return{cls:'follow-ok',text:d.toLocaleDateString('pt-BR')};}
+
+function updateBadges(){
+  const t=new Date();t.setHours(0,0,0,0);
+  document.getElementById('leadsBadge').textContent=leads.filter(l=>l.status!=='Ganho'&&l.status!=='Perdido').length;
+  document.getElementById('followBadge').textContent=leads.filter(l=>l.followup&&new Date(l.followup+'T00:00:00')<=t).length;
+}
+
+function searchLeads(){const q=document.getElementById('globalSearch').value.toLowerCase();if(q.length>1){nav('leads',document.querySelector('[onclick*="\'leads\'"]'));renderLeadsTable(q);}}
+
+function renderDashboard(){
+  const t=new Date();t.setHours(0,0,0,0);const mes=t.getMonth(),ano=t.getFullYear();
+  const mn=t.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  document.getElementById('statLeads').textContent=leads.length;
+  document.getElementById('statProp').textContent=leads.filter(l=>l.status==='Proposta').length;
+  document.getElementById('statVendasSub').textContent=mn.charAt(0).toUpperCase()+mn.slice(1);
+  const vm=vendas.filter(v=>{const d=new Date(v.data);return d.getMonth()===mes&&d.getFullYear()===ano;});
+  document.getElementById('statVendas').textContent=vm.length;
+  const fp=leads.filter(l=>l.followup&&new Date(l.followup+'T00:00:00')<=t&&l.status!=='Ganho'&&l.status!=='Perdido');
+  document.getElementById('statFollow').textContent=fp.length;
+  const ss=['Novo','Qualificado','Proposta','Negociação','Ganho'],cs=ss.map(s=>leads.filter(l=>l.status===s).length),mx=Math.max(...cs,1),cl=['#4488FF','#F5A623','#CC0000','#CC88FF','#00C87A'];
+  document.getElementById('funnelBars').innerHTML=ss.map((s,i)=>`<div class="progress-row"><div class="progress-label">${s}</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:${(cs[i]/mx)*100}%;background:${cl[i]}"></div></div><div class="progress-val">${cs[i]}</div></div>`).join('');
+  const tot=leads.length||1,ors=['Site LOOVI','Indicação','WhatsApp','Outros'],oc=ors.map(o=>leads.filter(l=>l.origem===o).length);
+  ['pctSite','pctInd','pctWa','pctOut'].forEach((id,i)=>document.getElementById(id).textContent=Math.round((oc[i]/tot)*100)+'%');
+  const up=leads.filter(l=>l.followup&&l.status!=='Ganho'&&l.status!=='Perdido').sort((a,b)=>new Date(a.followup)-new Date(b.followup)).slice(0,5);
+  const fEl=document.getElementById('dashFollowList');
+  fEl.innerHTML=up.length===0?'<div class="empty-state"><div class="icon">✅</div><h3>Tudo em dia!</h3></div>':up.map(l=>{const fs=followStatus(l.followup);return`<div class="follow-item"><div class="follow-avatar">${l.nome[0]}</div><div class="follow-info"><div class="follow-name">${l.nome}</div><div class="follow-detail">${l.carro||'Sem carro'} · ${l.status}</div></div><div class="follow-time ${fs.cls}">${fs.text}</div></div>`;}).join('');
+  const tEl=document.getElementById('dashLeadTable'),rc=leads.slice(0,8);
+  tEl.innerHTML=rc.length===0?'<tr><td colspan="5"><div class="empty-state" style="padding:24px"><p>Nenhum lead ainda.</p></div></td></tr>':rc.map(l=>{const fs=followStatus(l.followup);return`<tr onclick="editLead(${l.id})"><td><strong>${l.nome}</strong></td><td>${l.carro||'—'}</td><td>${badgeHtml(l.status)}</td><td style="font-size:11px;color:var(--muted)">${l.origem}</td><td style="font-size:11px" class="${fs.cls}">${fs.text}</td></tr>`;}).join('');
+}
+
+function renderLeadsTable(searchQ=''){
+  const sf=document.getElementById('filterStatus')?.value||'',of=document.getElementById('filterOrigem')?.value||'',q=searchQ||document.getElementById('globalSearch')?.value.toLowerCase()||'';
+  const f=leads.filter(l=>{if(sf&&l.status!==sf)return false;if(of&&l.origem!==of)return false;if(q&&!l.nome.toLowerCase().includes(q)&&!(l.carro||'').toLowerCase().includes(q)&&!(l.cidade||'').toLowerCase().includes(q))return false;return true;});
+  document.getElementById('leadsCount').textContent=`${f.length} leads`;
+  const tb=document.getElementById('leadsTable');
+  if(f.length===0){tb.innerHTML='<tr><td colspan="7"><div class="empty-state" style="padding:32px"><div class="icon">🔍</div><h3>Nenhum lead encontrado</h3></div></td></tr>';return;}
+  tb.innerHTML=f.map(l=>{const fs=followStatus(l.followup);return`<tr><td><strong>${l.nome}</strong>${l.tel?`<div style="font-size:10px;color:var(--muted)">${l.tel}</div>`:''}</td><td style="font-size:12px">${l.carro||'—'}</td><td>${l.cidade||'—'}</td><td>${badgeHtml(l.status)}</td><td style="font-size:11px;color:var(--muted)">${origemTag(l.origem)}</td><td style="font-size:11px" class="${fs.cls}">${fs.text}</td><td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;margin-right:4px" onclick="editLead(${l.id})">✏️</button><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;color:var(--red)" onclick="deleteLead(${l.id})">🗑️</button></td></tr>`;}).join('');
+}
+
+function renderPipeline(){
+  const cols=[{key:'Novo',label:'NOVO',color:'#4488FF'},{key:'Qualificado',label:'QUALIF.',color:'#F5A623'},{key:'Proposta',label:'PROPOSTA',color:'#CC0000'},{key:'Negociação',label:'NEGOC.',color:'#CC88FF'},{key:'Ganho',label:'GANHO',color:'#00C87A'},{key:'Perdido',label:'PERDIDO',color:'#555'}];
+  document.getElementById('pipelineBoard').innerHTML=cols.map(col=>{const cl=leads.filter(l=>l.status===col.key),tv=cl.reduce((s,l)=>s+(parseFloat(l.valor)||0),0);return`<div class="pipeline-col"><div class="pipeline-header"><span class="pipeline-col-title" style="color:${col.color}">${col.label}</span><span class="pipeline-count">${cl.length}</span></div><div class="pipeline-cards">${cl.length===0?'<div style="text-align:center;padding:20px;font-size:11px;color:var(--muted)">Vazio</div>':cl.map(l=>`<div class="pipeline-card" onclick="editLead(${l.id})"><div class="pc-name">${l.nome}</div><div class="pc-car">${l.carro||'Sem carro'}</div>${l.valor?`<div class="pc-value">R$ ${parseFloat(l.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}/mês</div>`:''}<div class="pc-time">${timeAgo(l.created)}</div></div>`).join('')}</div><div class="pipeline-footer">${tv>0?`R$ ${tv.toLocaleString('pt-BR',{minimumFractionDigits:2})}`:'—'}</div></div>`;}).join('');
+}
+
+function renderFollowup(){
+  const t=new Date();t.setHours(0,0,0,0);
+  const wf=leads.filter(l=>l.followup&&l.status!=='Ganho'&&l.status!=='Perdido').sort((a,b)=>new Date(a.followup)-new Date(b.followup));
+  document.getElementById('fuUrgente').textContent=wf.filter(l=>new Date(l.followup+'T00:00:00')<t).length;
+  document.getElementById('fuHoje').textContent=wf.filter(l=>{const d=new Date(l.followup+'T00:00:00');d.setHours(0,0,0,0);return d.getTime()===t.getTime();}).length;
+  const el=document.getElementById('followList');
+  if(wf.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🎉</div><h3>Nenhum follow-up!</h3></div>';return;}
+  el.innerHTML=wf.map(l=>{const fs=followStatus(l.followup);return`<div class="follow-item"><div class="follow-avatar">${l.nome[0]}</div><div class="follow-info"><div class="follow-name">${l.nome}</div><div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${l.status}</div>${l.obs?`<div class="follow-detail" style="margin-top:2px;font-style:italic">${l.obs.slice(0,60)}${l.obs.length>60?'...':''}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="follow-time ${fs.cls}">${fs.text}</div><button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button></div></div>`;}).join('');
+}
+
+function renderVendas(){
+  const t=new Date(),mes=t.getMonth(),ano=t.getFullYear(),mn=t.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  document.getElementById('vTotalQtd').textContent=vendas.length;
+  document.getElementById('vMesLabel').textContent=mn.charAt(0).toUpperCase()+mn.slice(1);
+  const vm=vendas.filter(v=>{const d=new Date(v.data);return d.getMonth()===mes&&d.getFullYear()===ano;});
+  document.getElementById('vMesQtd').textContent=vm.length;
+  document.getElementById('vConversao').textContent=(leads.length>0?Math.round((vendas.length/leads.length)*100):0)+'%';
+  if(vendas.length>0){const bm={};vendas.forEach(v=>{const k=v.data.slice(0,7);bm[k]=(bm[k]||0)+1;});const b=Object.entries(bm).sort((a,c)=>c[1]-a[1])[0];if(b){const[y,m]=b[0].split('-');document.getElementById('vMelhor').textContent=`${b[1]} — ${new Date(y,m-1).toLocaleDateString('pt-BR',{month:'short',year:'numeric'})}`;} }
+  const tb=document.getElementById('vendasTable');
+  if(vendas.length===0){tb.innerHTML='<tr><td colspan="6"><div class="empty-state" style="padding:32px"><div class="icon">💰</div><h3>Nenhuma venda</h3></div></td></tr>';return;}
+  tb.innerHTML=vendas.map(v=>`<tr><td style="font-family:'DM Mono',monospace;font-size:11px">${new Date(v.data).toLocaleDateString('pt-BR')}</td><td><strong>${v.cliente}</strong></td><td style="font-size:12px">${v.carro||'—'}</td><td><span class="badge badge-won">${v.plano}</span></td><td style="color:var(--green);font-weight:600;font-family:'DM Mono',monospace">R$ ${(parseFloat(v.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="font-size:11px;color:var(--muted)">${v.origem}</td></tr>`).join('');
+}
+
+function renderRelatorios(){
+  const ss=['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'],sc=ss.map(s=>leads.filter(l=>l.status===s).length),sco=['#4488FF','#F5A623','#CC0000','#CC88FF','#00C87A','#555'],m1=Math.max(...sc,1);
+  document.getElementById('relStatus').innerHTML=ss.map((s,i)=>`<div class="progress-row"><div class="progress-label" style="font-size:11px">${s}</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:${(sc[i]/m1)*100}%;background:${sco[i]}"></div></div><div class="progress-val">${sc[i]}</div></div>`).join('');
+  const os=['Site LOOVI','Indicação','WhatsApp','Outros'],oc=os.map(o=>leads.filter(l=>l.origem===o).length),oco=['#CC0000','#00C87A','#F5A623','#4488FF'],m2=Math.max(...oc,1);
+  document.getElementById('relOrigem').innerHTML=os.map((o,i)=>`<div class="progress-row"><div class="progress-label" style="font-size:11px">${o}</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:${(oc[i]/m2)*100}%;background:${oco[i]}"></div></div><div class="progress-val">${oc[i]}</div></div>`).join('');
+  const meta=10,td=new Date(),vm=vendas.filter(v=>{const d=new Date(v.data);return d.getMonth()===td.getMonth()&&d.getFullYear()===td.getFullYear();}).length,pct=Math.min(Math.round((vm/meta)*100),100);
+  document.getElementById('relMetas').innerHTML=`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px">Vendas do mês</span><span style="font-size:13px;font-weight:700;color:var(--green)">${vm}/${meta}</span></div><div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--green);border-radius:5px"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px">${pct}% da meta</div></div><div style="text-align:center;padding:12px;background:var(--mid);border-radius:6px"><div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:${pct>=100?'var(--green)':'var(--text)'}">${pct}%</div><div style="font-size:11px;color:var(--muted)">Meta: ${meta} vendas/mês</div></div>`;
+  const ex={};leads.forEach(l=>{const e=l.exec||'Cássio';if(!ex[e])ex[e]={leads:0,props:0,vendas:0};ex[e].leads++;if(l.status==='Proposta'||l.status==='Negociação')ex[e].props++;});vendas.forEach(v=>{const e=v.exec||'Cássio';if(!ex[e])ex[e]={leads:0,props:0,vendas:0};ex[e].vendas++;});
+  const er=Object.entries(ex).sort((a,b)=>b[1].vendas-a[1].vendas),re=document.getElementById('relExec');
+  re.innerHTML=er.length===0?'<tr><td colspan="5"><div class="empty-state" style="padding:24px"><p>Nenhum dado</p></div></td></tr>':er.map(([n,d])=>`<tr><td><strong>${n}</strong></td><td>${d.leads}</td><td>${d.props}</td><td style="color:var(--green);font-weight:700">${d.vendas}</td><td>${d.leads>0?Math.round((d.vendas/d.leads)*100):0}%</td></tr>`).join('');
+}
+
+function renderEquipe(){
+  const t=new Date(),mn=t.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  document.getElementById('rankingTitle').textContent=`🏆 Ranking — ${mn.charAt(0).toUpperCase()+mn.slice(1)}`;
+  const ex={};leads.forEach(l=>{const e=l.exec||'Cássio';if(!ex[e])ex[e]={leads:0,vendas:0};ex[e].leads++;});vendas.forEach(v=>{const e=v.exec||'Cássio';if(!ex[e])ex[e]={leads:0,vendas:0};ex[e].vendas++;});
+  const s=Object.entries(ex).sort((a,b)=>b[1].vendas-a[1].vendas),md=['🥇','🥈','🥉'],el=document.getElementById('rankingTable');
+  el.innerHTML=s.length===0?'<tr><td colspan="6"><div class="empty-state" style="padding:32px"><div class="icon">🏆</div><h3>Nenhum dado</h3></div></td></tr>':s.map(([n,d],i)=>{const cv=d.leads>0?Math.round((d.vendas/d.leads)*100):0,pt=s[0][1].vendas>0?Math.round((d.vendas/s[0][1].vendas)*100):0;return`<tr><td style="font-size:20px;text-align:center">${md[i]||i+1}</td><td><strong>${n}</strong></td><td>${d.leads}</td><td style="color:var(--green);font-weight:700">${d.vendas}</td><td>${cv}%</td><td style="min-width:80px"><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pt}%;background:var(--${i===0?'gold':'red'});border-radius:3px"></div></div></td></tr>`;}).join('');
+}
+
+function showFileName(f){if(f){document.getElementById('xlsxFileName').textContent='📄 '+f.name;document.getElementById('xlsxFileName').style.color='var(--green)';}}
+
+function importCSV(){
+  const raw=document.getElementById('csvInput').value.trim();
+  if(raw){importFromText(raw);return;}
+  const file=document.getElementById('xlsxFileInput').files[0];
+  if(file){const ext=file.name.split('.').pop().toLowerCase();if(ext==='xlsx'||ext==='xls')readXLSX(file);else readCSVFile(file);return;}
+  alert('Selecione um arquivo ou cole os dados.');
+}
+
+function readXLSX(file){const r=new FileReader();r.onload=function(e){try{const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array',cellDates:true}),sh=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:''});processImportRows(rows);}catch(err){alert('Erro: '+err.message);}};r.readAsArrayBuffer(file);}
+function readCSVFile(file){const r=new FileReader();r.onload=e=>importFromText(e.target.result);r.readAsText(file,'UTF-8');}
+
+async function processImportRows(rows){
+  let hr=-1,cm={};for(let i=0;i<Math.min(rows.length,10);i++){const row=rows[i].map(c=>String(c).toUpperCase().trim());if(row.findIndex(c=>c.includes('NOME'))>=0){hr=i;row.forEach((h,idx)=>{if(h.includes('NOME'))cm.nome=idx;if(h.includes('TELEFONE'))cm.tel=idx;if(h.includes('CARRO')||h.includes('MODELO'))cm.carro=idx;if(h.includes('CIDADE')||h.includes('UF'))cm.cidade=idx;if(h.includes('STATUS'))cm.status=idx;if(h.includes('ORIGEM'))cm.origem=idx;if(h.includes('MENSALIDADE'))cm.valor=idx;if(h.includes('FOLLOW'))cm.followup=idx;if(h.includes('EXECUTIVO'))cm.exec=idx;if(h.includes('OBS'))cm.obs=idx;});break;}}
+  if(hr===-1){cm={nome:0,tel:1};hr=0;}
+  const od=document.getElementById('xlsxOrigem').value,sd=document.getElementById('xlsxStatus').value,ed=document.getElementById('xlsxExec').value||'Cássio';
+  const btn=document.getElementById('btnImport');btn.disabled=true;btn.textContent='Importando...';
+  let count=0;
+  for(const row of rows.slice(hr+1)){
+    const nome=String(row[cm.nome]||'').trim();if(!nome||nome.toUpperCase()==='NOME')continue;
+    const fv=cm.followup!==undefined?row[cm.followup]:null;
+    let fup=fv instanceof Date?fv.toISOString().split('T')[0]:(fv?String(fv).trim():'');
+    if(!fup)fup=new Date().toISOString().split('T')[0];
+    try{const s=await api('/api/leads','POST',{nome,tel:String(row[cm.tel]||'').replace(/\D/g,''),carro:cm.carro!==undefined?String(row[cm.carro]||'').trim():'',cidade:cm.cidade!==undefined?String(row[cm.cidade]||'').trim():'',status:cm.status!==undefined&&row[cm.status]?String(row[cm.status]).trim():sd,origem:cm.origem!==undefined&&row[cm.origem]?String(row[cm.origem]).trim():od,valor:cm.valor!==undefined?parseFloat(row[cm.valor])||0:0,followup:fup,exec:cm.exec!==undefined&&row[cm.exec]?String(row[cm.exec]).trim():ed,obs:cm.obs!==undefined?String(row[cm.obs]||'').trim():'Importado via planilha'});leads.unshift(s);count++;}catch(e){console.warn(e.message);}
+  }
+  btn.disabled=false;btn.textContent='📥 Importar Leads';
+  closeModal('importCSV');document.getElementById('xlsxFileInput').value='';document.getElementById('csvInput').value='';
+  renderPage(currentPage);updateBadges();alert(`✅ ${count} leads importados!`);
+}
+
+async function importFromText(raw){
+  const od=document.getElementById('xlsxOrigem').value,sd=document.getElementById('xlsxStatus').value,ed=document.getElementById('xlsxExec').value||'Cássio';
+  const btn=document.getElementById('btnImport');btn.disabled=true;btn.textContent='Importando...';
+  let count=0;
+  for(const line of raw.split('\n').filter(l=>l.trim())){
+    const parts=line.split(/\t|,|;/).map(p=>p.trim()).filter(p=>p);if(!parts.length)continue;
+    let nome='',tel='';
+    if(parts.length>=2){if(/^\d{8,}$/.test(parts[0].replace(/\D/g,''))){tel=parts[0];nome=parts.slice(1).join(' ');}else{nome=parts[0];tel=parts[1];}}else{nome=parts[0];}
+    if(!nome)continue;
+    try{const s=await api('/api/leads','POST',{nome,tel:tel.replace(/\D/g,''),carro:'',cidade:'',status:sd,origem:od,valor:0,followup:new Date().toISOString().split('T')[0],exec:ed,obs:'Importado via texto'});leads.unshift(s);count++;}catch(e){console.warn(e.message);}
+  }
+  btn.disabled=false;btn.textContent='📥 Importar Leads';
+  closeModal('importCSV');document.getElementById('csvInput').value='';
+  renderPage(currentPage);updateBadges();alert(`✅ ${count} leads importados!`);
+}
+
+document.getElementById('leadFollowup').value=new Date().toISOString().split('T')[0];
+loadData();
+</script>
+</body>
+</html>
