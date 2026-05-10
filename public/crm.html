@@ -231,6 +231,57 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .pipeline { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── DISPAROS ── */
+.disp-layout { display:grid; grid-template-columns:300px 1fr; gap:20px; align-items:start; }
+.disp-panel { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.disp-panel-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.disp-panel-title { font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); font-family:'DM Mono',monospace; }
+.disp-filters { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+.disp-lead-list { max-height:420px; overflow-y:auto; }
+.disp-lead-item { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer; transition:background 0.1s; }
+.disp-lead-item:hover { background:rgba(255,255,255,0.03); }
+.disp-lead-item:last-child { border-bottom:none; }
+.disp-check { width:16px; height:16px; border-radius:4px; border:2px solid var(--border); background:transparent; cursor:pointer; flex-shrink:0; transition:all 0.15s; appearance:none; -webkit-appearance:none; }
+.disp-check:checked { background:var(--red); border-color:var(--red); }
+.disp-check:checked::after { content:'✓'; display:block; color:#fff; font-size:10px; font-weight:700; text-align:center; line-height:12px; }
+.disp-lead-name { font-size:13px; font-weight:500; flex:1; }
+.disp-lead-tel { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
+.disp-sel-bar { padding:10px 16px; background:rgba(204,0,0,0.08); border-top:1px solid rgba(204,0,0,0.15); display:flex; align-items:center; justify-content:space-between; }
+.disp-sel-count { font-size:11px; color:var(--red); font-weight:700; font-family:'DM Mono',monospace; }
+.disp-template-area { padding:18px; display:flex; flex-direction:column; gap:14px; }
+.disp-vars { display:flex; flex-wrap:wrap; gap:6px; }
+.disp-var-btn { padding:3px 10px; background:rgba(68,136,255,0.12); color:var(--blue); border:1px solid rgba(68,136,255,0.2); border-radius:20px; font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.15s; }
+.disp-var-btn:hover { background:rgba(68,136,255,0.25); }
+.disp-textarea { width:100%; min-height:130px; background:var(--mid); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; padding:12px 14px; resize:vertical; transition:border 0.15s; line-height:1.5; }
+.disp-textarea:focus { outline:none; border-color:rgba(204,0,0,0.4); }
+.disp-char-count { font-size:10px; color:var(--muted); text-align:right; font-family:'DM Mono',monospace; }
+.disp-preview-grid { display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto; padding:18px; padding-top:0; }
+.disp-preview-card { background:var(--mid); border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; gap:12px; align-items:flex-start; }
+.disp-preview-avatar { width:36px; height:36px; border-radius:50%; background:var(--red); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+.disp-preview-msg { flex:1; }
+.disp-preview-name { font-size:12px; font-weight:600; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.disp-preview-text { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.5; white-space:pre-wrap; }
+.disp-preview-tel { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
+.disp-queue-wrap { padding:18px; display:flex; flex-direction:column; gap:16px; }
+.disp-progress-bar { height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.disp-progress-fill { height:100%; background:linear-gradient(90deg,var(--red),#FF6644); border-radius:3px; transition:width 0.4s ease; }
+.disp-queue-card { background:var(--mid); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.disp-queue-info { display:flex; align-items:center; gap:12px; }
+.disp-queue-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--red),#FF6644); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+.disp-queue-meta { flex:1; }
+.disp-queue-name { font-size:15px; font-weight:600; }
+.disp-queue-tel { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+.disp-queue-msg { background:rgba(255,255,255,0.04); border-radius:8px; padding:12px 14px; font-size:13px; line-height:1.6; color:rgba(255,255,255,0.8); white-space:pre-wrap; border-left:3px solid rgba(37,211,102,0.4); }
+.disp-queue-actions { display:flex; gap:10px; align-items:center; }
+.disp-sent-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:rgba(0,200,122,0.15); color:var(--green); border-radius:20px; font-size:11px; font-weight:600; }
+.disp-nav-btns { display:flex; gap:8px; margin-left:auto; }
+.disp-interval-select { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); }
+.disp-summary { text-align:center; padding:32px 20px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.disp-summary-icon { font-size:48px; }
+.disp-summary-title { font-size:20px; font-weight:700; }
+.disp-summary-sub { font-size:13px; color:var(--muted); }
+@media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -252,6 +303,8 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <div class="nav-item" onclick="nav('followup', this)"><span class="icon">⏰</span> Follow-up<span class="nav-badge" id="followBadge">0</span></div>
     <div class="nav-item" onclick="nav('vendas', this)"><span class="icon">💰</span> Vendas</div>
     <div class="nav-item" onclick="nav('relatorios', this)"><span class="icon">📈</span> Relatórios</div>
+    <div class="nav-section">Ferramentas</div>
+    <div class="nav-item" onclick="nav('disparos', this)"><span class="icon">📲</span> Disparos WA</div>
     <div class="nav-section">Equipe</div>
     <div class="nav-item" onclick="nav('equipe', this)"><span class="icon">🏆</span> Ranking</div>
   </nav>
@@ -444,6 +497,10 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     </div>
 
     <!-- EQUIPE -->
+    <div class="page" id="page-disparos">
+      <div id="disparos-root"></div>
+    </div>
+
     <div class="page" id="page-equipe">
       <div class="card">
         <div class="card-header"><span class="card-title" id="rankingTitle">🏆 Ranking da Equipe</span></div>
@@ -728,6 +785,7 @@ function renderPage(page) {
   else if (page === 'followup') renderFollowup();
   else if (page === 'vendas') renderVendas();
   else if (page === 'relatorios') renderRelatorios();
+  else if (page === 'disparos') renderDisparos();
   else if (page === 'equipe') renderEquipe();
 }
 
@@ -1268,6 +1326,370 @@ function renderRelatorios() {
     }).join('');
   }
 }
+
+// ── RENDER DISPAROS ───────────────────────────────────
+let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5 };
+
+function renderDisparos() {
+  const root = document.getElementById('disparos-root');
+  if (dispState.step === 'queue') { renderDisparoQueue(); return; }
+
+  const statusOpts = ['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'];
+  const origemOpts = ['Site LOOVI','Indicação','WhatsApp','Outros'];
+  const execOpts   = [...new Set(leads.map(l => l.exec).filter(Boolean))];
+
+  const sfVal = dispState.filterStatus || '';
+  const ofVal = dispState.filterOrigem || '';
+  const efVal = dispState.filterExec   || '';
+
+  const filtered = leads.filter(l => {
+    if (!l.tel || l.tel.replace(/\D/g,'').length < 8) return false;
+    if (sfVal && l.status !== sfVal) return false;
+    if (ofVal && l.origem !== ofVal) return false;
+    if (efVal && l.exec   !== efVal) return false;
+    return true;
+  });
+
+  const selCount = [...dispState.selected].filter(id => filtered.find(l => l.id === id)).length;
+  const template = dispState.template || '';
+  const previews = filtered.filter(l => dispState.selected.has(l.id));
+
+  const previewHtml = previews.length === 0
+    ? `<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Selecione leads para ver o preview</div>`
+    : previews.map(l => {
+        const msg = applyTemplate(template, l);
+        const initials = l.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        const telClean = l.tel.replace(/\D/g,'');
+        return `<div class="disp-preview-card">
+          <div class="disp-preview-avatar">${initials}</div>
+          <div class="disp-preview-msg">
+            <div class="disp-preview-name">
+              ${l.nome}
+              <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span>
+            </div>
+            <div class="disp-preview-tel">${formatTel(telClean)}</div>
+            <div class="disp-preview-text" style="margin-top:6px">${escHtml(msg)}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+  root.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparos WhatsApp</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">Selecione leads, escreva a mensagem e dispare com um clique</p>
+      </div>
+      <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        Iniciar Disparo ${previews.length>0?`(${previews.length})`:''}
+      </button>
+    </div>
+
+    <div class="disp-layout">
+      <!-- COLUNA LEADS -->
+      <div>
+        <div class="disp-panel">
+          <div class="disp-panel-header">
+            <span class="disp-panel-title">Leads com telefone</span>
+            <span style="font-size:11px;color:var(--muted)">${filtered.length} disponíveis</span>
+          </div>
+          <div class="disp-filters">
+            <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('status',this.value)">
+              <option value="">Todos os status</option>
+              ${statusOpts.map(s=>`<option value="${s}" ${sfVal===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('origem',this.value)">
+                <option value="">Toda origem</option>
+                ${origemOpts.map(o=>`<option value="${o}" ${ofVal===o?'selected':''}>${o}</option>`).join('')}
+              </select>
+              <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('exec',this.value)">
+                <option value="">Todos exec.</option>
+                ${execOpts.map(e=>`<option value="${e}" ${efVal===e?'selected':''}>${e}</option>`).join('')}
+              </select>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispSelectAll(${JSON.stringify(filtered.map(l=>l.id))})">✓ Sel. todos</button>
+              <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispClearAll()">✕ Limpar</button>
+            </div>
+          </div>
+          <div class="disp-lead-list">
+            ${filtered.length===0
+              ? `<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Nenhum lead com telefone neste filtro</div>`
+              : filtered.map(l => {
+                  const checked = dispState.selected.has(l.id);
+                  const telClean = l.tel.replace(/\D/g,'');
+                  return `<div class="disp-lead-item" onclick="dispToggle(${l.id})">
+                    <input type="checkbox" class="disp-check" ${checked?'checked':''} onclick="event.stopPropagation();dispToggle(${l.id})">
+                    <div style="flex:1;min-width:0">
+                      <div class="disp-lead-name">${l.nome}</div>
+                      <div class="disp-lead-tel">${formatTel(telClean)}</div>
+                    </div>
+                    <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span>
+                  </div>`;
+                }).join('')
+            }
+          </div>
+          <div class="disp-sel-bar">
+            <span class="disp-sel-count">${selCount} selecionado${selCount!==1?'s':''}</span>
+            <span style="font-size:10px;color:var(--muted)">com telefone válido</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUNA TEMPLATE + PREVIEW -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="disp-panel">
+          <div class="disp-panel-header">
+            <span class="disp-panel-title">Mensagem Template</span>
+          </div>
+          <div class="disp-template-area">
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Clique para inserir variável:</div>
+              <div class="disp-vars">
+                ${['{nome}','{carro}','{cidade}','{status}','{origem}'].map(v=>`<button class="disp-var-btn" onclick="insertVar('${v}')">${v}</button>`).join('')}
+              </div>
+            </div>
+            <div>
+              <textarea class="disp-textarea" id="dispTemplate" placeholder="Olá {nome}! 👋&#10;&#10;Temos uma proposta exclusiva para o seguro do seu {carro}.&#10;&#10;Posso te enviar mais detalhes?" oninput="dispUpdateTemplate(this.value)">${escHtml(template)}</textarea>
+              <div class="disp-char-count" id="dispCharCount">${template.length} caracteres</div>
+            </div>
+          </div>
+        </div>
+
+        ${previews.length > 0 ? `
+        <div class="disp-panel">
+          <div class="disp-panel-header">
+            <span class="disp-panel-title">Preview das Mensagens</span>
+            <span style="font-size:11px;color:var(--muted)">${previews.length} lead${previews.length!==1?'s':''}</span>
+          </div>
+          <div class="disp-preview-grid">${previewHtml}</div>
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+
+function applyTemplate(tmpl, lead) {
+  if (!tmpl) return '';
+  return tmpl
+    .replace(/\{nome\}/gi,    lead.nome    || '')
+    .replace(/\{carro\}/gi,   lead.carro   || '')
+    .replace(/\{cidade\}/gi,  lead.cidade  || '')
+    .replace(/\{status\}/gi,  lead.status  || '')
+    .replace(/\{origem\}/gi,  lead.origem  || '');
+}
+
+function statusBadgeClass(s) {
+  return { 'Novo':'badge-new','Qualificado':'badge-qual','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost' }[s] || 'badge-new';
+}
+
+function formatTel(t) {
+  const d = t.replace(/\D/g,'');
+  if (d.length === 11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return t;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function dispFilter(field, val) {
+  dispState['filter' + field.charAt(0).toUpperCase() + field.slice(1)] = val;
+  dispState.selected.clear();
+  renderDisparos();
+}
+
+function dispToggle(id) {
+  if (dispState.selected.has(id)) dispState.selected.delete(id);
+  else dispState.selected.add(id);
+  renderDisparos();
+}
+
+function dispSelectAll(ids) {
+  ids.forEach(id => dispState.selected.add(id));
+  renderDisparos();
+}
+
+function dispClearAll() {
+  dispState.selected.clear();
+  renderDisparos();
+}
+
+function dispUpdateTemplate(val) {
+  dispState.template = val;
+  const cc = document.getElementById('dispCharCount');
+  if (cc) cc.textContent = val.length + ' caracteres';
+  const btn = document.querySelector('[onclick="startDisparoQueue()"]');
+  if (btn) {
+    const count = [...dispState.selected].length;
+    btn.disabled = count === 0;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Iniciar Disparo ${count>0?'('+count+')':''}`;
+  }
+  // re-render previews only
+  const previewSection = document.querySelector('.disp-preview-grid');
+  if (previewSection) {
+    const sel = leads.filter(l => dispState.selected.has(l.id));
+    previewSection.innerHTML = sel.map(l => {
+      const msg = applyTemplate(val, l);
+      const initials = l.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      const telClean = l.tel.replace(/\D/g,'');
+      return `<div class="disp-preview-card">
+        <div class="disp-preview-avatar">${initials}</div>
+        <div class="disp-preview-msg">
+          <div class="disp-preview-name">${l.nome} <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span></div>
+          <div class="disp-preview-tel">${formatTel(telClean)}</div>
+          <div class="disp-preview-text" style="margin-top:6px">${escHtml(msg)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function insertVar(v) {
+  const ta = document.getElementById('dispTemplate');
+  if (!ta) return;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const val = ta.value.slice(0,start) + v + ta.value.slice(end);
+  ta.value = val;
+  ta.setSelectionRange(start + v.length, start + v.length);
+  ta.focus();
+  dispUpdateTemplate(val);
+  dispState.template = val;
+}
+
+function startDisparoQueue() {
+  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
+  if (queue.length === 0) return;
+  dispState.queue   = queue;
+  dispState.current = 0;
+  dispState.sent    = new Set();
+  dispState.step    = 'queue';
+  renderDisparoQueue();
+}
+
+let dispAutoTimer = null;
+
+function renderDisparoQueue() {
+  const root    = document.getElementById('disparos-root');
+  const queue   = dispState.queue;
+  const cur     = dispState.current;
+  const total   = queue.length;
+  const done    = dispState.sent.size;
+  const lead    = queue[cur];
+  const msg     = applyTemplate(dispState.template, lead);
+  const telClean = lead.tel.replace(/\D/g,'');
+  const waUrl   = `https://wa.me/55${telClean}?text=${encodeURIComponent(msg)}`;
+  const initials = lead.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const isSent  = dispState.sent.has(lead.id);
+  const pct     = total > 1 ? Math.round((done / total) * 100) : 0;
+
+  if (done === total && total > 0) {
+    root.innerHTML = `
+      <div class="disp-panel" style="max-width:480px;margin:0 auto">
+        <div class="disp-summary">
+          <div class="disp-summary-icon">🎉</div>
+          <div class="disp-summary-title">Disparo Concluído!</div>
+          <div class="disp-summary-sub">${total} mensagem${total!==1?'s':''} enviada${total!==1?'s':''} com sucesso</div>
+          <button class="btn btn-primary" style="margin-top:8px" onclick="dispState.step='config';dispState.selected=new Set();renderDisparos()">Novo Disparo</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  root.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparando...</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">${done} de ${total} mensagens enviadas</p>
+      </div>
+      <button class="btn btn-ghost" onclick="if(dispAutoTimer)clearTimeout(dispAutoTimer);dispState.step='config';renderDisparos()">← Voltar</button>
+    </div>
+
+    <div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+      <!-- Progresso -->
+      <div class="disp-panel" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:12px;color:var(--muted)">Progresso</span>
+          <span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)">${done}/${total}</span>
+        </div>
+        <div class="disp-progress-bar"><div class="disp-progress-fill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          ${queue.map((_,i) => `<div style="width:8px;height:8px;border-radius:50%;background:${dispState.sent.has(queue[i].id)?'var(--green)':i===cur?'var(--red)':'rgba(255,255,255,0.1)'}"></div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Card atual -->
+      <div class="disp-queue-card">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace">
+          Lead ${cur+1} de ${total}
+        </div>
+        <div class="disp-queue-info">
+          <div class="disp-queue-avatar">${initials}</div>
+          <div class="disp-queue-meta">
+            <div class="disp-queue-name">${lead.nome}</div>
+            <div class="disp-queue-tel">${formatTel(telClean)}</div>
+          </div>
+          <span class="badge ${statusBadgeClass(lead.status)}">${lead.status}</span>
+        </div>
+        <div class="disp-queue-msg">${escHtml(msg)}</div>
+        <div class="disp-queue-actions">
+          ${isSent
+            ? `<span class="disp-sent-badge">✓ Enviado</span>`
+            : `<a href="${waUrl}" target="_blank" class="btn btn-primary" style="gap:8px;text-decoration:none" onclick="markDisparoSent(${lead.id})">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Abrir WhatsApp
+              </a>`
+          }
+          <div class="disp-nav-btns">
+            <button class="btn btn-ghost" style="padding:8px 14px" ${cur===0?'disabled':''} onclick="dispNav(-1)">← Ant.</button>
+            <button class="btn btn-ghost" style="padding:8px 14px;background:rgba(0,200,122,0.1);color:var(--green)" ${cur===total-1&&!isSent?'disabled':''} onclick="dispNav(1)">Próx. →</button>
+          </div>
+        </div>
+        <div class="disp-interval-select">
+          <span>Intervalo entre envios:</span>
+          <select class="form-select" style="font-size:11px;padding:4px 8px;width:auto" onchange="dispState.interval=parseInt(this.value)">
+            <option value="0" ${dispState.interval===0?'selected':''}>Manual</option>
+            <option value="5" ${dispState.interval===5?'selected':''}>5 seg</option>
+            <option value="10" ${dispState.interval===10?'selected':''}>10 seg</option>
+            <option value="30" ${dispState.interval===30?'selected':''}>30 seg</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Fila rápida -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${queue.map((l,i) => {
+          const sent = dispState.sent.has(l.id);
+          const active = i === cur;
+          return `<div onclick="dispGoto(${i})" style="padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid ${active?'var(--red)':sent?'rgba(0,200,122,0.3)':'var(--border)'};background:${active?'rgba(204,0,0,0.12)':sent?'rgba(0,200,122,0.08)':'transparent'};color:${active?'var(--red)':sent?'var(--green)':'var(--muted)'};transition:all 0.15s">
+            ${l.nome.split(' ')[0]}${sent?' ✓':''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function markDisparoSent(id) {
+  dispState.sent.add(id);
+  const interval = dispState.interval;
+  if (interval > 0) {
+    if (dispAutoTimer) clearTimeout(dispAutoTimer);
+    dispAutoTimer = setTimeout(() => {
+      const cur = dispState.current;
+      if (cur < dispState.queue.length - 1) { dispState.current++; renderDisparoQueue(); }
+      else renderDisparoQueue();
+    }, interval * 1000);
+  }
+  setTimeout(() => renderDisparoQueue(), 300);
+}
+
+function dispNav(dir) {
+  const next = dispState.current + dir;
+  if (next >= 0 && next < dispState.queue.length) { dispState.current = next; renderDisparoQueue(); }
+}
+
+function dispGoto(i) { dispState.current = i; renderDisparoQueue(); }
 
 // ── RENDER EQUIPE ─────────────────────────────────────
 function renderEquipe() {
