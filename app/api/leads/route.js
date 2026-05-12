@@ -2,9 +2,8 @@ import { initDb } from '@/lib/db';
 
 export async function GET() {
   const db = await initDb();
-  const { data, error } = await db.from('leads').select('*').order('id', { ascending: false });
-  if (error) return Response.json({ error: error.message }, { status: 500 });
-  return Response.json(data);
+  const result = await db.execute('SELECT * FROM leads ORDER BY id DESC');
+  return Response.json(result.rows);
 }
 
 export async function POST(req) {
@@ -13,12 +12,13 @@ export async function POST(req) {
   const { nome, tel, carro, cidade, status, origem, valor, followup, exec, obs } = body;
   if (!nome?.trim()) return Response.json({ error: 'Nome é obrigatório' }, { status: 400 });
 
-  const { data, error } = await db.from('leads').insert({
-    nome: nome.trim(), tel: tel||'', carro: carro||'', cidade: cidade||'',
-    status: status||'Novo', origem: origem||'Outros', valor: parseFloat(valor)||0,
-    followup: followup||'', exec: exec||'Cássio', obs: obs||''
-  }).select().single();
+  const result = await db.execute({
+    sql: `INSERT INTO leads (nome, tel, carro, cidade, status, origem, valor, followup, exec, obs)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [nome.trim(), tel||'', carro||'', cidade||'', status||'Novo', origem||'Outros',
+           parseFloat(valor)||0, followup||'', exec||'Cássio', obs||''],
+  });
 
-  if (error) return Response.json({ error: error.message }, { status: 500 });
-  return Response.json(data, { status: 201 });
+  const newLead = await db.execute({ sql: 'SELECT * FROM leads WHERE id = ?', args: [result.lastInsertRowid] });
+  return Response.json(newLead.rows[0], { status: 201 });
 }
