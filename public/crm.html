@@ -141,7 +141,28 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .wa-btn { color:#25D366; text-decoration:none; font-size:14px; margin-left:4px; vertical-align:middle; line-height:1; }
 .wa-btn:hover { opacity:0.8; }
 
-/* Pipeline enhanced cards */
+/* Pipeline side panel */
+.pipeline-panel { position:fixed; top:0; right:0; width:370px; height:100vh; background:var(--mid); border-left:1px solid var(--border); z-index:300; transform:translateX(100%); transition:transform 0.25s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.5); }
+.pipeline-panel.open { transform:translateX(0); }
+.pp-overlay { display:none; position:fixed; inset:0; z-index:299; background:rgba(0,0,0,0.4); }
+.pp-overlay.open { display:block; }
+.pp-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; flex-shrink:0; }
+.pp-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
+.pp-body { flex:1; overflow-y:auto; padding:16px 20px; }
+.pp-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; flex-shrink:0; }
+.pp-section { margin-bottom:14px; }
+.pp-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; font-family:'DM Mono',monospace; margin-bottom:4px; display:block; }
+.pp-input { width:100%; background:var(--card); border:1px solid var(--border); border-radius:6px; padding:8px 10px; color:var(--text); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.15s; }
+.pp-input:focus { border-color:var(--red); }
+.pp-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pp-quickbtns { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.pp-qbtn { padding:5px 10px; border-radius:4px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--muted); font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.pp-qbtn:hover { background:var(--red); border-color:var(--red); color:white; }
+.pp-qbtn.arch:hover { background:#555; border-color:#555; }
+.pp-qbtn.lost:hover { background:#333; border-color:#555; }
+/* Add custom column button */
+.pipeline-add-col { min-width:60px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,0.03); border:2px dashed var(--border); border-radius:8px; cursor:pointer; color:var(--muted); font-size:22px; transition:all 0.2s; user-select:none; }
+.pipeline-add-col:hover { border-color:var(--red); color:var(--red); background:rgba(204,0,0,0.05); }
 .pc-urgency { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:10px; font-size:9px; font-weight:700; font-family:'DM Mono',monospace; margin-bottom:5px; }
 .pc-urgency.ok { background:rgba(0,200,122,0.15); color:var(--green); }
 .pc-urgency.warn { background:rgba(245,166,35,0.18); color:var(--gold); }
@@ -501,6 +522,62 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <!-- PIPELINE -->
     <div class="page" id="page-pipeline">
       <div class="pipeline" id="pipelineBoard"></div>
+    </div>
+
+    <!-- PIPELINE SIDE PANEL -->
+    <div class="pp-overlay" id="ppOverlay" onclick="closePipelinePanel()"></div>
+    <div class="pipeline-panel" id="pipelinePanel">
+      <div class="pp-header">
+        <div style="flex:1;overflow:hidden">
+          <div class="pp-title" id="ppName">—</div>
+          <div id="ppBadge" style="margin-top:2px"></div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
+          <button onclick="openFullEditFromPanel()" title="Abrir editor completo" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;padding:4px 8px;font-size:12px">⤢</button>
+          <button onclick="closePipelinePanel()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1">✕</button>
+        </div>
+      </div>
+      <div class="pp-body">
+        <input type="hidden" id="ppLeadId">
+        <div class="pp-quickbtns" id="ppQuickBtns"></div>
+        <div class="pp-section">
+          <label class="pp-label">Telefone</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="pp-input" id="ppTel" placeholder="(00) 00000-0000" style="flex:1" oninput="updatePpWa()">
+            <a id="ppWaBtn" href="#" target="_blank" style="color:#25D366;font-size:20px;text-decoration:none;opacity:0.4" onclick="return document.getElementById('ppWaBtn').href!='#'">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="pp-grid2">
+          <div class="pp-section"><label class="pp-label">Carro</label><input class="pp-input" id="ppCarro"></div>
+          <div class="pp-section"><label class="pp-label">Cidade</label><input class="pp-input" id="ppCidade"></div>
+        </div>
+        <div class="pp-grid2">
+          <div class="pp-section"><label class="pp-label">Valor R$/mês</label><input class="pp-input" id="ppValor" type="number"></div>
+          <div class="pp-section"><label class="pp-label">Follow-up</label><input class="pp-input" id="ppFollowup" type="date"></div>
+        </div>
+        <div class="pp-section"><label class="pp-label">Status</label>
+          <select class="pp-input" id="ppStatus" onchange="updatePpBadge()">
+            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
+            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
+            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
+          </select>
+        </div>
+        <div class="pp-section"><label class="pp-label">Observações</label><textarea class="pp-input" id="ppObs" rows="3" style="resize:none"></textarea></div>
+        <div class="tl-section" style="margin-top:12px">
+          <div class="tl-title">Jornada</div>
+          <div class="tl-scroll" id="ppTimeline" style="max-height:160px"><div class="tl-empty">Carregando...</div></div>
+          <div class="tl-add">
+            <textarea id="ppNoteInput" placeholder="Adicionar nota..." style="height:44px"></textarea>
+            <button onclick="addPanelNote()">+ Nota</button>
+          </div>
+        </div>
+      </div>
+      <div class="pp-footer">
+        <button class="btn btn-ghost" onclick="closePipelinePanel()">Fechar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="savePanelLead()">Salvar</button>
+      </div>
     </div>
 
     <!-- FOLLOW-UP -->
@@ -1050,6 +1127,148 @@ async function addTimelineNote() {
   } catch(e) { alert('Erro: ' + e.message); }
 }
 
+// ── PIPELINE SIDE PANEL ───────────────────────────────
+function openPipelinePanel(id) {
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('ppLeadId').value    = id;
+  document.getElementById('ppName').textContent = l.nome;
+  document.getElementById('ppBadge').innerHTML  = badgeHtml(l.status);
+  document.getElementById('ppTel').value        = l.tel || '';
+  document.getElementById('ppCarro').value      = l.carro || '';
+  document.getElementById('ppCidade').value     = l.cidade || '';
+  document.getElementById('ppValor').value      = l.valor || '';
+  document.getElementById('ppFollowup').value   = l.followup || '';
+  document.getElementById('ppObs').value        = l.obs || '';
+  document.getElementById('ppStatus').value     = l.status;
+  updatePpWa();
+  // Quick action buttons
+  const next = nextStatus(l.status);
+  document.getElementById('ppQuickBtns').innerHTML = [
+    next ? `<button class="pp-qbtn" onclick="quickAdvancePP(${id},'${next}')">→ ${next}</button>` : '',
+    `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'Perdido')">✗ Perdido</button>`,
+    `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'Arquivado')">📁 Arquivar</button>`,
+  ].join('');
+  document.getElementById('ppTimeline').innerHTML = '<div class="tl-empty">Carregando...</div>';
+  document.getElementById('ppNoteInput').value = '';
+  document.getElementById('pipelinePanel').classList.add('open');
+  document.getElementById('ppOverlay').classList.add('open');
+  loadPanelHistory(id);
+}
+
+function closePipelinePanel() {
+  document.getElementById('pipelinePanel').classList.remove('open');
+  document.getElementById('ppOverlay').classList.remove('open');
+}
+
+function updatePpWa() {
+  const tel = document.getElementById('ppTel').value.replace(/\D/g,'');
+  const btn = document.getElementById('ppWaBtn');
+  btn.href    = tel ? `https://wa.me/55${tel}` : '#';
+  btn.style.opacity = tel ? '1' : '0.4';
+}
+
+function updatePpBadge() {
+  const s = document.getElementById('ppStatus').value;
+  document.getElementById('ppBadge').innerHTML = badgeHtml(s);
+  const id = parseInt(document.getElementById('ppLeadId').value);
+  const next = nextStatus(s);
+  document.getElementById('ppQuickBtns').innerHTML = [
+    next ? `<button class="pp-qbtn" onclick="quickAdvancePP(${id},'${next}')">→ ${next}</button>` : '',
+    `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'Perdido')">✗ Perdido</button>`,
+    `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'Arquivado')">📁 Arquivar</button>`,
+  ].join('');
+}
+
+async function savePanelLead() {
+  const id  = parseInt(document.getElementById('ppLeadId').value);
+  const idx = leads.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const l = leads[idx];
+  try {
+    const updated = await api(`/api/leads/${id}`, 'PUT', {
+      nome: l.nome, exec: l.exec, origem: l.origem,
+      tel:      document.getElementById('ppTel').value,
+      carro:    document.getElementById('ppCarro').value,
+      cidade:   document.getElementById('ppCidade').value,
+      valor:    parseFloat(document.getElementById('ppValor').value) || 0,
+      followup: document.getElementById('ppFollowup').value,
+      obs:      document.getElementById('ppObs').value,
+      status:   document.getElementById('ppStatus').value,
+    });
+    leads[idx] = updated;
+    closePipelinePanel();
+    renderPage(currentPage);
+    updateBadges();
+  } catch(e) { alert('Erro ao salvar: ' + e.message); }
+}
+
+async function quickAdvancePP(id, newStatus) {
+  const idx = leads.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const l = leads[idx];
+  try {
+    const updated = await api(`/api/leads/${id}`, 'PUT', { ...l, status: newStatus });
+    leads[idx] = updated;
+    closePipelinePanel();
+    renderPage(currentPage);
+    updateBadges();
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function loadPanelHistory(id) {
+  try {
+    const history = await api(`/api/leads/${id}/history`);
+    const el = document.getElementById('ppTimeline');
+    if (!history || history.length === 0) {
+      el.innerHTML = '<div class="tl-empty">Nenhum registro ainda.</div>';
+      return;
+    }
+    el.innerHTML = history.map((h, i) => {
+      const isStatus = h.status !== 'nota';
+      const dotCls = h.status === 'Ganho' ? 'ganho' : h.status === 'Perdido' ? 'perdido' : isStatus ? 'status-chg' : 'nota';
+      const label  = isStatus ? `→ <strong>${h.status}</strong>` : '📝 Nota';
+      const ts = new Date(h.created_at);
+      const timeStr = ts.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="tl-entry">
+        <div class="tl-line"><div class="tl-dot ${dotCls}"></div>${i < history.length-1 ? '<div class="tl-bar"></div>' : ''}</div>
+        <div class="tl-body"><div class="tl-status">${label}</div>${h.obs?`<div class="tl-obs">${h.obs}</div>`:''}<div class="tl-time">${timeStr}</div></div>
+      </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  } catch(e) {
+    document.getElementById('ppTimeline').innerHTML = '<div class="tl-empty">Erro ao carregar</div>';
+  }
+}
+
+async function addPanelNote() {
+  const id  = parseInt(document.getElementById('ppLeadId').value);
+  const obs = document.getElementById('ppNoteInput').value.trim();
+  if (!obs) return;
+  try {
+    await api(`/api/leads/${id}/history`, 'POST', { obs, status: 'nota' });
+    document.getElementById('ppNoteInput').value = '';
+    await loadPanelHistory(id);
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+function openFullEditFromPanel() {
+  const id = parseInt(document.getElementById('ppLeadId').value);
+  closePipelinePanel();
+  editLead(id);
+}
+
+function addCustomPipelineCol() {
+  const name = prompt('Nome da nova coluna (ex: Reativação, Pós-venda):');
+  if (!name || !name.trim()) return;
+  const cols = JSON.parse(localStorage.getItem('customPipelineCols') || '[]');
+  if (cols.find(c => c.key.toLowerCase() === name.trim().toLowerCase())) return;
+  const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A','#98D8C8','#DDA0DD'];
+  cols.push({ key: name.trim(), color: colors[cols.length % colors.length] });
+  localStorage.setItem('customPipelineCols', JSON.stringify(cols));
+  renderPipeline();
+}
+
 // ── VENDA CRUD ─────────────────────────────────────────
 async function saveVenda() {
   const cliente = document.getElementById('vendaCliente').value.trim();
@@ -1357,7 +1576,9 @@ function renderPipeline() {
     { key: 'Perdido',     label: 'PERDIDO',   color: '#555' },
     { key: 'Arquivado',   label: 'ARQUIVADO', color: '#666' },
   ];
-  document.getElementById('pipelineBoard').innerHTML = cols.map(col => {
+  const customCols = JSON.parse(localStorage.getItem('customPipelineCols') || '[]');
+  const allCols = [...cols, ...customCols.map(c => ({ key: c.key, label: c.key.toUpperCase(), color: c.color || '#888', custom: true }))];
+  document.getElementById('pipelineBoard').innerHTML = allCols.map(col => {
     const colLeads = leads.filter(l => l.status === col.key);
     const totalVal = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
     return `<div class="pipeline-col">
@@ -1376,7 +1597,7 @@ function renderPipeline() {
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                   </a>`
                 : '<span></span>';
-              return `<div class="pipeline-card" onclick="editLead(${l.id})">
+              return `<div class="pipeline-card" onclick="openPipelinePanel(${l.id})">
                 ${urgencyBadge(l)}
                 <div class="pc-name">${l.nome}</div>
                 <div class="pc-car">${l.carro || 'Sem carro'}${l.cidade ? ' · ' + l.cidade : ''}</div>
@@ -1395,7 +1616,10 @@ function renderPipeline() {
         ${totalVal > 0 ? `R$ ${totalVal.toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—'}
       </div>
     </div>`;
-  }).join('');
+  }).join('') + `<div class="pipeline-add-col" onclick="addCustomPipelineCol()" title="Adicionar coluna">
+    <div style="font-size:28px;margin-bottom:4px">+</div>
+    <div style="font-size:9px;font-family:'DM Mono',monospace;letter-spacing:1px">COLUNA</div>
+  </div>`;
 }
 
 // ── RENDER FOLLOWUP ───────────────────────────────────
