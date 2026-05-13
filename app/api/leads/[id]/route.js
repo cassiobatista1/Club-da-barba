@@ -6,7 +6,6 @@ export async function PUT(req, { params }) {
   const body = await req.json();
   const { nome, tel, carro, cidade, status, origem, valor, followup, exec, obs } = body;
 
-  // Fetch current lead to detect status change
   const { data: current } = await db.from('leads').select('status').eq('id', id).single();
   const statusChanged = current && current.status !== status;
 
@@ -21,11 +20,7 @@ export async function PUT(req, { params }) {
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
   if (statusChanged) {
-    await db.from('lead_history').insert({
-      lead_id: parseInt(id),
-      status: status,
-      obs: obs || ''
-    });
+    await db.from('lead_history').insert({ lead_id: parseInt(id), status, obs: obs||'' });
   }
 
   return Response.json(data);
