@@ -9,24 +9,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --primary: #5A78FF;
-  --primary2: #7B95FF;
-  --danger: #FF3344;
-  --danger2: #FF5566;
-  --dark: #0C0C14;
-  --mid: #13131C;
-  --card: #1A1A26;
-  --border: #26263A;
-  --fg: #E9EBFF;
-  --text: #E9EBFF;
-  --muted: #6868AA;
+  --red: #CC0000;
+  --red2: #FF2233;
+  --dark: #0A0A0A;
+  --mid: #141414;
+  --card: #1C1C1C;
+  --border: #2A2A2A;
+  --text: #F0F0F0;
+  --muted: #666;
   --green: #00C87A;
   --gold: #F5A623;
-  --cyan: #54D9F3;
-  --lilac: #DAADFF;
-  --blue: #5A78FF;
-  --red: #FF3344;
-  --red2: #FF5566;
+  --blue: #4488FF;
   --white: #FFFFFF;
   --sidebar: 220px;
 }
@@ -57,7 +50,7 @@ body {
 
 .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
 .sidebar-logo h1 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
-.sidebar-logo h1 span { color: var(--primary); }
+.sidebar-logo h1 span { color: var(--red); }
 .sidebar-logo p { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; font-family: 'DM Mono', monospace; }
 
 .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
@@ -66,14 +59,14 @@ body {
 
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
 .nav-item:hover { background: var(--card); color: var(--text); }
-.nav-item.active { background: var(--primary); color: var(--white); }
+.nav-item.active { background: var(--red); color: var(--white); }
 .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
 
-.nav-badge { margin-left: auto; background: var(--primary); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+.nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; font-family: 'DM Mono', monospace; }
 .nav-item.active .nav-badge { background: rgba(255,255,255,0.25); }
 
 .sidebar-user { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-.user-avatar { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+.user-avatar { width: 32px; height: 32px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
 .user-info { flex: 1; overflow: hidden; }
 .user-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-role { font-size: 10px; color: var(--muted); }
@@ -86,8 +79,8 @@ body {
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 
 .btn { padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary2); }
+.btn-primary { background: var(--red); color: white; }
+.btn-primary:hover { background: var(--red2); }
 .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 .btn-green { background: var(--green); color: var(--dark); }
@@ -101,8 +94,8 @@ body {
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
 
 .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; position: relative; overflow: hidden; }
-.stat-card.highlight { border-color: var(--primary); }
-.stat-card.highlight::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--primary); }
+.stat-card.highlight { border-color: var(--red); }
+.stat-card.highlight::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--red); }
 
 .stat-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
 .stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--white); line-height: 1; }
@@ -147,65 +140,18 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .status-menu-item:hover { background:rgba(255,255,255,0.07); }
 .wa-btn { color:#25D366; text-decoration:none; font-size:14px; margin-left:4px; vertical-align:middle; line-height:1; }
 .wa-btn:hover { opacity:0.8; }
-.uf-badge-cell { display:inline-flex;align-items:center;justify-content:center;background:var(--border);border-radius:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 8px;cursor:pointer;min-width:32px;color:var(--fg);border:1px solid transparent; }
-.uf-badge-cell:hover { background:var(--primary)22;border-color:var(--primary);color:var(--primary); }
-.uf-picker { display:none;position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.6); }
-.uf-picker.open { display:grid;grid-template-columns:repeat(6,1fr);gap:4px; }
-.uf-btn { background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 2px;cursor:pointer;text-align:center;letter-spacing:0.5px; }
-.uf-btn:hover { background:var(--primary)22;border-color:var(--primary);color:var(--primary); }
 
-/* WhatsApp Instances */
-.wa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:16px; }
-.wa-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:12px; }
-.wa-card-header { display:flex; align-items:center; gap:12px; }
-.wa-avatar { width:44px; height:44px; border-radius:50%; background:var(--primary)22; border:2px solid var(--primary)55; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-.wa-name { font-weight:700; font-size:14px; }
-.wa-status { font-size:10px; font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:2px; }
-.wa-status.open { color:var(--green); }
-.wa-status.close { color:var(--muted); }
-.wa-status.connecting { color:var(--gold); }
-.wa-qr { background:#fff; border-radius:8px; padding:8px; display:flex; align-items:center; justify-content:center; min-height:180px; }
-.wa-qr img { width:160px; height:160px; }
-.wa-qr-msg { font-size:11px; color:var(--muted); text-align:center; padding:16px; }
-.wa-actions { display:flex; gap:8px; flex-wrap:wrap; }
-.wa-btn-sm { padding:6px 14px; border-radius:6px; border:none; font-size:11px; font-weight:600; font-family:'DM Mono',monospace; cursor:pointer; letter-spacing:0.5px; }
-.wa-btn-connect { background:var(--green)22; color:var(--green); border:1px solid var(--green)44; }
-.wa-btn-disconnect { background:var(--gold)22; color:var(--gold); border:1px solid var(--gold)44; }
-.wa-btn-delete { background:var(--danger)22; color:var(--danger); border:1px solid var(--danger)44; }
-.wa-add-card { background:var(--card); border:2px dashed var(--border); border-radius:12px; padding:32px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; cursor:pointer; color:var(--muted); transition:all 0.2s; }
-.wa-add-card:hover { border-color:var(--primary); color:var(--primary); }
-
-/* Pipeline side panel */
-.pipeline-panel { position:fixed; top:0; right:0; width:370px; height:100vh; background:var(--mid); border-left:1px solid var(--border); z-index:300; transform:translateX(100%); transition:transform 0.25s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.5); }
-.pipeline-panel.open { transform:translateX(0); }
-.pp-overlay { display:none; position:fixed; inset:0; z-index:299; background:rgba(0,0,0,0.4); }
-.pp-overlay.open { display:block; }
-.pp-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; flex-shrink:0; }
-.pp-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
-.pp-body { flex:1; overflow-y:auto; padding:16px 20px; }
-.pp-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; flex-shrink:0; }
-.pp-section { margin-bottom:14px; }
-.pp-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; font-family:'DM Mono',monospace; margin-bottom:4px; display:block; }
-.pp-input { width:100%; background:var(--card); border:1px solid var(--border); border-radius:6px; padding:8px 10px; color:var(--text); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.15s; }
-.pp-input:focus { border-color:var(--primary); }
-.pp-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.pp-quickbtns { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
-.pp-qbtn { padding:5px 10px; border-radius:4px; border:1px solid var(--border); background:rgba(90,120,255,0.08); color:var(--muted); font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
-.pp-qbtn:hover { background:var(--primary); border-color:var(--primary); color:white; }
-.pp-qbtn.arch:hover { background:#555; border-color:#555; }
-.pp-qbtn.lost:hover { background:#FF3344; border-color:#FF3344; }
-.pipeline-add-col { min-width:60px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,0.03); border:2px dashed var(--border); border-radius:8px; cursor:pointer; color:var(--muted); font-size:22px; transition:all 0.2s; user-select:none; }
-.pipeline-add-col:hover { border-color:var(--primary); color:var(--primary); background:rgba(90,120,255,0.06); }
+/* Pipeline enhanced cards */
 .pc-urgency { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:10px; font-size:9px; font-weight:700; font-family:'DM Mono',monospace; margin-bottom:5px; }
 .pc-urgency.ok { background:rgba(0,200,122,0.15); color:var(--green); }
 .pc-urgency.warn { background:rgba(245,166,35,0.18); color:var(--gold); }
-.pc-urgency.crit { background:rgba(255,51,68,0.18); color:var(--danger); animation:pulse-red 1.4s infinite; }
+.pc-urgency.crit { background:rgba(204,0,0,0.18); color:var(--red); animation:pulse-red 1.4s infinite; }
 @keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
 .pc-actions { display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); gap:4px; }
 .pc-wa { color:#25D366; font-size:16px; text-decoration:none; line-height:1; flex-shrink:0; }
 .pc-wa:hover { opacity:0.8; }
-.pc-adv { background:rgba(90,120,255,0.1); border:1px solid var(--primary); border-radius:4px; color:var(--primary); font-size:9px; font-family:'DM Mono',monospace; cursor:pointer; padding:3px 7px; transition:all 0.15s; white-space:nowrap; }
-.pc-adv:hover { background:var(--primary); color:white; }
+.pc-adv { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; color:var(--muted); font-size:9px; font-family:'DM Mono',monospace; cursor:pointer; padding:3px 7px; transition:all 0.15s; white-space:nowrap; }
+.pc-adv:hover { background:var(--red); border-color:var(--red); color:white; }
 .pc-followup { font-size:9px; font-family:'DM Mono',monospace; }
 .pc-followup.fu-late { color:var(--red); }
 .pc-followup.fu-today { color:var(--gold); }
@@ -219,7 +165,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .stage-dot { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); background:var(--mid); margin:0 auto 4px; position:relative; z-index:1; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; transition:all 0.2s; }
 .stage-step.done .stage-dot { background:var(--green); border-color:var(--green); color:white; }
 .stage-step.done .stage-dot::after { content:'✓'; }
-.stage-step.current .stage-dot { background:var(--primary); border-color:var(--primary); box-shadow:0 0 0 3px rgba(90,120,255,0.25); }
+.stage-step.current .stage-dot { background:var(--red); border-color:var(--red); box-shadow:0 0 0 3px rgba(204,0,0,0.25); }
 .stage-step.current .stage-dot::after { content:'●'; color:white; font-size:7px; }
 .stage-label { font-size:7px; font-family:'DM Mono',monospace; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase; }
 .stage-step.current .stage-label { color:var(--text); font-weight:700; }
@@ -243,73 +189,24 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .tl-time { font-size:9px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
 .tl-add { display:flex; gap:8px; margin-top:10px; }
 .tl-add textarea { flex:1; background:var(--card); border:1px solid var(--border); border-radius:6px; padding:8px 10px; color:var(--text); font-size:12px; font-family:'DM Sans',sans-serif; resize:none; height:52px; outline:none; transition:border-color 0.15s; }
-.tl-add textarea:focus { border-color:var(--primary); }
-.tl-add button { background:var(--primary); border:none; color:white; border-radius:6px; padding:0 14px; cursor:pointer; font-size:11px; font-weight:600; white-space:nowrap; }
+.tl-add textarea:focus { border-color:var(--red); }
+.tl-add button { background:var(--red); border:none; color:white; border-radius:6px; padding:0 14px; cursor:pointer; font-size:11px; font-weight:600; white-space:nowrap; }
 .tl-add button:hover { background:var(--red2); }
 .tl-empty { text-align:center; padding:16px; font-size:11px; color:var(--muted); }
 
-.kpi-row { display:flex; gap:14px; overflow-x:auto; padding-bottom:14px; padding-top:6px; margin-bottom:16px; scrollbar-width:thin; }
-.kpi-card { min-width:190px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 18px 16px; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; user-select:none; }
-.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--kpi-color,var(--border)); border-radius:12px 12px 0 0; }
-.kpi-card.active { border-color:var(--kpi-color,var(--red)); box-shadow:0 0 0 1px var(--kpi-color,var(--red)), 0 4px 20px rgba(0,0,0,0.3); transform:translateY(-2px); }
-.kpi-card:hover:not(.active) { transform:translateY(-2px); border-color:rgba(255,255,255,0.15); }
-.kpi-card-controls { position:absolute; top:8px; right:8px; display:none; gap:4px; z-index:5; }
-.kpi-card:hover .kpi-card-controls { display:flex; }
-.kpi-ctrl-btn { background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:4px; color:var(--muted); cursor:pointer; font-size:10px; padding:3px 6px; line-height:1.4; transition:all 0.15s; backdrop-filter:blur(4px); }
-.kpi-ctrl-btn:hover { background:var(--danger); border-color:var(--danger); color:white; }
-.kpi-label { font-size:9px; font-family:'DM Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; display:flex; align-items:center; gap:5px; padding-right:36px; }
-.kpi-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.kpi-count { font-family:'Syne',sans-serif; font-size:44px; font-weight:800; line-height:1; margin-bottom:4px; }
-.kpi-pct { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); margin-bottom:10px; }
-.kpi-value { font-size:10px; color:var(--green); font-family:'DM Mono',monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.kpi-add-card { min-width:80px; max-width:80px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:2px dashed var(--border); border-radius:12px; cursor:pointer; color:var(--muted); transition:all 0.2s; padding:16px 8px; font-size:11px; font-family:'DM Mono',monospace; letter-spacing:0.5px; }
-.kpi-add-card:hover { border-color:var(--primary); color:var(--primary); }
-
-.pipe-leads-panel { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:16px; overflow:hidden; display:none; }
-.pipe-leads-panel.visible { display:block; }
-.pipe-leads-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-.pipe-leads-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; }
-.pipe-leads-grid { padding:12px; display:flex; flex-direction:column; gap:0; max-height:420px; overflow-y:auto; }
-.plc { background:var(--mid); border-bottom:1px solid var(--border); padding:12px 14px; cursor:pointer; transition:background 0.15s; }
-.plc:first-child { border-radius:8px 8px 0 0; }
-.plc:last-child { border-bottom:none; border-radius:0 0 8px 8px; }
-.plc:only-child { border-radius:8px; }
-.plc:hover { background:rgba(90,120,255,0.06); }
-.plc-row { display:flex; align-items:center; gap:10px; }
-.plc-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:white; flex-shrink:0; }
-.plc-info { flex:1; overflow:hidden; }
-.plc-name { font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
-.plc-sub { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-.plc-status-badge { font-size:9px; font-family:'DM Mono',monospace; padding:2px 6px; border-radius:4px; white-space:nowrap; flex-shrink:0; }
-.plc-actions-row { display:flex; align-items:center; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid var(--border); }
-.plc-status-pills { display:flex; gap:4px; overflow-x:auto; padding:8px 0 4px; scrollbar-width:none; flex-wrap:nowrap; }
-.plc-status-pills::-webkit-scrollbar { display:none; }
-.plc-pill { flex-shrink:0; padding:4px 10px; border-radius:20px; border:1px solid; font-size:9px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
-.plc-pill.active { opacity:1; font-weight:700; }
-.plc-pill:not(.active) { opacity:0.45; }
-.plc-pill:hover { opacity:1; transform:scale(1.05); }
-.plc-btn { padding:5px 10px; border-radius:20px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--muted); font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.15s; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
-.plc-btn:hover { background:var(--primary); border-color:var(--primary); color:white; }
-.plc-btn.wa { color:#25D366; border-color:rgba(37,211,102,0.3); text-decoration:none; }
-.plc-btn.wa:hover { background:#25D366; color:white; border-color:#25D366; }
-.plc-btn.cal { color:var(--cyan); border-color:rgba(84,217,243,0.3); }
-.plc-btn.cal:hover { background:var(--cyan); color:var(--dark); border-color:var(--cyan); }
-
-.pipe-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
-.chart-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; }
-.chart-title { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; letter-spacing:0.3px; margin-bottom:16px; color:var(--text); }
-.chart-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.chart-bar-label { font-size:9px; font-family:'DM Mono',monospace; color:var(--muted); width:64px; flex-shrink:0; text-align:right; }
-.chart-bar-wrap { flex:1; height:14px; background:var(--border); border-radius:4px; overflow:hidden; }
-.chart-bar-fill { height:100%; border-radius:4px; transition:width 0.5s ease; }
-.chart-bar-val { font-size:9px; font-family:'DM Mono',monospace; color:var(--text); width:24px; flex-shrink:0; }
-.chart-donut-wrap { display:flex; align-items:center; gap:16px; }
-.chart-donut-legend { flex:1; }
-.chart-donut-item { display:flex; align-items:center; gap:6px; margin-bottom:6px; font-size:11px; }
-.chart-donut-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.chart-donut-pct { margin-left:auto; font-family:'DM Mono',monospace; font-size:10px; font-weight:600; }
-
-@media(max-width:768px){ .pipe-charts { grid-template-columns:1fr; } }
+.pipeline { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 12px; }
+.pipeline-col { min-width: 185px; flex-shrink: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.pipeline-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.pipeline-col-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.pipeline-count { font-size: 10px; color: var(--muted); background: var(--border); padding: 1px 6px; border-radius: 10px; }
+.pipeline-cards { padding: 8px; min-height: 200px; }
+.pipeline-card { background: var(--mid); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s; }
+.pipeline-card:hover { border-color: var(--red); transform: translateY(-1px); }
+.pc-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.pc-car { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.pc-value { font-size: 11px; color: var(--green); font-weight: 600; font-family: 'DM Mono', monospace; }
+.pc-time { font-size: 9px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+.pipeline-footer { padding: 8px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); text-align: center; font-family: 'DM Mono', monospace; }
 
 .follow-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .follow-item:last-child { border-bottom: none; }
@@ -318,14 +215,14 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .follow-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .follow-detail { font-size: 11px; color: var(--muted); }
 .follow-time { font-size: 10px; font-family: 'DM Mono', monospace; white-space: nowrap; }
-.follow-urgent { color: var(--danger); }
+.follow-urgent { color: var(--red); }
 .follow-today { color: var(--gold); }
 .follow-ok { color: var(--green); }
 
 .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .progress-label { font-size: 12px; flex: 1; }
 .progress-bar-wrap { flex: 2; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.progress-bar { height: 100%; border-radius: 3px; background: var(--primary); }
+.progress-bar { height: 100%; border-radius: 3px; background: var(--red); }
 .progress-val { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); width: 36px; text-align: right; }
 
 .donut-wrap { display: flex; align-items: center; gap: 20px; }
@@ -346,7 +243,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .form-row { margin-bottom: 16px; }
 .form-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display: block; font-family: 'DM Mono', monospace; }
 .form-input, .form-select, .form-textarea { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s; outline: none; }
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
 .form-select option { background: var(--card); }
 .form-textarea { resize: vertical; min-height: 80px; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -359,7 +256,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .search-box { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 13px; color: var(--muted); transition: border-color 0.15s; min-width: 200px; }
 .search-box input { background: none; border: none; color: var(--text); font-size: 13px; outline: none; flex: 1; font-family: 'DM Sans', sans-serif; }
 .search-box input::placeholder { color: var(--muted); }
-.search-box:focus-within { border-color: var(--primary); }
+.search-box:focus-within { border-color: var(--red); }
 
 .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
 .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
@@ -379,7 +276,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .page.active .stat-card:nth-child(4) { animation-delay: 0.15s; }
 @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
 
-#loadingBar { position: fixed; top: 0; left: 0; height: 2px; background: var(--primary); z-index: 999; transition: width 0.3s ease, opacity 0.3s; width: 0; opacity: 0; }
+#loadingBar { position: fixed; top: 0; left: 0; height: 2px; background: var(--red); z-index: 999; transition: width 0.3s ease, opacity 0.3s; width: 0; opacity: 0; }
 
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
@@ -402,12 +299,12 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-lead-item:hover { background:rgba(255,255,255,0.03); }
 .disp-lead-item:last-child { border-bottom:none; }
 .disp-check { width:16px; height:16px; border-radius:4px; border:2px solid var(--border); background:transparent; cursor:pointer; flex-shrink:0; transition:all 0.15s; appearance:none; -webkit-appearance:none; }
-.disp-check:checked { background:var(--primary); border-color:var(--primary); }
+.disp-check:checked { background:var(--red); border-color:var(--red); }
 .disp-check:checked::after { content:'✓'; display:block; color:#fff; font-size:10px; font-weight:700; text-align:center; line-height:12px; }
 .disp-lead-name { font-size:13px; font-weight:500; flex:1; }
 .disp-lead-tel { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
 .disp-sel-bar { padding:10px 16px; background:rgba(204,0,0,0.08); border-top:1px solid rgba(204,0,0,0.15); display:flex; align-items:center; justify-content:space-between; }
-.disp-sel-count { font-size:11px; color:var(--primary); font-weight:700; font-family:'DM Mono',monospace; }
+.disp-sel-count { font-size:11px; color:var(--red); font-weight:700; font-family:'DM Mono',monospace; }
 .disp-template-area { padding:18px; display:flex; flex-direction:column; gap:14px; }
 .disp-vars { display:flex; flex-wrap:wrap; gap:6px; }
 .disp-var-btn { padding:3px 10px; background:rgba(68,136,255,0.12); color:var(--blue); border:1px solid rgba(68,136,255,0.2); border-radius:20px; font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.15s; }
@@ -441,22 +338,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-summary-title { font-size:20px; font-weight:700; }
 .disp-summary-sub { font-size:13px; color:var(--muted); }
 @media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
-
-/* ── Follow-up multi-select ── */
-.fu-item-chk { width:18px;height:18px;border-radius:5px;border:2px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;transition:all 0.15s;appearance:none;-webkit-appearance:none; }
-.fu-item-chk:checked { background:var(--primary);border-color:var(--primary); }
-.fu-item-chk:checked::after { content:'✓';display:block;color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:14px; }
-.follow-item.fu-checked { background:rgba(204,0,0,0.07);border-radius:8px;margin:0 -4px;padding-left:8px;padding-right:8px; }
-.fu-bulk-bar { display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(204,0,0,0.08);border-top:2px solid rgba(204,0,0,0.2);flex-wrap:wrap; }
-.fu-bulk-count { font-size:12px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace;white-space:nowrap; }
-
-/* ── Disparos saved templates ── */
-.disp-tpl-list { display:flex;flex-wrap:wrap;gap:6px; }
-.disp-tpl-chip { display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;transition:all 0.15s;max-width:200px; }
-.disp-tpl-chip:hover { background:rgba(204,0,0,0.1);border-color:rgba(204,0,0,0.3); }
-.disp-tpl-chip .tpl-name { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-.disp-tpl-del { font-size:13px;color:var(--muted);line-height:1;flex-shrink:0;opacity:0.5;padding:0 2px; }
-.disp-tpl-del:hover { opacity:1;color:var(--red); }
 </style>
 </head>
 <body>
@@ -480,7 +361,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <div class="nav-item" onclick="nav('relatorios', this)"><span class="icon">📈</span> Relatórios</div>
     <div class="nav-section">Ferramentas</div>
     <div class="nav-item" onclick="nav('disparos', this)"><span class="icon">📲</span> Disparos WA</div>
-    <div class="nav-item" onclick="nav('whatsapp', this)"><span class="icon">📱</span> Contas WA<span class="nav-badge" id="waBadge" style="background:var(--green);display:none">●</span></div>
     <div class="nav-section">Equipe</div>
     <div class="nav-item" onclick="nav('equipe', this)"><span class="icon">🏆</span> Ranking</div>
   </nav>
@@ -588,7 +468,16 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <div class="page" id="page-leads">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterStatus" onchange="renderLeadsTable()">
-          <option value="">Todas as jornadas</option>
+          <option value="">Todos os status</option>
+          <option value="Novo">Novo</option>
+          <option value="Contactado">Contactado</option>
+          <option value="Qualificado">Qualificado</option>
+          <option value="Agendado">Agendado</option>
+          <option value="Proposta">Proposta</option>
+          <option value="Negociação">Negociação</option>
+          <option value="Ganho">Ganho</option>
+          <option value="Perdido">Perdido</option>
+          <option value="Arquivado">Arquivado</option>
         </select>
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterOrigem" onchange="renderLeadsTable()">
           <option value="">Todas as origens</option>
@@ -602,7 +491,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Nome</th><th>UF</th><th>Modelo / Placa</th><th>Jornada</th><th>Origem</th><th>Follow-up</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Carro</th><th>Cidade</th><th>Status</th><th>Follow-up</th><th>Ações</th></tr></thead>
             <tbody id="leadsTable"></tbody>
           </table>
         </div>
@@ -611,68 +500,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
     <!-- PIPELINE -->
     <div class="page" id="page-pipeline">
-      <div class="kpi-row" id="kpiRow"></div>
-      <div class="pipe-leads-panel" id="pipeLeadsPanel">
-        <div class="pipe-leads-header">
-          <div class="pipe-leads-title" id="pipeLeadsTitle">—</div>
-          <button onclick="closePipeLeads()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1">✕</button>
-        </div>
-        <div class="pipe-leads-grid" id="pipeLeadsGrid"></div>
-      </div>
-      <div class="pipe-charts" id="pipeCharts"></div>
-    </div>
-
-    <!-- PIPELINE SIDE PANEL -->
-    <div class="pp-overlay" id="ppOverlay" onclick="closePipelinePanel()"></div>
-    <div class="pipeline-panel" id="pipelinePanel">
-      <div class="pp-header">
-        <div style="flex:1;overflow:hidden">
-          <div class="pp-title" id="ppName">—</div>
-          <div id="ppBadge" style="margin-top:2px"></div>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
-          <button onclick="openFullEditFromPanel()" title="Abrir editor completo" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;padding:4px 8px;font-size:12px">⤢</button>
-          <button onclick="closePipelinePanel()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1">✕</button>
-        </div>
-      </div>
-      <div class="pp-body">
-        <input type="hidden" id="ppLeadId">
-        <div class="pp-quickbtns" id="ppQuickBtns"></div>
-        <div class="pp-section">
-          <label class="pp-label">Telefone</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input class="pp-input" id="ppTel" placeholder="(00) 00000-0000" style="flex:1" oninput="updatePpWa()">
-            <a id="ppWaBtn" href="#" target="_blank" style="color:#25D366;font-size:20px;text-decoration:none;opacity:0.4" onclick="return document.getElementById('ppWaBtn').href!='#'">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div class="pp-grid2">
-          <div class="pp-section"><label class="pp-label">Carro</label><input class="pp-input" id="ppCarro"></div>
-          <div class="pp-section"><label class="pp-label">Cidade</label><input class="pp-input" id="ppCidade"></div>
-        </div>
-        <div class="pp-grid2">
-          <div class="pp-section"><label class="pp-label">Valor R$/mês</label><input class="pp-input" id="ppValor" type="number"></div>
-          <div class="pp-section"><label class="pp-label">Follow-up</label><input class="pp-input" id="ppFollowup" type="date"></div>
-        </div>
-        <div class="pp-section"><label class="pp-label">Status</label>
-          <select class="pp-input" id="ppStatus" onchange="updatePpBadge()"></select>
-        </div>
-        <div class="pp-section"><label class="pp-label">Observações</label><textarea class="pp-input" id="ppObs" rows="3" style="resize:none"></textarea></div>
-        <div class="tl-section" style="margin-top:12px">
-          <div class="tl-title">Jornada</div>
-          <div class="tl-scroll" id="ppTimeline" style="max-height:160px"><div class="tl-empty">Carregando...</div></div>
-          <div class="tl-add">
-            <textarea id="ppNoteInput" placeholder="Adicionar nota..." style="height:44px"></textarea>
-            <button onclick="addPanelNote()">+ Nota</button>
-          </div>
-        </div>
-      </div>
-      <div class="pp-footer">
-        <button class="btn btn-ghost" onclick="closePipelinePanel()">Fechar</button>
-        <button class="btn btn-ghost" onclick="openCalendarFromPanel()" title="Agendar no Google Agenda" style="padding:8px 10px">📅</button>
-        <button class="btn btn-primary" style="flex:1" onclick="savePanelLead()">Salvar</button>
-      </div>
+      <div class="pipeline" id="pipelineBoard"></div>
     </div>
 
     <!-- FOLLOW-UP -->
@@ -682,19 +510,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <div class="stat-card"><div class="stat-label">Hoje</div><div class="stat-value gold" id="fuHoje">0</div></div>
       </div>
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">Lista de Follow-ups</span>
-          <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px" id="fuSelectBtn" onclick="fuToggleSelectMode()">☑ Selecionar</button>
-        </div>
-        <div id="fuBulkBar" style="display:none" class="fu-bulk-bar">
-          <span class="fu-bulk-count" id="fuBulkCount">0 selecionados</span>
-          <select class="form-select" id="fuBulkStatus" style="font-size:11px;padding:5px 10px;width:auto;flex:1;min-width:140px">
-            <option value="">— Novo status —</option>
-            ${getPipelineCols ? getPipelineCols().map(c=>`<option value="${c.key}">${c.label||c.key}</option>`).join('') : ''}
-          </select>
-          <button class="btn btn-primary" style="font-size:11px;padding:6px 14px" onclick="fuBulkChangeStatus()">Alterar</button>
-          <button class="btn btn-ghost" style="font-size:11px;padding:6px 12px" onclick="fuClearSelection()">✕</button>
-        </div>
+        <div class="card-header"><span class="card-title">Lista de Follow-ups</span></div>
         <div class="card-body" id="followList"></div>
       </div>
     </div>
@@ -710,10 +526,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="card">
         <div class="card-header">
           <span class="card-title">Vendas por Mês</span>
-          <div style="display:flex;gap:8px">
-            <button class="btn" style="border-color:var(--muted);color:var(--muted);font-size:12px" onclick="syncWonLeadsToVendas()">⟳ Sincronizar Pipeline</button>
-            <button class="btn btn-green" onclick="openModal('addVenda')">+ Registrar Venda</button>
-          </div>
+          <button class="btn btn-green" onclick="openModal('addVenda')">+ Registrar Venda</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -745,11 +558,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <!-- EQUIPE -->
     <div class="page" id="page-disparos">
       <div id="disparos-root"></div>
-    </div>
-
-    <!-- CONTAS WHATSAPP -->
-    <div class="page" id="page-whatsapp">
-      <div id="wa-root"></div>
     </div>
 
     <div class="page" id="page-equipe">
@@ -786,7 +594,11 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="form-grid">
         <div class="form-row">
           <label class="form-label">Status</label>
-          <select class="form-select" id="leadStatus"></select>
+          <select class="form-select" id="leadStatus">
+            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
+            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
+            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
+          </select>
         </div>
         <div class="form-row">
           <label class="form-label">Origem</label>
@@ -865,7 +677,11 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="form-grid">
         <div class="form-row">
           <label class="form-label">Status</label>
-          <select class="form-select" id="editStatus"></select>
+          <select class="form-select" id="editStatus">
+            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
+            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
+            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
+          </select>
         </div>
         <div class="form-row">
           <label class="form-label">Origem</label>
@@ -939,7 +755,13 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         </div>
         <div class="form-row">
           <label class="form-label">Status inicial</label>
-          <select class="form-select" id="xlsxStatus"></select>
+          <select class="form-select" id="xlsxStatus">
+            <option value="Novo">Novo</option>
+            <option value="Contactado">Contactado</option>
+            <option value="Qualificado">Qualificado</option>
+            <option value="Agendado">Agendado</option>
+            <option value="Proposta">Proposta</option>
+          </select>
         </div>
       </div>
       <div class="form-row">
@@ -998,27 +820,15 @@ function hideLoading() {
 async function loadData() {
   showLoading();
   try {
-    const [leadsData, vendasData, dbCols] = await Promise.all([
+    [leads, vendas] = await Promise.all([
       api('/api/leads'),
       api('/api/vendas'),
-      api('/api/settings?key=pipelineCols').catch(()=>null),
     ]);
-    leads  = leadsData  || [];
-    vendas = vendasData || [];
-    // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
-    if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
-      localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
-    } else {
-      // First run: push whatever is in localStorage to DB
-      const localCols = getPipelineCols();
-      api('/api/settings?key=pipelineCols', 'PUT', localCols).catch(()=>{});
-    }
   } catch(e) {
     console.error('Erro ao carregar dados:', e);
     leads = []; vendas = [];
   }
   hideLoading();
-  refreshAllStatusSelects();
   renderDashboard();
   updateBadges();
 }
@@ -1042,13 +852,12 @@ function nav(page, el) {
 
 function renderPage(page) {
   if (page === 'dashboard') renderDashboard();
-  else if (page === 'leads') { refreshAllStatusSelects(); renderLeadsTable(); }
+  else if (page === 'leads') renderLeadsTable();
   else if (page === 'pipeline') renderPipeline();
   else if (page === 'followup') renderFollowup();
   else if (page === 'vendas') renderVendas();
   else if (page === 'relatorios') renderRelatorios();
   else if (page === 'disparos') renderDisparos();
-  else if (page === 'whatsapp') renderWaPage();
   else if (page === 'equipe') renderEquipe();
 }
 
@@ -1116,7 +925,7 @@ function editLead(id) {
   document.getElementById('editTel').value      = l.tel || '';
   document.getElementById('editCarro').value    = l.carro || '';
   document.getElementById('editCidade').value   = l.cidade || '';
-  populateStatusSelect('editStatus', l.status);
+  document.getElementById('editStatus').value   = l.status;
   document.getElementById('editOrigem').value   = l.origem;
   document.getElementById('editValor').value    = l.valor || '';
   document.getElementById('editFollowup').value = l.followup || '';
@@ -1135,15 +944,13 @@ async function updateLead() {
   if (idx === -1) return;
   const btn = document.getElementById('btnUpdateLead');
   btn.disabled = true; btn.textContent = 'Salvando...';
-  const newStatus = document.getElementById('editStatus').value;
   try {
-    autoVendaIfWon(leads[idx], newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', {
       nome:     document.getElementById('editNome').value,
       tel:      document.getElementById('editTel').value,
       carro:    document.getElementById('editCarro').value,
       cidade:   document.getElementById('editCidade').value,
-      status:   newStatus,
+      status:   document.getElementById('editStatus').value,
       origem:   document.getElementById('editOrigem').value,
       valor:    parseFloat(document.getElementById('editValor').value) || 0,
       followup: document.getElementById('editFollowup').value,
@@ -1170,11 +977,17 @@ async function deleteLead(id) {
 
 // ── STAGE PROGRESS & TIMELINE ─────────────────────────
 function renderStageProgress(currentStatus) {
-  const cols = getPipelineCols();
-  const stages = cols.filter(c => !isLost(c.key) && !isArchived(c.key))
-    .map(c=>({ key:c.key, label:c.label.slice(0,7) }));
+  const stages = [
+    { key: 'Novo',        label: 'NOVO' },
+    { key: 'Contactado',  label: 'CONTACT.' },
+    { key: 'Qualificado', label: 'QUALIF' },
+    { key: 'Agendado',    label: 'AGEND.' },
+    { key: 'Proposta',    label: 'PROPOSTA' },
+    { key: 'Negociação',  label: 'NEGOC.' },
+    { key: 'Ganho',       label: 'GANHO' },
+  ];
   const el = document.getElementById('stageProgress');
-  if (isLost(currentStatus)) {
+  if (currentStatus === 'Perdido') {
     el.innerHTML = '<div style="width:100%;text-align:center;padding:8px 0 16px;font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;letter-spacing:1px">— LEAD PERDIDO —</div>';
     return;
   }
@@ -1205,7 +1018,7 @@ function renderLeadTimeline(history) {
   }
   el.innerHTML = history.map((h, i) => {
     const isStatusChange = h.status !== 'nota';
-    const dotCls = isWon(h.status) ? 'ganho' : isLost(h.status) ? 'perdido' : isStatusChange ? 'status-chg' : 'nota';
+    const dotCls = h.status === 'Ganho' ? 'ganho' : h.status === 'Perdido' ? 'perdido' : isStatusChange ? 'status-chg' : 'nota';
     const label = isStatusChange ? `Status → <strong>${h.status}</strong>` : '📝 Nota';
     const showBar = i < history.length - 1;
     const ts = new Date(h.created_at);
@@ -1237,182 +1050,6 @@ async function addTimelineNote() {
   } catch(e) { alert('Erro: ' + e.message); }
 }
 
-// ── PIPELINE SIDE PANEL ───────────────────────────────
-function openPipelinePanel(id) {
-  const l = leads.find(x => x.id === id);
-  if (!l) return;
-  document.getElementById('ppLeadId').value    = id;
-  document.getElementById('ppName').textContent = l.nome;
-  document.getElementById('ppBadge').innerHTML  = badgeHtml(l.status);
-  document.getElementById('ppTel').value        = l.tel || '';
-  document.getElementById('ppCarro').value      = l.carro || '';
-  document.getElementById('ppCidade').value     = l.cidade || '';
-  document.getElementById('ppValor').value      = l.valor || '';
-  document.getElementById('ppFollowup').value   = l.followup || '';
-  document.getElementById('ppObs').value        = l.obs || '';
-  populateStatusSelect('ppStatus', l.status);
-  updatePpWa();
-  // Quick action buttons
-  const next = nextStatus(l.status);
-  const lostKey = getColsByRole('lost')[0] || null;
-  const archKey = getColsByRole('archived')[0] || null;
-  document.getElementById('ppQuickBtns').innerHTML = [
-    next ? `<button class="pp-qbtn" onclick="quickAdvancePP(${id},'${next}')">→ ${next}</button>` : '',
-    lostKey ? `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'${lostKey}')">✗ ${lostKey}</button>` : '',
-    archKey ? `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'${archKey}')">📁 Arquivar</button>` : '',
-  ].join('');
-  document.getElementById('ppTimeline').innerHTML = '<div class="tl-empty">Carregando...</div>';
-  document.getElementById('ppNoteInput').value = '';
-  document.getElementById('pipelinePanel').classList.add('open');
-  document.getElementById('ppOverlay').classList.add('open');
-  loadPanelHistory(id);
-}
-
-function closePipelinePanel() {
-  document.getElementById('pipelinePanel').classList.remove('open');
-  document.getElementById('ppOverlay').classList.remove('open');
-}
-
-function updatePpWa() {
-  const tel = document.getElementById('ppTel').value.replace(/\D/g,'');
-  const btn = document.getElementById('ppWaBtn');
-  btn.href    = tel ? `https://wa.me/55${tel}` : '#';
-  btn.style.opacity = tel ? '1' : '0.4';
-}
-
-function updatePpBadge() {
-  const s = document.getElementById('ppStatus').value;
-  document.getElementById('ppBadge').innerHTML = badgeHtml(s);
-  const id = parseInt(document.getElementById('ppLeadId').value);
-  const next = nextStatus(s);
-  const lostKey2 = getColsByRole('lost')[0] || null;
-  const archKey2 = getColsByRole('archived')[0] || null;
-  document.getElementById('ppQuickBtns').innerHTML = [
-    next ? `<button class="pp-qbtn" onclick="quickAdvancePP(${id},'${next}')">→ ${next}</button>` : '',
-    lostKey2 ? `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'${lostKey2}')">✗ ${lostKey2}</button>` : '',
-    archKey2 ? `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'${archKey2}')">📁 Arquivar</button>` : '',
-  ].join('');
-}
-
-async function savePanelLead() {
-  const id  = parseInt(document.getElementById('ppLeadId').value);
-  const idx = leads.findIndex(x => x.id === id);
-  if (idx === -1) return;
-  const l = leads[idx];
-  const newStatus = document.getElementById('ppStatus').value;
-  try {
-    autoVendaIfWon(l, newStatus);
-    const updated = await api(`/api/leads/${id}`, 'PUT', {
-      nome: l.nome, exec: l.exec, origem: l.origem,
-      tel:      document.getElementById('ppTel').value,
-      carro:    document.getElementById('ppCarro').value,
-      cidade:   document.getElementById('ppCidade').value,
-      valor:    parseFloat(document.getElementById('ppValor').value) || 0,
-      followup: document.getElementById('ppFollowup').value,
-      obs:      document.getElementById('ppObs').value,
-      status:   newStatus,
-    });
-    leads[idx] = updated;
-    closePipelinePanel();
-    renderPage(currentPage);
-    updateBadges();
-  } catch(e) { alert('Erro ao salvar: ' + e.message); }
-}
-
-async function quickAdvancePP(id, newStatus) {
-  const idx = leads.findIndex(x => x.id === id);
-  if (idx === -1) return;
-  const l = leads[idx];
-  try {
-    autoVendaIfWon(l, newStatus);
-    const updated = await api(`/api/leads/${id}`, 'PUT', { ...l, status: newStatus });
-    leads[idx] = updated;
-    closePipelinePanel();
-    renderPage(currentPage);
-    updateBadges();
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-async function loadPanelHistory(id) {
-  try {
-    const history = await api(`/api/leads/${id}/history`);
-    const el = document.getElementById('ppTimeline');
-    if (!history || history.length === 0) {
-      el.innerHTML = '<div class="tl-empty">Nenhum registro ainda.</div>';
-      return;
-    }
-    el.innerHTML = history.map((h, i) => {
-      const isStatus = h.status !== 'nota';
-      const dotCls = isWon(h.status) ? 'ganho' : isLost(h.status) ? 'perdido' : isStatus ? 'status-chg' : 'nota';
-      const label  = isStatus ? `→ <strong>${h.status}</strong>` : '📝 Nota';
-      const ts = new Date(h.created_at);
-      const timeStr = ts.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      return `<div class="tl-entry">
-        <div class="tl-line"><div class="tl-dot ${dotCls}"></div>${i < history.length-1 ? '<div class="tl-bar"></div>' : ''}</div>
-        <div class="tl-body"><div class="tl-status">${label}</div>${h.obs?`<div class="tl-obs">${h.obs}</div>`:''}<div class="tl-time">${timeStr}</div></div>
-      </div>`;
-    }).join('');
-    el.scrollTop = el.scrollHeight;
-  } catch(e) {
-    document.getElementById('ppTimeline').innerHTML = '<div class="tl-empty">Erro ao carregar</div>';
-  }
-}
-
-async function addPanelNote() {
-  const id  = parseInt(document.getElementById('ppLeadId').value);
-  const obs = document.getElementById('ppNoteInput').value.trim();
-  if (!obs) return;
-  try {
-    await api(`/api/leads/${id}/history`, 'POST', { obs, status: 'nota' });
-    document.getElementById('ppNoteInput').value = '';
-    await loadPanelHistory(id);
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-function openFullEditFromPanel() {
-  const id = parseInt(document.getElementById('ppLeadId').value);
-  closePipelinePanel();
-  editLead(id);
-}
-
-function addCustomPipelineCol() {
-  const name = prompt('Nome da nova coluna (ex: Reativação, Pós-venda):');
-  if (!name || !name.trim()) return;
-  const cols = getPipelineCols();
-  if (cols.find(c => c.key.toLowerCase() === name.trim().toLowerCase())) { alert('Já existe uma coluna com este nome!'); return; }
-  const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A','#98D8C8','#DDA0DD'];
-  const customCount = cols.length - DEFAULT_PIPELINE_COLS.length;
-  cols.push({ key: name.trim(), label: name.trim().toUpperCase(), color: colors[Math.max(0,customCount) % colors.length] });
-  savePipelineCols(cols);
-  refreshAllStatusSelects();
-  renderPipeline();
-}
-
-function renameKpiCol(key) {
-  const cols = getPipelineCols();
-  const col = cols.find(c => c.key === key);
-  if (!col) return;
-  const newLabel = prompt(`Novo nome de exibição para "${col.key}":`, col.label);
-  if (!newLabel || !newLabel.trim()) return;
-  col.label = newLabel.trim().toUpperCase();
-  savePipelineCols(cols);
-  if (_activeKpiKey === key) { _activeKpiKey = null; document.getElementById('pipeLeadsPanel').classList.remove('visible'); }
-  refreshAllStatusSelects();
-  renderPipeline();
-}
-
-function deleteKpiCol(key) {
-  const cnt = leads.filter(l => l.status === key).length;
-  const msg = cnt > 0
-    ? `Excluir a coluna "${key}"?\n\n${cnt} lead(s) com este status não aparecerão no pipeline (registros não são apagados).`
-    : `Excluir a coluna "${key}"?`;
-  if (!confirm(msg)) return;
-  savePipelineCols(getPipelineCols().filter(c => c.key !== key));
-  if (_activeKpiKey === key) { _activeKpiKey = null; document.getElementById('pipeLeadsPanel').classList.remove('visible'); }
-  refreshAllStatusSelects();
-  renderPipeline();
-}
-
 // ── VENDA CRUD ─────────────────────────────────────────
 async function saveVenda() {
   const cliente = document.getElementById('vendaCliente').value.trim();
@@ -1438,99 +1075,27 @@ async function saveVenda() {
   finally { btn.disabled = false; btn.textContent = 'Registrar Venda'; }
 }
 
-// ── PIPELINE COLUMN CONFIG ─────────────────────────────
-const DEFAULT_PIPELINE_COLS = [
-  { key:'Novo',        label:'NOVO',        color:'#4488FF' },
-  { key:'Contactado',  label:'CONTACTADO',  color:'#00CCDD' },
-  { key:'Qualificado', label:'QUALIFICADO', color:'#F5A623' },
-  { key:'Agendado',    label:'AGENDADO',    color:'#9966FF' },
-  { key:'Proposta',    label:'PROPOSTA',    color:'#CC0000', role:'proposal' },
-  { key:'Negociação',  label:'NEGOCIAÇÃO',  color:'#CC88FF' },
-  { key:'Ganho',       label:'GANHO',       color:'#00C87A', role:'won' },
-  { key:'Perdido',     label:'PERDIDO',     color:'#888888', role:'lost' },
-  { key:'Arquivado',   label:'ARQUIVADO',   color:'#555555', role:'archived' },
-];
-function getPipelineCols() {
-  try {
-    const s = localStorage.getItem('pipelineCols');
-    if (s) return JSON.parse(s);
-    // Migrate from old customPipelineCols key
-    const old = localStorage.getItem('customPipelineCols');
-    if (old) {
-      const custom = JSON.parse(old);
-      const migrated = [...DEFAULT_PIPELINE_COLS.map(c=>({...c})),
-        ...custom.map(c=>({ key:c.key, label:c.key.toUpperCase(), color:c.color||'#888' }))];
-      localStorage.setItem('pipelineCols', JSON.stringify(migrated));
-      return migrated;
-    }
-  } catch(e) {}
-  return DEFAULT_PIPELINE_COLS.map(c=>({...c}));
-}
-function savePipelineCols(cols) {
-  localStorage.setItem('pipelineCols', JSON.stringify(cols));
-  // Sync to DB (fire-and-forget)
-  api('/api/settings?key=pipelineCols', 'PUT', cols).catch(()=>{});
-}
-function getColColor(key) { const c = getPipelineCols().find(c=>c.key===key); return c ? c.color : '#888'; }
-
 // ── HELPERS ────────────────────────────────────────────
-function getColLabel(key) { const c = getPipelineCols().find(c=>c.key===key); return c ? (c.label||c.key) : key; }
-function getColRole(key)  { const c = getPipelineCols().find(c=>c.key===key); return c ? (c.role||null) : null; }
-function isWon(key)       { return getColRole(key) === 'won'; }
-function isLost(key)      { return getColRole(key) === 'lost'; }
-function isArchived(key)  { return getColRole(key) === 'archived'; }
-function isTerminal(key)  { const r = getColRole(key); return r === 'won' || r === 'lost' || r === 'archived'; }
-function getColsByRole(role) { return getPipelineCols().filter(c=>c.role===role).map(c=>c.key); }
-
-function autoVendaIfWon(lead, newStatus) {
-  if (!isWon(newStatus) || isWon(lead.status)) return;
-  api('/api/vendas', 'POST', {
-    cliente: lead.nome,
-    data:    new Date().toISOString().split('T')[0],
-    carro:   lead.carro  || '',
-    plano:   'Completo',
-    valor:   lead.valor  || 0,
-    origem:  lead.origem || 'Outros',
-    exec:    lead.exec   || 'Cássio',
-  }).then(v => { if (v && v.id) vendas.unshift(v); }).catch(() => {});
-}
-
+const BADGE_MAP = { 'Novo':'badge-new','Contactado':'badge-contact','Qualificado':'badge-qual','Agendado':'badge-sched','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost','Arquivado':'badge-arch' };
 function badgeHtml(status) {
-  const color = getColColor(status);
-  return `<span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55">${getColLabel(status)}</span>`;
+  return `<span class="badge ${BADGE_MAP[status]||'badge-new'}">${status}</span>`;
 }
+
+const STATUS_COLORS = {
+  'Novo':'var(--blue)', 'Contactado':'#00CCDD', 'Qualificado':'var(--gold)',
+  'Agendado':'#9966FF', 'Proposta':'var(--red)', 'Negociação':'#CC88FF',
+  'Ganho':'var(--green)', 'Perdido':'var(--muted)', 'Arquivado':'#666'
+};
+const STATUS_LIST = ['Novo','Contactado','Qualificado','Agendado','Proposta','Negociação','Ganho','Perdido','Arquivado'];
 
 function statusDropdownHtml(id, status) {
-  const cols = getPipelineCols();
-  const items = cols.map(c =>
-    `<button class="status-menu-item" style="color:${c.color}" onclick="changeStatus(event,${id},'${c.key}')">${c.label||c.key}</button>`
+  const items = STATUS_LIST.map(s =>
+    `<button class="status-menu-item" style="color:${STATUS_COLORS[s]}" onclick="changeStatus(event,${id},'${s}')">${s}</button>`
   ).join('');
-  const color = getColColor(status);
-  const label = getColLabel(status);
   return `<div class="status-dropdown" onclick="toggleStatusMenu(event,${id})">
-    <span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55;cursor:pointer">${label} ▾</span>
+    <span class="badge ${BADGE_MAP[status]||'badge-new'}" style="cursor:pointer">${status} ▾</span>
     <div class="status-menu" id="sm-${id}">${items}</div>
   </div>`;
-}
-
-function populateStatusSelect(selectId, currentVal) {
-  const sel = document.getElementById(selectId);
-  if (!sel) return;
-  sel.innerHTML = getPipelineCols().map(c=>`<option value="${c.key}">${c.label||c.key}</option>`).join('');
-  if (currentVal !== undefined) sel.value = currentVal;
-}
-
-function refreshAllStatusSelects() {
-  // All static status selects outside of dynamically rendered pages
-  ['leadStatus','xlsxStatus'].forEach(id => populateStatusSelect(id));
-  // Leads page filter
-  const fs = document.getElementById('filterStatus');
-  if (fs) {
-    const cur = fs.value;
-    fs.innerHTML = '<option value="">Todas as jornadas</option>' +
-      getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
-    fs.value = cur;
-  }
 }
 
 function toggleStatusMenu(e, id) {
@@ -1551,7 +1116,6 @@ async function changeStatus(e, id, newStatus) {
   if (idx === -1) return;
   const lead = leads[idx];
   try {
-    autoVendaIfWon(lead, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', { ...lead, status: newStatus });
     leads[idx] = updated;
     renderPage(currentPage);
@@ -1561,41 +1125,11 @@ async function changeStatus(e, id, newStatus) {
 
 document.addEventListener('click', () => {
   document.querySelectorAll('.status-menu.open').forEach(m => m.classList.remove('open'));
-  document.getElementById('ufPicker')?.classList.remove('open');
 });
 
 function origemTag(orig) {
   const map = { 'Site LOOVI':'🌐','Indicação':'👥','WhatsApp':'📱','Outros':'➕' };
   return `${map[orig]||'📌'} ${orig}`;
-}
-
-// ── UF / ESTADO PICKER ────────────────────────────────
-const BR_STATES = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
-
-function openUfPicker(evt, id) {
-  evt.stopPropagation();
-  document.querySelectorAll('.status-menu.open').forEach(m => m.classList.remove('open'));
-  const picker = document.getElementById('ufPicker');
-  picker.dataset.leadId = id;
-  const rect = evt.currentTarget.getBoundingClientRect();
-  picker.style.top  = (rect.bottom + 4) + 'px';
-  picker.style.left = Math.min(rect.left, window.innerWidth - 228) + 'px';
-  picker.innerHTML  = BR_STATES.map(uf => `<button class="uf-btn" onclick="selectUF('${uf}')">${uf}</button>`).join('');
-  picker.classList.toggle('open');
-}
-
-async function selectUF(uf) {
-  const picker = document.getElementById('ufPicker');
-  picker.classList.remove('open');
-  const id  = parseInt(picker.dataset.leadId);
-  const idx = leads.findIndex(x => x.id === id);
-  if (idx === -1) return;
-  const l = leads[idx];
-  try {
-    const updated = await api(`/api/leads/${id}`, 'PUT', { ...l, cidade: uf });
-    leads[idx] = updated;
-    renderLeadsTable();
-  } catch(e) { alert('Erro: ' + e.message); }
 }
 
 function timeAgo(iso) {
@@ -1631,7 +1165,7 @@ function formatHours(h) {
 }
 
 function urgencyBadge(lead) {
-  if (isTerminal(lead.status)) return '';
+  if (lead.status === 'Ganho' || lead.status === 'Perdido') return '';
   const h = hoursInStatus(lead);
   if (h < 12) return `<span class="pc-urgency ok">● ${formatHours(h)}</span>`;
   if (h < 48) return `<span class="pc-urgency warn">⏱ ${formatHours(h)}</span>`;
@@ -1639,14 +1173,13 @@ function urgencyBadge(lead) {
 }
 
 function nextStatus(current) {
-  // Flow = all non-lost, non-archived cols (includes 'won' as final step)
-  const flow = getPipelineCols().filter(c=>!isLost(c.key) && !isArchived(c.key)).map(c=>c.key);
+  const flow = ['Novo','Contactado','Qualificado','Agendado','Proposta','Negociação','Ganho'];
   const idx = flow.indexOf(current);
   return idx >= 0 && idx < flow.length - 1 ? flow[idx + 1] : null;
 }
 
 function followupBadge(lead) {
-  if (!lead.followup || isTerminal(lead.status)) return '';
+  if (!lead.followup || lead.status === 'Ganho' || lead.status === 'Perdido') return '';
   const today = new Date(); today.setHours(0,0,0,0);
   const d = new Date(lead.followup + 'T00:00:00'); d.setHours(0,0,0,0);
   const diff = Math.round((d - today) / 86400000);
@@ -1661,7 +1194,6 @@ async function quickAdvance(id, newStatus, evt) {
   if (idx === -1) return;
   const l = leads[idx];
   try {
-    autoVendaIfWon(l, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', {
       nome: l.nome, tel: l.tel, carro: l.carro, cidade: l.cidade,
       status: newStatus, origem: l.origem, valor: l.valor,
@@ -1676,7 +1208,7 @@ async function quickAdvance(id, newStatus, evt) {
 // ── BADGES ────────────────────────────────────────────
 function updateBadges() {
   const today = new Date(); today.setHours(0,0,0,0);
-  const active = leads.filter(l => !isTerminal(l.status));
+  const active = leads.filter(l => l.status !== 'Ganho' && l.status !== 'Perdido');
   const pend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today);
   document.getElementById('leadsBadge').textContent = active.length;
   document.getElementById('followBadge').textContent = pend.length;
@@ -1698,7 +1230,7 @@ function renderDashboard() {
   const mesNome = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   document.getElementById('statLeads').textContent  = leads.length;
-  document.getElementById('statProp').textContent   = leads.filter(l => getColsByRole('proposal').includes(l.status)).length;
+  document.getElementById('statProp').textContent   = leads.filter(l => l.status === 'Proposta').length;
   document.getElementById('statVendasSub').textContent = mesNome.charAt(0).toUpperCase() + mesNome.slice(1);
 
   const vendasMes = vendas.filter(v => {
@@ -1707,18 +1239,19 @@ function renderDashboard() {
   });
   document.getElementById('statVendas').textContent = vendasMes.length;
 
-  const followPend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status));
+  const followPend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today && l.status !== 'Ganho' && l.status !== 'Perdido');
   document.getElementById('statFollow').textContent = followPend.length;
 
-  // Funil — dynamic from pipeline config (exclude archived)
-  const funnelCols = getPipelineCols().filter(c => !isArchived(c.key));
-  const fCounts = funnelCols.map(c => leads.filter(l => l.status === c.key).length);
-  const fMax = Math.max(...fCounts, 1);
-  document.getElementById('funnelBars').innerHTML = funnelCols.map((c, i) => `
+  // Funil
+  const statuses = ['Novo','Qualificado','Proposta','Negociação','Ganho'];
+  const counts = statuses.map(s => leads.filter(l => l.status === s).length);
+  const max = Math.max(...counts, 1);
+  const colors = ['#4488FF','#F5A623','#CC0000','#CC88FF','#00C87A'];
+  document.getElementById('funnelBars').innerHTML = statuses.map((s, i) => `
     <div class="progress-row">
-      <div class="progress-label">${c.label}</div>
-      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(fCounts[i]/fMax)*100}%;background:${c.color||'var(--primary)'}"></div></div>
-      <div class="progress-val">${fCounts[i]}</div>
+      <div class="progress-label">${s}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(counts[i]/max)*100}%;background:${colors[i]}"></div></div>
+      <div class="progress-val">${counts[i]}</div>
     </div>
   `).join('');
 
@@ -1731,7 +1264,7 @@ function renderDashboard() {
   });
 
   // Follow-up list
-  const upcoming = leads.filter(l => l.followup && !isTerminal(l.status))
+  const upcoming = leads.filter(l => l.followup && l.status !== 'Ganho' && l.status !== 'Perdido')
     .sort((a,b) => new Date(a.followup) - new Date(b.followup)).slice(0, 5);
   const fEl = document.getElementById('dashFollowList');
   if (upcoming.length === 0) {
@@ -1796,11 +1329,10 @@ function renderLeadsTable(searchQ = '') {
     const waBtn = telClean ? `<a class="wa-btn" href="https://wa.me/55${telClean}" target="_blank" onclick="event.stopPropagation()" title="Abrir WhatsApp">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     </a>` : '';
-    const ufDisplay = l.cidade ? (BR_STATES.includes(l.cidade.trim().toUpperCase()) ? l.cidade.trim().toUpperCase() : l.cidade.trim().slice(0,2).toUpperCase()) : '—';
     return `<tr>
       <td><strong>${l.nome}</strong>${l.tel ? `<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:2px">${l.tel}${waBtn}</div>` : ''}</td>
-      <td><span class="uf-badge-cell" onclick="openUfPicker(event,${l.id})">${ufDisplay}</span></td>
       <td style="font-size:12px">${l.carro || '—'}</td>
+      <td>${l.cidade || '—'}</td>
       <td>${statusDropdownHtml(l.id, l.status)}</td>
       <td style="font-size:11px;color:var(--muted)">${origemTag(l.origem)}</td>
       <td style="font-size:11px" class="${fs.cls}">${fs.text}</td>
@@ -1812,279 +1344,64 @@ function renderLeadsTable(searchQ = '') {
   }).join('');
 }
 
-// ── PIPELINE KPI DASHBOARD ────────────────────────────
-let _activeKpiKey = null;
-
+// ── RENDER PIPELINE ───────────────────────────────────
 function renderPipeline() {
-  const allCols = getPipelineCols();
-  const total = leads.length || 1;
-
-  const row = document.getElementById('kpiRow');
-  row.innerHTML = allCols.map(col => {
+  const cols = [
+    { key: 'Novo',        label: 'NOVO',      color: '#4488FF' },
+    { key: 'Contactado',  label: 'CONTACTADO',color: '#00CCDD' },
+    { key: 'Qualificado', label: 'QUALIF.',   color: '#F5A623' },
+    { key: 'Agendado',    label: 'AGENDADO',  color: '#9966FF' },
+    { key: 'Proposta',    label: 'PROPOSTA',  color: '#CC0000' },
+    { key: 'Negociação',  label: 'NEGOC.',    color: '#CC88FF' },
+    { key: 'Ganho',       label: 'GANHO',     color: '#00C87A' },
+    { key: 'Perdido',     label: 'PERDIDO',   color: '#555' },
+    { key: 'Arquivado',   label: 'ARQUIVADO', color: '#666' },
+  ];
+  document.getElementById('pipelineBoard').innerHTML = cols.map(col => {
     const colLeads = leads.filter(l => l.status === col.key);
-    const cnt = colLeads.length;
-    const pct = ((cnt / total) * 100).toFixed(0);
-    const val = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
-    const isActive = _activeKpiKey === col.key;
-    const keyEsc = col.key.replace(/'/g,"\\'");
-    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color}" onclick="selectKpiCol('${keyEsc}')">
-      <div class="kpi-card-controls" onclick="event.stopPropagation()">
-        <button class="kpi-ctrl-btn" onclick="renameKpiCol('${keyEsc}')" title="Renomear">✏</button>
-        <button class="kpi-ctrl-btn" onclick="deleteKpiCol('${keyEsc}')" title="Excluir">✕</button>
+    const totalVal = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
+    return `<div class="pipeline-col">
+      <div class="pipeline-header">
+        <span class="pipeline-col-title" style="color:${col.color}">${col.label}</span>
+        <span class="pipeline-count">${colLeads.length}</span>
       </div>
-      <div class="kpi-label"><span class="kpi-dot" style="background:${col.color}"></span>${col.label}</div>
-      <div class="kpi-count" style="color:${col.color}">${cnt}</div>
-      <div class="kpi-pct">${pct}% do total</div>
-      ${val > 0 ? `<div class="kpi-value">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>` : ''}
-    </div>`;
-  }).join('') + `<div class="kpi-add-card kpi-card" onclick="addCustomPipelineCol()" title="Nova coluna">
-    <div style="font-size:26px;color:var(--muted)">+</div>
-    <div style="font-size:9px;font-family:'DM Mono',monospace;letter-spacing:1px;color:var(--muted)">COLUNA</div>
-  </div>`;
-
-  renderPipeCharts(allCols);
-  if (_activeKpiKey) selectKpiCol(_activeKpiKey, true);
-}
-
-function selectKpiCol(key, refresh) {
-  const panel = document.getElementById('pipeLeadsPanel');
-  const grid = document.getElementById('pipeLeadsGrid');
-  const title = document.getElementById('pipeLeadsTitle');
-
-  if (!refresh && _activeKpiKey === key) {
-    _activeKpiKey = null;
-    panel.classList.remove('visible');
-    renderPipeline();
-    return;
-  }
-  _activeKpiKey = key;
-  if (!refresh) renderPipeline();
-
-  const col = getPipelineCols().find(c => c.key === key) || { label: key, color: '#888' };
-  const colLeads = leads.filter(l => l.status === key);
-  title.innerHTML = `<span style="color:${col.color}">${col.label}</span> <span style="color:var(--muted);font-weight:400;font-size:11px">${colLeads.length} leads</span>`;
-
-  if (colLeads.length === 0) {
-    grid.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Nenhum lead nesta etapa</div>';
-  } else {
-    const allCols = getPipelineCols();
-    const AVATAR_COLORS = ['#5A78FF','#54D9F3','#DAADFF','#00C87A','#F5A623','#FF6B6B','#4ECDC4','#45B7D1'];
-    grid.innerHTML = colLeads.map((l, li) => {
-      const telClean = (l.tel || '').replace(/\D/g, '');
-      const waHref   = telClean ? `https://wa.me/55${telClean}` : null;
-      const initials = l.nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
-      const avatarColor = AVATAR_COLORS[li % AVATAR_COLORS.length];
-      const statusColor = getColColor(l.status);
-      const statusLabel = getColLabel(l.status);
-      const followStr = l.followup ? `📅 ${l.followup}` : '';
-      const subParts = [l.carro, l.cidade, followStr].filter(Boolean);
-      const valStr = l.valor ? `R$ ${parseFloat(l.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}/mês` : '';
-      const pills = allCols.map(c => {
-        const active = c.key === l.status;
-        return `<button class="plc-pill${active?' active':''}"
-          style="background:${active?c.color+'22':'transparent'};color:${c.color};border-color:${c.color}55"
-          onclick="event.stopPropagation();plcChangeStatus(${l.id},'${c.key.replace(/'/g,"\\'")}')"
-          title="${c.label||c.key}">${c.label||c.key}</button>`;
-      }).join('');
-      return `<div class="plc" id="plc-${l.id}">
-        <div class="plc-row" onclick="openPipelinePanel(${l.id})">
-          <div class="plc-avatar" style="background:${avatarColor}">${initials}</div>
-          <div class="plc-info">
-            <div class="plc-name">${l.nome}</div>
-            <div class="plc-sub">${subParts.join(' · ')||'—'}</div>
-          </div>
-          <div class="plc-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">${statusLabel}</div>
-        </div>
-        ${valStr ? `<div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin:6px 0 0 48px">${valStr}</div>` : ''}
-        <div class="plc-actions-row" onclick="event.stopPropagation()">
-          <div class="plc-status-pills">${pills}</div>
-          <div style="display:flex;gap:5px;flex-shrink:0;margin-left:6px">
-            ${waHref ? `<a class="plc-btn wa" href="${waHref}" target="_blank" title="WhatsApp">💬</a>` : ''}
-            <button class="plc-btn cal" onclick="openCalendar(${JSON.stringify(l).replace(/"/g,'&quot;')})" title="Agenda">📅</button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  panel.classList.add('visible');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function closePipeLeads() {
-  _activeKpiKey = null;
-  document.getElementById('pipeLeadsPanel').classList.remove('visible');
-  renderPipeline();
-}
-
-async function plcChangeStatus(id, newStatus) {
-  const idx = leads.findIndex(l => l.id === id);
-  if (idx === -1) return;
-  const l = leads[idx];
-  if (l.status === newStatus) return;
-  try {
-    autoVendaIfWon(l, newStatus);
-    const updated = await api(`/api/leads/${id}`, 'PUT', {
-      nome:l.nome, tel:l.tel, carro:l.carro, cidade:l.cidade,
-      status:newStatus, origem:l.origem, valor:l.valor,
-      followup:l.followup, exec:l.exec, obs:l.obs
-    });
-    leads[idx] = updated;
-    updateBadges();
-    // Refresh the open panel without closing it
-    selectKpiCol(_activeKpiKey, true);
-    renderPipeCharts(getPipelineCols());
-    // Re-render KPI row counts
-    const row = document.getElementById('kpiRow');
-    if (row) renderPipeline();
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-function renderPipeCharts(allCols) {
-  const el = document.getElementById('pipeCharts');
-  if (!el) return;
-  const total = leads.length || 1;
-
-  // bar chart — leads per status
-  const barRows = allCols.map(col => {
-    const cnt = leads.filter(l => l.status === col.key).length;
-    const pct = (cnt / total * 100).toFixed(0);
-    return `<div class="chart-bar-row">
-      <div style="width:80px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${col.label}</div>
-      <div class="chart-bar-wrap"><div style="height:100%;width:${pct}%;background:${col.color};border-radius:4px;transition:width 0.5s"></div></div>
-      <div style="width:28px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);text-align:right">${cnt}</div>
+      <div class="pipeline-cards">
+        ${colLeads.length === 0
+          ? '<div style="text-align:center;padding:24px 8px;font-size:11px;color:var(--muted)">Vazio</div>'
+          : colLeads.map(l => {
+              const next = nextStatus(l.status);
+              const telClean = (l.tel || '').replace(/\D/g, '');
+              const waBtn = telClean
+                ? `<a class="pc-wa" href="https://wa.me/55${telClean}" target="_blank" onclick="event.stopPropagation()" title="WhatsApp">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  </a>`
+                : '<span></span>';
+              return `<div class="pipeline-card" onclick="editLead(${l.id})">
+                ${urgencyBadge(l)}
+                <div class="pc-name">${l.nome}</div>
+                <div class="pc-car">${l.carro || 'Sem carro'}${l.cidade ? ' · ' + l.cidade : ''}</div>
+                ${l.valor ? `<div class="pc-value">R$ ${parseFloat(l.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}/mês</div>` : ''}
+                ${followupBadge(l)}
+                <div class="pc-actions">
+                  ${waBtn}
+                  <div style="display:flex;gap:4px;align-items:center;margin-left:auto">
+                    ${next ? `<button class="pc-adv" onclick="quickAdvance(${l.id},'${next}',event)" title="Avançar para ${next}">→ ${next}</button>` : ''}
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+      </div>
+      <div class="pipeline-footer">
+        ${totalVal > 0 ? `R$ ${totalVal.toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—'}
+      </div>
     </div>`;
   }).join('');
-
-  // donut chart — leads by origin using SVG
-  const ORIG_COLORS = { 'Indicação':'#4488FF','Instagram':'#E1306C','Facebook':'#1877F2','Google':'#FBBC04','WhatsApp':'#25D366','Outros':'#888' };
-  const originMap = {};
-  leads.forEach(l => { const o = l.origem || 'Outros'; originMap[o] = (originMap[o] || 0) + 1; });
-  const originEntries = Object.entries(originMap).sort((a,b) => b[1]-a[1]);
-  const radius = 45, cx = 60, cy = 60, r = radius;
-  let startAngle = -Math.PI / 2;
-  const arcs = originEntries.map(([name, cnt]) => {
-    const angle = (cnt / total) * 2 * Math.PI;
-    const x1 = cx + r * Math.cos(startAngle);
-    const y1 = cy + r * Math.sin(startAngle);
-    startAngle += angle;
-    const x2 = cx + r * Math.cos(startAngle);
-    const y2 = cy + r * Math.sin(startAngle);
-    const large = angle > Math.PI ? 1 : 0;
-    const color = ORIG_COLORS[name] || '#888';
-    return { name, cnt, x1, y1, x2, y2, large, color };
-  });
-  const svgPaths = arcs.length > 1
-    ? arcs.map(a => `<path d="M ${cx} ${cy} L ${a.x1} ${a.y1} A ${r} ${r} 0 ${a.large} 1 ${a.x2} ${a.y2} Z" fill="${a.color}" stroke="var(--mid)" stroke-width="2"/>`)
-        .join('') + `<circle cx="${cx}" cy="${cy}" r="26" fill="var(--mid)"/>
-        <text x="${cx}" y="${cy+4}" text-anchor="middle" fill="var(--fg)" font-size="11" font-family="'DM Mono',monospace">${total}</text>`
-    : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${arcs[0]?.color||'#888'}"/>
-       <circle cx="${cx}" cy="${cy}" r="26" fill="var(--mid)"/>
-       <text x="${cx}" y="${cy+4}" text-anchor="middle" fill="var(--fg)" font-size="11" font-family="'DM Mono',monospace">${total}</text>`;
-
-  const legend = arcs.map(a => `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">
-    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${a.color};flex-shrink:0"></span>
-    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</span>
-    <span style="color:var(--fg)">${a.cnt}</span>
-  </div>`).join('');
-
-  el.innerHTML = `
-    <div class="chart-card">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;color:var(--muted);margin-bottom:14px">LEADS POR ETAPA</div>
-      ${barRows}
-    </div>
-    <div class="chart-card">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;color:var(--muted);margin-bottom:14px">ORIGEM DOS LEADS</div>
-      <div class="chart-donut-wrap">
-        <svg width="120" height="120" viewBox="0 0 120 120">${svgPaths}</svg>
-        <div style="flex:1;display:flex;flex-direction:column;gap:5px;overflow:hidden">${legend || '<div style="color:var(--muted);font-size:11px">Sem dados</div>'}</div>
-      </div>
-    </div>`;
-}
-
-function openCalendar(lead) {
-  const nome = encodeURIComponent('Contato: ' + (lead.nome || ''));
-  const details = encodeURIComponent(
-    (lead.carro ? 'Carro: ' + lead.carro + '\n' : '') +
-    (lead.tel ? 'Tel: ' + lead.tel + '\n' : '') +
-    (lead.obs ? 'Obs: ' + lead.obs : '')
-  );
-  const dateStr = lead.followup
-    ? lead.followup.replace(/-/g, '') + 'T090000'
-    : (() => {
-        const d = new Date(); d.setDate(d.getDate() + 1);
-        return d.toISOString().slice(0,10).replace(/-/g,'') + 'T090000';
-      })();
-  const endStr = dateStr.slice(0,8) + 'T100000';
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${nome}&details=${details}&dates=${dateStr}/${endStr}`;
-  window.open(url, '_blank');
-}
-
-function openCalendarFromPanel() {
-  const id = parseInt(document.getElementById('ppLeadId').value);
-  const lead = leads.find(l => l.id === id);
-  if (!lead) return;
-  const followup = document.getElementById('ppFollowup').value || lead.followup;
-  openCalendar({ ...lead, followup });
 }
 
 // ── RENDER FOLLOWUP ───────────────────────────────────
-let fuSelectMode = false;
-let fuSelected = new Set();
-
-function fuToggleSelectMode() {
-  fuSelectMode = !fuSelectMode;
-  fuSelected.clear();
-  const btn = document.getElementById('fuSelectBtn');
-  if (btn) btn.textContent = fuSelectMode ? '✕ Cancelar' : '☑ Selecionar';
-  const bar = document.getElementById('fuBulkBar');
-  if (bar) bar.style.display = fuSelectMode ? 'flex' : 'none';
-  renderFollowup();
-}
-
-function fuToggleItem(id) {
-  if (fuSelected.has(id)) fuSelected.delete(id);
-  else fuSelected.add(id);
-  const count = fuSelected.size;
-  const el = document.getElementById('fuBulkCount');
-  if (el) el.textContent = `${count} selecionado${count !== 1 ? 's' : ''}`;
-  // toggle highlight only — no full re-render
-  const row = document.querySelector(`[data-fu-id="${id}"]`);
-  if (row) row.classList.toggle('fu-checked', fuSelected.has(id));
-  const chk = document.querySelector(`[data-fu-chk="${id}"]`);
-  if (chk) chk.checked = fuSelected.has(id);
-}
-
-function fuClearSelection() {
-  fuSelectMode = false;
-  fuSelected.clear();
-  const btn = document.getElementById('fuSelectBtn');
-  if (btn) btn.textContent = '☑ Selecionar';
-  const bar = document.getElementById('fuBulkBar');
-  if (bar) bar.style.display = 'none';
-  renderFollowup();
-}
-
-async function fuBulkChangeStatus() {
-  const newStatus = document.getElementById('fuBulkStatus')?.value;
-  if (!newStatus) { alert('Selecione um status'); return; }
-  const ids = [...fuSelected];
-  if (ids.length === 0) return;
-  for (const id of ids) {
-    const idx = leads.findIndex(l => l.id === id);
-    if (idx < 0) continue;
-    const lead = leads[idx];
-    autoVendaIfWon(lead, newStatus);
-    const updated = await api(`/api/leads/${id}`, 'PUT', { status: newStatus });
-    if (updated) leads[idx] = { ...lead, ...updated };
-  }
-  fuClearSelection();
-  updateBadges();
-  renderFollowup();
-}
-
 function renderFollowup() {
   const today = new Date(); today.setHours(0,0,0,0);
-  const withFollow = leads.filter(l => l.followup && !isTerminal(l.status))
+  const withFollow = leads.filter(l => l.followup && l.status !== 'Ganho' && l.status !== 'Perdido')
     .sort((a,b) => new Date(a.followup) - new Date(b.followup));
 
   const urgente = withFollow.filter(l => new Date(l.followup + 'T00:00:00') < today).length;
@@ -2096,21 +1413,6 @@ function renderFollowup() {
   document.getElementById('fuUrgente').textContent = urgente;
   document.getElementById('fuHoje').textContent = hoje;
 
-  // keep bulk bar in sync with select mode
-  const bar = document.getElementById('fuBulkBar');
-  if (bar) {
-    bar.style.display = fuSelectMode ? 'flex' : 'none';
-    // re-populate status options dynamically
-    const sel = document.getElementById('fuBulkStatus');
-    if (sel && sel.options.length <= 1) {
-      getPipelineCols().forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.key; opt.textContent = c.label || c.key;
-        sel.appendChild(opt);
-      });
-    }
-  }
-
   const el = document.getElementById('followList');
   if (withFollow.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><h3>Nenhum follow-up pendente!</h3></div>';
@@ -2118,20 +1420,16 @@ function renderFollowup() {
   }
   el.innerHTML = withFollow.map(l => {
     const fs = followStatus(l.followup);
-    const checked = fuSelected.has(l.id);
-    return `<div class="follow-item${checked ? ' fu-checked' : ''}" data-fu-id="${l.id}" onclick="${fuSelectMode ? `fuToggleItem(${l.id})` : ''}">
-      ${fuSelectMode
-        ? `<input type="checkbox" class="fu-item-chk" data-fu-chk="${l.id}" ${checked ? 'checked' : ''} onclick="event.stopPropagation();fuToggleItem(${l.id})">`
-        : `<div class="follow-avatar">${l.nome[0]}</div>`
-      }
-      <div class="follow-info" style="cursor:${fuSelectMode ? 'pointer' : 'default'}">
+    return `<div class="follow-item">
+      <div class="follow-avatar">${l.nome[0]}</div>
+      <div class="follow-info">
         <div class="follow-name">${l.nome}</div>
-        <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${getColLabel(l.status)||l.status}</div>
+        <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${l.status}</div>
         ${l.obs ? `<div class="follow-detail" style="margin-top:2px;font-style:italic">${l.obs.slice(0,60)}${l.obs.length>60?'...':''}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div class="follow-time ${fs.cls}">${fs.text}</div>
-        ${!fuSelectMode ? `<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button>` : ''}
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button>
       </div>
     </div>`;
   }).join('');
@@ -2183,13 +1481,14 @@ function renderVendas() {
 
 // ── RENDER RELATÓRIOS ─────────────────────────────────
 function renderRelatorios() {
-  const allCols = getPipelineCols();
-  const sCounts = allCols.map(c => leads.filter(l => l.status === c.key).length);
+  const statuses = ['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'];
+  const sCounts = statuses.map(s => leads.filter(l => l.status === s).length);
+  const sColors = ['#4488FF','#F5A623','#CC0000','#CC88FF','#00C87A','#555'];
   const max1 = Math.max(...sCounts, 1);
-  document.getElementById('relStatus').innerHTML = allCols.map((c,i) => `
+  document.getElementById('relStatus').innerHTML = statuses.map((s,i) => `
     <div class="progress-row">
-      <div class="progress-label" style="font-size:11px">${c.key}</div>
-      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(sCounts[i]/max1)*100}%;background:${c.color}"></div></div>
+      <div class="progress-label" style="font-size:11px">${s}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(sCounts[i]/max1)*100}%;background:${sColors[i]}"></div></div>
       <div class="progress-val">${sCounts[i]}</div>
     </div>
   `).join('');
@@ -2235,7 +1534,7 @@ function renderRelatorios() {
     const e = l.exec || 'Cássio';
     if (!execs[e]) execs[e] = { leads: 0, props: 0, vendas: 0 };
     execs[e].leads++;
-    if (getColsByRole('proposal').includes(l.status)) execs[e].props++;
+    if (l.status === 'Proposta' || l.status === 'Negociação') execs[e].props++;
   });
   vendas.forEach(v => {
     const e = v.exec || 'Cássio';
@@ -2256,41 +1555,12 @@ function renderRelatorios() {
 
 // ── RENDER DISPAROS ───────────────────────────────────
 let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5 };
-let dispTemplates = [];
-
-function initDispTemplates() {
-  try { dispTemplates = JSON.parse(localStorage.getItem('dispTemplates') || '[]'); } catch { dispTemplates = []; }
-}
-
-function saveDispTemplate() {
-  const ta = document.getElementById('dispTemplate');
-  const body = (ta ? ta.value : dispState.template).trim();
-  if (!body) { alert('Escreva uma mensagem antes de salvar o modelo'); return; }
-  const name = prompt('Nome do modelo:');
-  if (!name?.trim()) return;
-  dispTemplates.push({ id: Date.now(), name: name.trim(), body });
-  localStorage.setItem('dispTemplates', JSON.stringify(dispTemplates));
-  renderDisparos();
-}
-
-function loadDispTemplate(id) {
-  const tpl = dispTemplates.find(t => t.id === id);
-  if (!tpl) return;
-  dispState.template = tpl.body;
-  renderDisparos();
-}
-
-function deleteDispTemplate(id) {
-  dispTemplates = dispTemplates.filter(t => t.id !== id);
-  localStorage.setItem('dispTemplates', JSON.stringify(dispTemplates));
-  renderDisparos();
-}
 
 function renderDisparos() {
   const root = document.getElementById('disparos-root');
   if (dispState.step === 'queue') { renderDisparoQueue(); return; }
 
-  const statusOpts = getPipelineCols();
+  const statusOpts = ['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'];
   const origemOpts = ['Site LOOVI','Indicação','WhatsApp','Outros'];
   const execOpts   = [...new Set(leads.map(l => l.exec).filter(Boolean))];
 
@@ -2335,45 +1605,10 @@ function renderDisparos() {
         <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparos WhatsApp</h2>
         <p style="font-size:12px;color:var(--muted);margin-top:4px">Selecione leads, escreva a mensagem e dispare com um clique</p>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        ${(() => { const contas = waGetConnectedInstances(); return contas.length > 0
-          ? `<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
-               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                 <select class="form-select" id="dispWaInstance" style="width:auto;padding:8px 12px;font-size:12px">
-                   ${contas.map(n=>`<option value="${n}">📱 ${n}</option>`).join('')}
-                 </select>
-                 <button class="btn" style="background:var(--green)22;color:var(--green);border:1px solid var(--green)44;gap:8px;padding:10px 22px" onclick="startDisparoAuto()" ${previews.length===0?'disabled':''}>
-                   ⚡ Auto-enviar (${previews.length})
-                 </button>
-                 <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-                   Manual ${previews.length>0?`(${previews.length})`:''}
-                 </button>
-               </div>
-               <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;flex-wrap:wrap">
-                 <span>⏱ Intervalo entre envios:</span>
-                 <select class="form-select" id="dispIntervalMode" style="width:auto;padding:4px 8px;font-size:11px;background:transparent;border-color:rgba(245,166,35,0.3)" onchange="dispState.intervalMode=this.value">
-                   <option value="30"  ${(dispState.intervalMode||'rand1')==='30'   ?'selected':''}>30 seg</option>
-                   <option value="60"  ${(dispState.intervalMode||'rand1')==='60'   ?'selected':''}>1 minuto</option>
-                   <option value="120" ${(dispState.intervalMode||'rand1')==='120'  ?'selected':''}>2 minutos</option>
-                   <option value="300" ${(dispState.intervalMode||'rand1')==='300'  ?'selected':''}>5 minutos</option>
-                   <option value="rand1" ${(dispState.intervalMode||'rand1')==='rand1'?'selected':''}>🎲 Aleatório 30s–90s (recomendado)</option>
-                   <option value="rand2" ${(dispState.intervalMode||'rand1')==='rand2'?'selected':''}>🎲 Aleatório 1–3 min (mais seguro)</option>
-                 </select>
-                 <span style="color:var(--gold)">⚠️ Menos de 30s pode gerar bloqueio</span>
-               </div>
-             </div>`
-          : `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-               <div style="font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px">
-                 📱 <a onclick="nav('whatsapp',null)" style="cursor:pointer;color:var(--primary)">Conecte uma conta WA</a> para envio automático
-               </div>
-               <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
-                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-                 Manual ${previews.length>0?`(${previews.length})`:''}
-               </button>
-             </div>`
-        })()}
-      </div>
+      <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        Iniciar Disparo ${previews.length>0?`(${previews.length})`:''}
+      </button>
     </div>
 
     <div class="disp-layout">
@@ -2387,7 +1622,7 @@ function renderDisparos() {
           <div class="disp-filters">
             <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('status',this.value)">
               <option value="">Todos os status</option>
-              ${statusOpts.map(c=>`<option value="${c.key}" ${sfVal===c.key?'selected':''}>${c.label||c.key}</option>`).join('')}
+              ${statusOpts.map(s=>`<option value="${s}" ${sfVal===s?'selected':''}>${s}</option>`).join('')}
             </select>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('origem',this.value)">
@@ -2433,19 +1668,7 @@ function renderDisparos() {
         <div class="disp-panel">
           <div class="disp-panel-header">
             <span class="disp-panel-title">Mensagem Template</span>
-            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="saveDispTemplate()">+ Salvar modelo</button>
           </div>
-          ${dispTemplates.length > 0 ? `
-          <div style="padding:12px 18px;border-bottom:1px solid var(--border)">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace">Modelos salvos</div>
-            <div class="disp-tpl-list">
-              ${dispTemplates.map(t => `
-                <div class="disp-tpl-chip" onclick="loadDispTemplate(${t.id})" title="${escHtml(t.body.slice(0,100))}">
-                  <span class="tpl-name">${escHtml(t.name)}</span>
-                  <span class="disp-tpl-del" onclick="event.stopPropagation();deleteDispTemplate(${t.id})" title="Excluir">×</span>
-                </div>`).join('')}
-            </div>
-          </div>` : ''}
           <div class="disp-template-area">
             <div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Clique para inserir variável:</div>
@@ -2483,7 +1706,7 @@ function applyTemplate(tmpl, lead) {
 }
 
 function statusBadgeClass(s) {
-  return 'badge-new';
+  return BADGE_MAP[s] || 'badge-new';
 }
 
 function formatTel(t) {
@@ -2561,129 +1784,13 @@ function insertVar(v) {
   dispState.template = val;
 }
 
-function getDispInterval() {
-  const m = dispState.intervalMode || 'rand1';
-  if (m === 'rand1') return 30 + Math.floor(Math.random() * 61);  // 30–90s
-  if (m === 'rand2') return 60 + Math.floor(Math.random() * 121); // 60–180s
-  return parseInt(m) || 60;
-}
-
-function fmtSecs(s) {
-  if (s < 60) return `${s}s`;
-  return `${Math.floor(s/60)}m ${s%60}s`;
-}
-
-let _autoStopFlag = false;
-
-function stopDisparoAuto() { _autoStopFlag = true; }
-
-async function startDisparoAuto() {
-  const instance = document.getElementById('dispWaInstance')?.value;
-  if (!instance) { alert('Selecione uma conta WhatsApp conectada'); return; }
-  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
-  if (queue.length === 0) return;
-
-  dispState.queue = queue;
-  dispState.sent  = new Set();
-  _autoStopFlag   = false;
-
-  const root = document.getElementById('disparos-root');
-  let cdTimer = null;
-
-  function renderAutoProgress(i, lead, msg, countdown, waiting) {
-    const pct = Math.round((dispState.sent.size / queue.length) * 100);
-    const modeLabel = { '30':'30s fixo', '60':'1 min fixo', '120':'2 min fixo', '300':'5 min fixo', 'rand1':'Aleatório 30–90s', 'rand2':'Aleatório 1–3 min' }[dispState.intervalMode||'rand1'];
-    root.innerHTML = `
-      <div style="max-width:560px;margin:24px auto;display:flex;flex-direction:column;gap:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <div>
-            <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800">⚡ Enviando automaticamente...</h2>
-            <p style="font-size:11px;color:var(--muted);margin-top:2px">📱 ${instance} · ⏱ ${modeLabel}</p>
-          </div>
-          <button class="btn" style="background:rgba(204,0,0,0.15);color:var(--primary);border:1px solid rgba(204,0,0,0.3);font-size:12px" onclick="stopDisparoAuto()">⏹ Parar</button>
-        </div>
-
-        <div class="disp-panel" style="padding:18px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-            <span style="font-size:12px;color:var(--muted)">Progresso</span>
-            <span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${dispState.sent.size}/${queue.length} enviadas</span>
-          </div>
-          <div class="disp-progress-bar"><div class="disp-progress-fill" style="width:${pct}%"></div></div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--muted)">
-            <span>Lead ${i+1} de ${queue.length}</span>
-            <span id="autoEta"></span>
-          </div>
-        </div>
-
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:38px;height:38px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">${lead.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
-            <div>
-              <div style="font-size:14px;font-weight:600">${lead.nome}</div>
-              <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">${formatTel(lead.tel.replace(/\D/g,''))}</div>
-            </div>
-          </div>
-          <div style="background:rgba(255,255,255,0.04);border-left:3px solid rgba(37,211,102,0.4);border-radius:0 8px 8px 0;padding:12px;font-size:13px;line-height:1.6;white-space:pre-wrap">${escHtml(msg)}</div>
-          ${waiting
-            ? `<div style="text-align:center;padding:10px 0">
-                 <div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:var(--gold)" id="autoCountdown">${fmtSecs(countdown)}</div>
-                 <div style="font-size:11px;color:var(--muted);margin-top:4px">aguardando próximo envio...</div>
-               </div>`
-            : `<div style="text-align:center;padding:6px 0;font-size:12px;color:var(--muted)">Enviando mensagem...</div>`
-          }
-        </div>
-      </div>`;
-  }
-
-  for (let i = 0; i < queue.length; i++) {
-    if (_autoStopFlag) break;
-    const lead = queue[i];
-    const msg  = applyTemplate(dispState.template, lead);
-    renderAutoProgress(i, lead, msg, 0, false);
-    try {
-      await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
-      dispState.sent.add(lead.id);
-    } catch(e) { console.warn('Erro ao enviar para', lead.nome, e.message); }
-
-    if (i < queue.length - 1 && !_autoStopFlag) {
-      const secs = getDispInterval();
-      const finishAt = new Date(Date.now() + (queue.length - i - 1) * secs * 1000);
-      const eta = finishAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const etaEl = document.getElementById('autoEta');
-      if (etaEl) etaEl.textContent = `Previsão fim: ${eta}`;
-      let remaining = secs;
-      renderAutoProgress(i, lead, msg, remaining, true);
-      await new Promise(resolve => {
-        cdTimer = setInterval(() => {
-          remaining--;
-          const el = document.getElementById('autoCountdown');
-          if (el) el.textContent = fmtSecs(remaining);
-          if (remaining <= 0 || _autoStopFlag) { clearInterval(cdTimer); resolve(); }
-        }, 1000);
-      });
-    }
-  }
-
-  if (cdTimer) clearInterval(cdTimer);
-  root.innerHTML = `
-    <div class="disp-panel" style="max-width:480px;margin:40px auto">
-      <div class="disp-summary">
-        <div class="disp-summary-icon">${_autoStopFlag ? '⏹' : '🎉'}</div>
-        <div class="disp-summary-title">${_autoStopFlag ? 'Disparo pausado' : 'Disparo Concluído!'}</div>
-        <div class="disp-summary-sub">${dispState.sent.size} de ${queue.length} mensagens enviadas via 📱 ${instance}</div>
-        <button class="btn btn-primary" style="margin-top:8px" onclick="dispState.step='config';dispState.selected=new Set();_autoStopFlag=false;renderDisparos()">Novo Disparo</button>
-      </div>
-    </div>`;
-}
-
 function startDisparoQueue() {
   const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
   if (queue.length === 0) return;
-  dispState.queue    = queue;
-  dispState.current  = 0;
-  dispState.sent     = new Set();
-  dispState.step     = 'queue';
-  dispState.instance = document.getElementById('dispWaInstance')?.value || '';
+  dispState.queue   = queue;
+  dispState.current = 0;
+  dispState.sent    = new Set();
+  dispState.step    = 'queue';
   renderDisparoQueue();
 }
 
@@ -2716,26 +1823,13 @@ function renderDisparoQueue() {
     return;
   }
 
-  const connectedInstances = waGetConnectedInstances();
-
   root.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
       <div>
         <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparando...</h2>
         <p style="font-size:12px;color:var(--muted);margin-top:4px">${done} de ${total} mensagens enviadas</p>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        ${connectedInstances.length > 0
-          ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(0,200,122,0.08);border:1px solid rgba(0,200,122,0.2);border-radius:8px;padding:6px 12px">
-               <span style="font-size:11px;color:var(--muted)">📱 Conta:</span>
-               <select id="queueWaInstance" style="background:transparent;border:none;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;outline:none" onchange="dispState.instance=this.value">
-                 ${connectedInstances.map(n=>`<option value="${n}" ${dispState.instance===n?'selected':''}>${n}</option>`).join('')}
-               </select>
-             </div>`
-          : `<span style="font-size:11px;color:var(--gold);background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px">⚠️ Nenhuma conta WA conectada</span>`
-        }
-        <button class="btn btn-ghost" onclick="if(dispAutoTimer)clearTimeout(dispAutoTimer);dispState.step='config';renderDisparos()">← Voltar</button>
-      </div>
+      <button class="btn btn-ghost" onclick="if(dispAutoTimer)clearTimeout(dispAutoTimer);dispState.step='config';renderDisparos()">← Voltar</button>
     </div>
 
     <div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
@@ -2768,12 +1862,10 @@ function renderDisparoQueue() {
         <div class="disp-queue-actions">
           ${isSent
             ? `<span class="disp-sent-badge">✓ Enviado</span>`
-            : connectedInstances.length > 0
-              ? `<button class="btn btn-primary" style="gap:8px" onclick="dispSendViaApi(${lead.id})">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                  Enviar agora
-                </button>`
-              : `<span style="font-size:11px;color:var(--gold)">Conecte uma conta WA para enviar</span>`
+            : `<a href="${waUrl}" target="_blank" class="btn btn-primary" style="gap:8px;text-decoration:none" onclick="markDisparoSent(${lead.id})">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Abrir WhatsApp
+              </a>`
           }
           <div class="disp-nav-btns">
             <button class="btn btn-ghost" style="padding:8px 14px" ${cur===0?'disabled':''} onclick="dispNav(-1)">← Ant.</button>
@@ -2824,26 +1916,6 @@ function dispNav(dir) {
 }
 
 function dispGoto(i) { dispState.current = i; renderDisparoQueue(); }
-
-async function dispSendViaApi(leadId) {
-  const lead = dispState.queue.find(l => l.id === leadId);
-  if (!lead) return;
-  // always read the live dropdown in case user changed it
-  const sel = document.getElementById('queueWaInstance');
-  const instance = (sel ? sel.value : dispState.instance) || dispState.instance;
-  if (!instance) { alert('Selecione uma conta WhatsApp conectada'); return; }
-  dispState.instance = instance;
-  const msg = applyTemplate(dispState.template, lead);
-  const btn = document.querySelector(`[onclick="dispSendViaApi(${leadId})"]`);
-  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
-  try {
-    await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
-    markDisparoSent(leadId);
-  } catch(e) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
-    alert('Erro ao enviar: ' + (e.message || 'tente novamente'));
-  }
-}
 
 // ── RENDER EQUIPE ─────────────────────────────────────
 function renderEquipe() {
@@ -3037,226 +2109,9 @@ async function importFromText(raw) {
   alert(`✅ ${count} leads importados com sucesso!`);
 }
 
-// ── PIPELINE ROLES CONFIG ────────────────────────────
-const ROLE_OPTIONS = [
-  { value: '',         label: '— Nenhuma',    color: 'var(--muted)',  bg: 'transparent' },
-  { value: 'proposal', label: '📋 Proposta',  color: '#F5A623',       bg: '#F5A62322' },
-  { value: 'won',      label: '✅ Venda',     color: 'var(--green)',  bg: 'var(--green)22' },
-  { value: 'lost',     label: '❌ Perdido',   color: 'var(--danger)', bg: 'var(--danger)22' },
-  { value: 'archived', label: '📁 Arquivado', color: 'var(--muted)',  bg: 'rgba(255,255,255,0.05)' },
-];
-
-function openRolesConfig() {
-  const cols = getPipelineCols();
-  const list = document.getElementById('rolesConfigList');
-  list.innerHTML = cols.map(col => {
-    const roleOpts = ROLE_OPTIONS.map(r =>
-      `<option value="${r.value}" ${(col.role||'') === r.value ? 'selected' : ''}>${r.label}</option>`
-    ).join('');
-    return `<div class="role-row">
-      <div class="role-dot" style="background:${col.color}"></div>
-      <div class="role-label">${col.label}</div>
-      <select class="role-select" data-key="${col.key}">${roleOpts}</select>
-    </div>`;
-  }).join('');
-  openModal('rolesConfig');
-}
-
-function saveRolesConfig() {
-  const cols = getPipelineCols();
-  document.querySelectorAll('#rolesConfigList .role-select').forEach(sel => {
-    const col = cols.find(c => c.key === sel.dataset.key);
-    if (col) { if (sel.value) col.role = sel.value; else delete col.role; }
-  });
-  savePipelineCols(cols);
-  closeModal('rolesConfig');
-  refreshAllStatusSelects();
-  renderPipeline();
-  syncWonLeadsToVendas();
-}
-
-async function syncWonLeadsToVendas() {
-  const wonKeys = getColsByRole('won');
-  if (wonKeys.length === 0) return;
-  const wonLeads = leads.filter(l => wonKeys.includes(l.status));
-  if (wonLeads.length === 0) return;
-  const existingClients = new Set(vendas.map(v => (v.cliente||'').toLowerCase().trim()));
-  const missing = wonLeads.filter(l => !existingClients.has((l.nome||'').toLowerCase().trim()));
-  if (missing.length === 0) return;
-  const confirmed = confirm(
-    `${missing.length} lead${missing.length > 1 ? 's estão' : ' está'} na coluna de Venda mas não ${missing.length > 1 ? 'foram registrados' : 'foi registrado'} em Vendas.\n\nDeseja registrá-los agora?`
-  );
-  if (!confirmed) return;
-  let count = 0;
-  for (const lead of missing) {
-    try {
-      const v = await api('/api/vendas', 'POST', {
-        cliente: lead.nome,
-        data:    new Date().toISOString().split('T')[0],
-        carro:   lead.carro  || '',
-        plano:   'Completo',
-        valor:   lead.valor  || 0,
-        origem:  lead.origem || 'Outros',
-        exec:    lead.exec   || 'Cássio',
-      });
-      if (v && v.id) { vendas.unshift(v); count++; }
-    } catch {}
-  }
-  if (count > 0) {
-    renderVendas();
-    const now = new Date();
-    const vendasMes = vendas.filter(v => {
-      const d = new Date(v.data);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    });
-    const el = document.getElementById('statVendas');
-    if (el) el.textContent = vendasMes.length;
-    alert(`${count} venda${count > 1 ? 's registradas' : ' registrada'} com sucesso!`);
-  }
-}
-
-// ── WHATSAPP INSTANCES ────────────────────────────────
-let _waInstances = [];
-let _waQrPollers = {};
-
-async function renderWaPage() {
-  const root = document.getElementById('wa-root');
-  root.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <div>
-        <h2 style="font-size:20px;font-weight:800;font-family:'Syne',sans-serif">Contas WhatsApp</h2>
-        <p style="font-size:12px;color:var(--muted);margin-top:2px">Gerencie múltiplos números simultaneamente</p>
-      </div>
-      <button class="btn btn-primary" onclick="waAddInstance()">+ Nova Conta</button>
-    </div>
-    <div class="wa-grid" id="waGrid"><div style="color:var(--muted);font-size:13px;padding:24px">Carregando...</div></div>`;
-  await waLoadInstances();
-}
-
-async function waLoadInstances() {
-  try {
-    const data = await api('/api/whatsapp/instances');
-    _waInstances = Array.isArray(data) ? data : [];
-    waRenderGrid();
-    waUpdateNavBadge();
-  } catch(e) {
-    document.getElementById('waGrid').innerHTML = `<div style="color:var(--muted);font-size:13px;padding:24px">Erro ao carregar instâncias: ${e.message}</div>`;
-  }
-}
-
-function waUpdateNavBadge() {
-  const badge = document.getElementById('waBadge');
-  if (!badge) return;
-  const connected = _waInstances.filter(i => (i.connectionStatus || i.instance?.state) === 'open').length;
-  badge.style.display = connected > 0 ? 'inline-flex' : 'none';
-  badge.textContent = connected > 0 ? connected : '';
-}
-
-function waRenderGrid() {
-  const grid = document.getElementById('waGrid');
-  if (!grid) return;
-  let html = _waInstances.map(inst => {
-    const name = inst.instance?.instanceName || inst.instanceName || inst.name || '?';
-    const state = inst.instance?.state || inst.connectionStatus || 'close';
-    const stateLabel = state === 'open' ? '● CONECTADO' : state === 'connecting' ? '◌ CONECTANDO...' : '○ DESCONECTADO';
-    const stateCls = state === 'open' ? 'open' : state === 'connecting' ? 'connecting' : 'close';
-    return `<div class="wa-card" id="waCard-${name}">
-      <div class="wa-card-header">
-        <div class="wa-avatar">📱</div>
-        <div>
-          <div class="wa-name">${name}</div>
-          <div class="wa-status ${stateCls}">${stateLabel}</div>
-        </div>
-      </div>
-      <div id="waQr-${name}">${state === 'open' ? `<div class="wa-qr-msg" style="color:var(--green)">✅ WhatsApp conectado e pronto para uso</div>` : `<div class="wa-qr-msg">Clique em "Conectar" para gerar o QR Code</div>`}</div>
-      <div class="wa-actions">
-        ${state !== 'open' ? `<button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Conectar / QR Code</button>` : ''}
-        ${state === 'open' ? `<button class="wa-btn-sm wa-btn-disconnect" onclick="waDisconnect('${name}')">⏏ Desconectar</button>` : ''}
-        <button class="wa-btn-sm wa-btn-delete" onclick="waDelete('${name}')">🗑 Remover</button>
-      </div>
-    </div>`;
-  }).join('');
-  html += `<div class="wa-add-card" onclick="waAddInstance()">
-    <div style="font-size:32px">➕</div>
-    <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px">NOVA CONTA</div>
-  </div>`;
-  grid.innerHTML = html;
-}
-
-async function waAddInstance() {
-  const name = prompt('Nome para esta conta (ex: Vendas01, Suporte, Cassio):');
-  if (!name?.trim()) return;
-  try {
-    const res = await api('/api/whatsapp/instances', 'POST', { name: name.trim() });
-    if (res.error) { alert('Erro: ' + res.error); return; }
-    await waLoadInstances();
-    setTimeout(() => waConnect(name.trim()), 500);
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-async function waConnect(name) {
-  const qrEl = document.getElementById(`waQr-${name}`);
-  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando QR Code...</div>`;
-  try {
-    const res = await api(`/api/whatsapp/instances/${name}?action=qrcode`);
-    if (res.base64) {
-      const src = res.base64.startsWith('data:') ? res.base64 : `data:image/png;base64,${res.base64}`;
-      if (qrEl) qrEl.innerHTML = `<div class="wa-qr"><img src="${src}" alt="QR Code"/></div>
-        <div style="font-size:11px;color:var(--muted);text-align:center">Abra o WhatsApp → Dispositivos conectados → Conectar dispositivo</div>`;
-      waStartPolling(name);
-    } else if (res.instance?.state === 'open') {
-      await waLoadInstances();
-    } else {
-      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⚠ Sem QR Code. Tente novamente.</div>`;
-    }
-  } catch(e) {
-    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${e.message}</div>`;
-  }
-}
-
-function waStartPolling(name) {
-  if (_waQrPollers[name]) clearInterval(_waQrPollers[name]);
-  let tries = 0;
-  _waQrPollers[name] = setInterval(async () => {
-    tries++;
-    if (tries > 30) { clearInterval(_waQrPollers[name]); return; }
-    try {
-      const res = await api(`/api/whatsapp/instances/${name}?action=status`);
-      const state = res.instance?.state || res.state;
-      if (state === 'open') {
-        clearInterval(_waQrPollers[name]);
-        await waLoadInstances();
-      }
-    } catch(e) {}
-  }, 4000);
-}
-
-async function waDisconnect(name) {
-  if (!confirm(`Desconectar a conta "${name}"?`)) return;
-  try {
-    await api(`/api/whatsapp/instances/${name}?action=disconnect`);
-    await waLoadInstances();
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-async function waDelete(name) {
-  if (!confirm(`Remover a conta "${name}" permanentemente?`)) return;
-  try {
-    await api(`/api/whatsapp/instances?name=${encodeURIComponent(name)}`, 'DELETE');
-    await waLoadInstances();
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-function waGetConnectedInstances() {
-  return _waInstances.filter(i => (i.instance?.state || i.connectionStatus) === 'open')
-    .map(i => i.instance?.instanceName || i.instanceName || i.name);
-}
-
 // ── INIT ───────────────────────────────────────────────
 document.getElementById('leadFollowup').value = new Date().toISOString().split('T')[0];
-initDispTemplates();
 loadData();
 </script>
-<div class="uf-picker" id="ufPicker"></div>
 </body>
 </html>
