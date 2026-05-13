@@ -124,12 +124,15 @@ tbody tr:last-child { border-bottom: none; }
 tbody td { padding: 12px 14px; vertical-align: middle; }
 
 .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; white-space: nowrap; }
-.badge-new { background: rgba(68,136,255,0.15); color: var(--blue); }
-.badge-qual { background: rgba(245,166,35,0.15); color: var(--gold); }
-.badge-prop { background: rgba(204,0,0,0.15); color: var(--red); }
-.badge-neg { background: rgba(180,100,255,0.15); color: #CC88FF; }
-.badge-won { background: rgba(0,200,122,0.15); color: var(--green); }
-.badge-lost { background: rgba(255,255,255,0.08); color: var(--muted); }
+.badge-new     { background: rgba(68,136,255,0.15);  color: var(--blue); }
+.badge-contact { background: rgba(0,204,221,0.15);   color: #00CCDD; }
+.badge-qual    { background: rgba(245,166,35,0.15);  color: var(--gold); }
+.badge-sched   { background: rgba(153,102,255,0.15); color: #9966FF; }
+.badge-prop    { background: rgba(204,0,0,0.15);     color: var(--red); }
+.badge-neg     { background: rgba(180,100,255,0.15); color: #CC88FF; }
+.badge-won     { background: rgba(0,200,122,0.15);   color: var(--green); }
+.badge-lost    { background: rgba(255,255,255,0.08); color: var(--muted); }
+.badge-arch    { background: rgba(80,80,80,0.2);     color: #888; }
 .status-dropdown { position:relative; display:inline-block; }
 .status-menu { display:none; position:fixed; z-index:9999; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:4px; min-width:130px; box-shadow:0 8px 24px rgba(0,0,0,0.5); }
 .status-menu.open { display:block; }
@@ -191,8 +194,8 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .tl-add button:hover { background:var(--red2); }
 .tl-empty { text-align:center; padding:16px; font-size:11px; color:var(--muted); }
 
-.pipeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 24px; }
-.pipeline-col { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.pipeline { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 12px; }
+.pipeline-col { min-width: 185px; flex-shrink: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .pipeline-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
 .pipeline-col-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
 .pipeline-count { font-size: 10px; color: var(--muted); background: var(--border); padding: 1px 6px; border-radius: 10px; }
@@ -282,7 +285,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
   .hamburger { display: block; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .pipeline { grid-template-columns: repeat(2, 1fr); }
+  .pipeline { flex-wrap: nowrap; }
 }
 
 /* ── DISPAROS ── */
@@ -467,11 +470,14 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterStatus" onchange="renderLeadsTable()">
           <option value="">Todos os status</option>
           <option value="Novo">Novo</option>
+          <option value="Contactado">Contactado</option>
           <option value="Qualificado">Qualificado</option>
+          <option value="Agendado">Agendado</option>
           <option value="Proposta">Proposta</option>
           <option value="Negociação">Negociação</option>
           <option value="Ganho">Ganho</option>
           <option value="Perdido">Perdido</option>
+          <option value="Arquivado">Arquivado</option>
         </select>
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterOrigem" onchange="renderLeadsTable()">
           <option value="">Todas as origens</option>
@@ -589,8 +595,9 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <div class="form-row">
           <label class="form-label">Status</label>
           <select class="form-select" id="leadStatus">
-            <option>Novo</option><option>Qualificado</option><option>Proposta</option>
-            <option>Negociação</option><option>Ganho</option><option>Perdido</option>
+            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
+            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
+            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
           </select>
         </div>
         <div class="form-row">
@@ -671,8 +678,9 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <div class="form-row">
           <label class="form-label">Status</label>
           <select class="form-select" id="editStatus">
-            <option>Novo</option><option>Qualificado</option><option>Proposta</option>
-            <option>Negociação</option><option>Ganho</option><option>Perdido</option>
+            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
+            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
+            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
           </select>
         </div>
         <div class="form-row">
@@ -749,7 +757,9 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
           <label class="form-label">Status inicial</label>
           <select class="form-select" id="xlsxStatus">
             <option value="Novo">Novo</option>
+            <option value="Contactado">Contactado</option>
             <option value="Qualificado">Qualificado</option>
+            <option value="Agendado">Agendado</option>
             <option value="Proposta">Proposta</option>
           </select>
         </div>
@@ -969,7 +979,9 @@ async function deleteLead(id) {
 function renderStageProgress(currentStatus) {
   const stages = [
     { key: 'Novo',        label: 'NOVO' },
+    { key: 'Contactado',  label: 'CONTACT.' },
     { key: 'Qualificado', label: 'QUALIF' },
+    { key: 'Agendado',    label: 'AGEND.' },
     { key: 'Proposta',    label: 'PROPOSTA' },
     { key: 'Negociação',  label: 'NEGOC.' },
     { key: 'Ganho',       label: 'GANHO' },
@@ -1064,21 +1076,24 @@ async function saveVenda() {
 }
 
 // ── HELPERS ────────────────────────────────────────────
+const BADGE_MAP = { 'Novo':'badge-new','Contactado':'badge-contact','Qualificado':'badge-qual','Agendado':'badge-sched','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost','Arquivado':'badge-arch' };
 function badgeHtml(status) {
-  const map = { 'Novo':'badge-new','Qualificado':'badge-qual','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost' };
-  return `<span class="badge ${map[status]||'badge-new'}">${status}</span>`;
+  return `<span class="badge ${BADGE_MAP[status]||'badge-new'}">${status}</span>`;
 }
 
-const STATUS_COLORS = { 'Novo':'var(--blue)','Qualificado':'var(--gold)','Proposta':'var(--red)','Negociação':'#CC88FF','Ganho':'var(--green)','Perdido':'var(--muted)' };
-const STATUS_LIST = ['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'];
+const STATUS_COLORS = {
+  'Novo':'var(--blue)', 'Contactado':'#00CCDD', 'Qualificado':'var(--gold)',
+  'Agendado':'#9966FF', 'Proposta':'var(--red)', 'Negociação':'#CC88FF',
+  'Ganho':'var(--green)', 'Perdido':'var(--muted)', 'Arquivado':'#666'
+};
+const STATUS_LIST = ['Novo','Contactado','Qualificado','Agendado','Proposta','Negociação','Ganho','Perdido','Arquivado'];
 
 function statusDropdownHtml(id, status) {
-  const map = { 'Novo':'badge-new','Qualificado':'badge-qual','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost' };
   const items = STATUS_LIST.map(s =>
     `<button class="status-menu-item" style="color:${STATUS_COLORS[s]}" onclick="changeStatus(event,${id},'${s}')">${s}</button>`
   ).join('');
   return `<div class="status-dropdown" onclick="toggleStatusMenu(event,${id})">
-    <span class="badge ${map[status]||'badge-new'}" style="cursor:pointer">${status} ▾</span>
+    <span class="badge ${BADGE_MAP[status]||'badge-new'}" style="cursor:pointer">${status} ▾</span>
     <div class="status-menu" id="sm-${id}">${items}</div>
   </div>`;
 }
@@ -1158,7 +1173,7 @@ function urgencyBadge(lead) {
 }
 
 function nextStatus(current) {
-  const flow = ['Novo','Qualificado','Proposta','Negociação','Ganho'];
+  const flow = ['Novo','Contactado','Qualificado','Agendado','Proposta','Negociação','Ganho'];
   const idx = flow.indexOf(current);
   return idx >= 0 && idx < flow.length - 1 ? flow[idx + 1] : null;
 }
@@ -1332,12 +1347,15 @@ function renderLeadsTable(searchQ = '') {
 // ── RENDER PIPELINE ───────────────────────────────────
 function renderPipeline() {
   const cols = [
-    { key: 'Novo',       label: 'NOVO',     color: '#4488FF' },
-    { key: 'Qualificado',label: 'QUALIF.',   color: '#F5A623' },
-    { key: 'Proposta',   label: 'PROPOSTA', color: '#CC0000' },
-    { key: 'Negociação', label: 'NEGOC.',   color: '#CC88FF' },
-    { key: 'Ganho',      label: 'GANHO',    color: '#00C87A' },
-    { key: 'Perdido',    label: 'PERDIDO',  color: '#555' },
+    { key: 'Novo',        label: 'NOVO',      color: '#4488FF' },
+    { key: 'Contactado',  label: 'CONTACTADO',color: '#00CCDD' },
+    { key: 'Qualificado', label: 'QUALIF.',   color: '#F5A623' },
+    { key: 'Agendado',    label: 'AGENDADO',  color: '#9966FF' },
+    { key: 'Proposta',    label: 'PROPOSTA',  color: '#CC0000' },
+    { key: 'Negociação',  label: 'NEGOC.',    color: '#CC88FF' },
+    { key: 'Ganho',       label: 'GANHO',     color: '#00C87A' },
+    { key: 'Perdido',     label: 'PERDIDO',   color: '#555' },
+    { key: 'Arquivado',   label: 'ARQUIVADO', color: '#666' },
   ];
   document.getElementById('pipelineBoard').innerHTML = cols.map(col => {
     const colLeads = leads.filter(l => l.status === col.key);
@@ -1688,7 +1706,7 @@ function applyTemplate(tmpl, lead) {
 }
 
 function statusBadgeClass(s) {
-  return { 'Novo':'badge-new','Qualificado':'badge-qual','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost' }[s] || 'badge-new';
+  return BADGE_MAP[s] || 'badge-new';
 }
 
 function formatTel(t) {
