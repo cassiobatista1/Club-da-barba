@@ -215,21 +215,21 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .tl-add button:hover { background:var(--red2); }
 .tl-empty { text-align:center; padding:16px; font-size:11px; color:var(--muted); }
 
-.kpi-row { display:flex; gap:12px; overflow-x:auto; padding-bottom:10px; margin-bottom:16px; scrollbar-width:thin; }
-.kpi-card { min-width:158px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; cursor:pointer; transition:all 0.2s; position:relative; overflow:visible; user-select:none; }
-.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--kpi-color,var(--border)); border-radius:10px 10px 0 0; }
+.kpi-row { display:flex; gap:14px; overflow-x:auto; padding-bottom:14px; padding-top:6px; margin-bottom:16px; scrollbar-width:thin; }
+.kpi-card { min-width:190px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 18px 16px; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; user-select:none; }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--kpi-color,var(--border)); border-radius:12px 12px 0 0; }
 .kpi-card.active { border-color:var(--kpi-color,var(--red)); box-shadow:0 0 0 1px var(--kpi-color,var(--red)), 0 4px 20px rgba(0,0,0,0.3); transform:translateY(-2px); }
 .kpi-card:hover:not(.active) { transform:translateY(-2px); border-color:rgba(255,255,255,0.15); }
-.kpi-card-controls { position:absolute; top:-8px; right:-6px; display:none; gap:3px; z-index:10; }
+.kpi-card-controls { position:absolute; top:8px; right:8px; display:none; gap:4px; z-index:5; }
 .kpi-card:hover .kpi-card-controls { display:flex; }
-.kpi-ctrl-btn { background:var(--mid); border:1px solid var(--border); border-radius:4px; color:var(--muted); cursor:pointer; font-size:10px; padding:2px 5px; line-height:1.4; transition:all 0.15s; }
+.kpi-ctrl-btn { background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:4px; color:var(--muted); cursor:pointer; font-size:10px; padding:3px 6px; line-height:1.4; transition:all 0.15s; backdrop-filter:blur(4px); }
 .kpi-ctrl-btn:hover { background:var(--red); border-color:var(--red); color:white; }
-.kpi-label { font-size:9px; font-family:'DM Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:5px; }
+.kpi-label { font-size:9px; font-family:'DM Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; display:flex; align-items:center; gap:5px; padding-right:36px; }
 .kpi-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.kpi-count { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; line-height:1; margin-bottom:3px; }
-.kpi-pct { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); margin-bottom:8px; }
+.kpi-count { font-family:'Syne',sans-serif; font-size:44px; font-weight:800; line-height:1; margin-bottom:4px; }
+.kpi-pct { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); margin-bottom:10px; }
 .kpi-value { font-size:10px; color:var(--green); font-family:'DM Mono',monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.kpi-add-card { min-width:80px; max-width:80px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:2px dashed var(--border); border-radius:10px; cursor:pointer; color:var(--muted); transition:all 0.2s; padding:16px 8px; font-size:11px; font-family:'DM Mono',monospace; letter-spacing:0.5px; }
+.kpi-add-card { min-width:80px; max-width:80px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:transparent; border:2px dashed var(--border); border-radius:12px; cursor:pointer; color:var(--muted); transition:all 0.2s; padding:16px 8px; font-size:11px; font-family:'DM Mono',monospace; letter-spacing:0.5px; }
 .kpi-add-card:hover { border-color:var(--red); color:var(--red); }
 
 .pipe-leads-panel { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:16px; overflow:hidden; display:none; }
@@ -703,11 +703,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="form-grid">
         <div class="form-row">
           <label class="form-label">Status</label>
-          <select class="form-select" id="leadStatus">
-            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
-            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
-            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
-          </select>
+          <select class="form-select" id="leadStatus"></select>
         </div>
         <div class="form-row">
           <label class="form-label">Origem</label>
@@ -860,13 +856,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         </div>
         <div class="form-row">
           <label class="form-label">Status inicial</label>
-          <select class="form-select" id="xlsxStatus">
-            <option value="Novo">Novo</option>
-            <option value="Contactado">Contactado</option>
-            <option value="Qualificado">Qualificado</option>
-            <option value="Agendado">Agendado</option>
-            <option value="Proposta">Proposta</option>
-          </select>
+          <select class="form-select" id="xlsxStatus"></select>
         </div>
       </div>
       <div class="form-row">
@@ -934,14 +924,7 @@ async function loadData() {
     leads = []; vendas = [];
   }
   hideLoading();
-  // Populate dynamic status filter dropdown in leads page
-  const fs = document.getElementById('filterStatus');
-  if (fs) {
-    const cur = fs.value;
-    fs.innerHTML = '<option value="">Todos os status</option>' +
-      getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
-    if (cur) fs.value = cur;
-  }
+  refreshAllStatusSelects();
   renderDashboard();
   updateBadges();
 }
@@ -1298,6 +1281,7 @@ function addCustomPipelineCol() {
   const customCount = cols.length - DEFAULT_PIPELINE_COLS.length;
   cols.push({ key: name.trim(), label: name.trim().toUpperCase(), color: colors[Math.max(0,customCount) % colors.length] });
   savePipelineCols(cols);
+  refreshAllStatusSelects();
   renderPipeline();
 }
 
@@ -1310,6 +1294,7 @@ function renameKpiCol(key) {
   col.label = newLabel.trim().toUpperCase();
   savePipelineCols(cols);
   if (_activeKpiKey === key) { _activeKpiKey = null; document.getElementById('pipeLeadsPanel').classList.remove('visible'); }
+  refreshAllStatusSelects();
   renderPipeline();
 }
 
@@ -1321,6 +1306,7 @@ function deleteKpiCol(key) {
   if (!confirm(msg)) return;
   savePipelineCols(getPipelineCols().filter(c => c.key !== key));
   if (_activeKpiKey === key) { _activeKpiKey = null; document.getElementById('pipeLeadsPanel').classList.remove('visible'); }
+  refreshAllStatusSelects();
   renderPipeline();
 }
 
@@ -1391,6 +1377,19 @@ function populateStatusSelect(selectId, currentVal) {
   if (!sel) return;
   sel.innerHTML = getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
   if (currentVal !== undefined) sel.value = currentVal;
+}
+
+function refreshAllStatusSelects() {
+  // All static status selects outside of dynamically rendered pages
+  ['leadStatus','xlsxStatus'].forEach(id => populateStatusSelect(id));
+  // Leads page filter
+  const fs = document.getElementById('filterStatus');
+  if (fs) {
+    const cur = fs.value;
+    fs.innerHTML = '<option value="">Todos os status</option>' +
+      getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
+    fs.value = cur;
+  }
 }
 
 function toggleStatusMenu(e, id) {
@@ -1971,7 +1970,7 @@ function renderDisparos() {
   const root = document.getElementById('disparos-root');
   if (dispState.step === 'queue') { renderDisparoQueue(); return; }
 
-  const statusOpts = ['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'];
+  const statusOpts = getPipelineCols().map(c => c.key);
   const origemOpts = ['Site LOOVI','Indicação','WhatsApp','Outros'];
   const execOpts   = [...new Set(leads.map(l => l.exec).filter(Boolean))];
 
