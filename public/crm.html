@@ -915,10 +915,21 @@ function hideLoading() {
 async function loadData() {
   showLoading();
   try {
-    [leads, vendas] = await Promise.all([
+    const [leadsData, vendasData, dbCols] = await Promise.all([
       api('/api/leads'),
       api('/api/vendas'),
+      api('/api/settings?key=pipelineCols').catch(()=>null),
     ]);
+    leads  = leadsData  || [];
+    vendas = vendasData || [];
+    // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
+    if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
+      localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
+    } else {
+      // First run: push whatever is in localStorage to DB
+      const localCols = getPipelineCols();
+      api('/api/settings?key=pipelineCols', 'PUT', localCols).catch(()=>{});
+    }
   } catch(e) {
     console.error('Erro ao carregar dados:', e);
     leads = []; vendas = [];
@@ -1348,26 +1359,45 @@ const DEFAULT_PIPELINE_COLS = [
   { key:'Arquivado',   label:'ARQUIVADO',   color:'#555555' },
 ];
 function getPipelineCols() {
-  try { const s = localStorage.getItem('pipelineCols'); return s ? JSON.parse(s) : DEFAULT_PIPELINE_COLS.map(c=>({...c})); }
-  catch(e) { return DEFAULT_PIPELINE_COLS.map(c=>({...c})); }
+  try {
+    const s = localStorage.getItem('pipelineCols');
+    if (s) return JSON.parse(s);
+    // Migrate from old customPipelineCols key
+    const old = localStorage.getItem('customPipelineCols');
+    if (old) {
+      const custom = JSON.parse(old);
+      const migrated = [...DEFAULT_PIPELINE_COLS.map(c=>({...c})),
+        ...custom.map(c=>({ key:c.key, label:c.key.toUpperCase(), color:c.color||'#888' }))];
+      localStorage.setItem('pipelineCols', JSON.stringify(migrated));
+      return migrated;
+    }
+  } catch(e) {}
+  return DEFAULT_PIPELINE_COLS.map(c=>({...c}));
 }
-function savePipelineCols(cols) { localStorage.setItem('pipelineCols', JSON.stringify(cols)); }
+function savePipelineCols(cols) {
+  localStorage.setItem('pipelineCols', JSON.stringify(cols));
+  // Sync to DB (fire-and-forget)
+  api('/api/settings?key=pipelineCols', 'PUT', cols).catch(()=>{});
+}
 function getColColor(key) { const c = getPipelineCols().find(c=>c.key===key); return c ? c.color : '#888'; }
 
 // ── HELPERS ────────────────────────────────────────────
+function getColLabel(key) { const c = getPipelineCols().find(c=>c.key===key); return c ? (c.label||c.key) : key; }
+
 function badgeHtml(status) {
   const color = getColColor(status);
-  return `<span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55">${status}</span>`;
+  return `<span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55">${getColLabel(status)}</span>`;
 }
 
 function statusDropdownHtml(id, status) {
   const cols = getPipelineCols();
   const items = cols.map(c =>
-    `<button class="status-menu-item" style="color:${c.color}" onclick="changeStatus(event,${id},'${c.key}')">${c.key}</button>`
+    `<button class="status-menu-item" style="color:${c.color}" onclick="changeStatus(event,${id},'${c.key}')">${c.label||c.key}</button>`
   ).join('');
   const color = getColColor(status);
+  const label = getColLabel(status);
   return `<div class="status-dropdown" onclick="toggleStatusMenu(event,${id})">
-    <span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55;cursor:pointer">${status} ▾</span>
+    <span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55;cursor:pointer">${label} ▾</span>
     <div class="status-menu" id="sm-${id}">${items}</div>
   </div>`;
 }
@@ -1375,7 +1405,7 @@ function statusDropdownHtml(id, status) {
 function populateStatusSelect(selectId, currentVal) {
   const sel = document.getElementById(selectId);
   if (!sel) return;
-  sel.innerHTML = getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
+  sel.innerHTML = getPipelineCols().map(c=>`<option value="${c.key}">${c.label||c.key}</option>`).join('');
   if (currentVal !== undefined) sel.value = currentVal;
 }
 
@@ -1970,7 +2000,7 @@ function renderDisparos() {
   const root = document.getElementById('disparos-root');
   if (dispState.step === 'queue') { renderDisparoQueue(); return; }
 
-  const statusOpts = getPipelineCols().map(c => c.key);
+  const statusOpts = getPipelineCols();
   const origemOpts = ['Site LOOVI','Indicação','WhatsApp','Outros'];
   const execOpts   = [...new Set(leads.map(l => l.exec).filter(Boolean))];
 
@@ -2032,7 +2062,7 @@ function renderDisparos() {
           <div class="disp-filters">
             <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('status',this.value)">
               <option value="">Todos os status</option>
-              ${statusOpts.map(s=>`<option value="${s}" ${sfVal===s?'selected':''}>${s}</option>`).join('')}
+              ${statusOpts.map(c=>`<option value="${c.key}" ${sfVal===c.key?'selected':''}>${c.label||c.key}</option>`).join('')}
             </select>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('origem',this.value)">
