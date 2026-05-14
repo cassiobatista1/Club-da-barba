@@ -216,10 +216,14 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .tl-empty { text-align:center; padding:16px; font-size:11px; color:var(--muted); }
 
 .kpi-row { display:flex; gap:12px; overflow-x:auto; padding-bottom:10px; margin-bottom:16px; scrollbar-width:thin; }
-.kpi-card { min-width:158px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; user-select:none; }
+.kpi-card { min-width:158px; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; cursor:pointer; transition:all 0.2s; position:relative; overflow:visible; user-select:none; }
 .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--kpi-color,var(--border)); border-radius:10px 10px 0 0; }
 .kpi-card.active { border-color:var(--kpi-color,var(--red)); box-shadow:0 0 0 1px var(--kpi-color,var(--red)), 0 4px 20px rgba(0,0,0,0.3); transform:translateY(-2px); }
 .kpi-card:hover:not(.active) { transform:translateY(-2px); border-color:rgba(255,255,255,0.15); }
+.kpi-card-controls { position:absolute; top:-8px; right:-6px; display:none; gap:3px; z-index:10; }
+.kpi-card:hover .kpi-card-controls { display:flex; }
+.kpi-ctrl-btn { background:var(--mid); border:1px solid var(--border); border-radius:4px; color:var(--muted); cursor:pointer; font-size:10px; padding:2px 5px; line-height:1.4; transition:all 0.15s; }
+.kpi-ctrl-btn:hover { background:var(--red); border-color:var(--red); color:white; }
 .kpi-label { font-size:9px; font-family:'DM Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:5px; }
 .kpi-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .kpi-count { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; line-height:1; margin-bottom:3px; }
@@ -522,15 +526,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterStatus" onchange="renderLeadsTable()">
           <option value="">Todos os status</option>
-          <option value="Novo">Novo</option>
-          <option value="Contactado">Contactado</option>
-          <option value="Qualificado">Qualificado</option>
-          <option value="Agendado">Agendado</option>
-          <option value="Proposta">Proposta</option>
-          <option value="Negociação">Negociação</option>
-          <option value="Ganho">Ganho</option>
-          <option value="Perdido">Perdido</option>
-          <option value="Arquivado">Arquivado</option>
         </select>
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterOrigem" onchange="renderLeadsTable()">
           <option value="">Todas as origens</option>
@@ -598,11 +593,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
           <div class="pp-section"><label class="pp-label">Follow-up</label><input class="pp-input" id="ppFollowup" type="date"></div>
         </div>
         <div class="pp-section"><label class="pp-label">Status</label>
-          <select class="pp-input" id="ppStatus" onchange="updatePpBadge()">
-            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
-            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
-            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
-          </select>
+          <select class="pp-input" id="ppStatus" onchange="updatePpBadge()"></select>
         </div>
         <div class="pp-section"><label class="pp-label">Observações</label><textarea class="pp-input" id="ppObs" rows="3" style="resize:none"></textarea></div>
         <div class="tl-section" style="margin-top:12px">
@@ -795,11 +786,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="form-grid">
         <div class="form-row">
           <label class="form-label">Status</label>
-          <select class="form-select" id="editStatus">
-            <option>Novo</option><option>Contactado</option><option>Qualificado</option>
-            <option>Agendado</option><option>Proposta</option><option>Negociação</option>
-            <option>Ganho</option><option>Perdido</option><option>Arquivado</option>
-          </select>
+          <select class="form-select" id="editStatus"></select>
         </div>
         <div class="form-row">
           <label class="form-label">Origem</label>
@@ -947,6 +934,14 @@ async function loadData() {
     leads = []; vendas = [];
   }
   hideLoading();
+  // Populate dynamic status filter dropdown in leads page
+  const fs = document.getElementById('filterStatus');
+  if (fs) {
+    const cur = fs.value;
+    fs.innerHTML = '<option value="">Todos os status</option>' +
+      getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
+    if (cur) fs.value = cur;
+  }
   renderDashboard();
   updateBadges();
 }
@@ -1043,7 +1038,7 @@ function editLead(id) {
   document.getElementById('editTel').value      = l.tel || '';
   document.getElementById('editCarro').value    = l.carro || '';
   document.getElementById('editCidade').value   = l.cidade || '';
-  document.getElementById('editStatus').value   = l.status;
+  populateStatusSelect('editStatus', l.status);
   document.getElementById('editOrigem').value   = l.origem;
   document.getElementById('editValor').value    = l.valor || '';
   document.getElementById('editFollowup').value = l.followup || '';
@@ -1095,15 +1090,10 @@ async function deleteLead(id) {
 
 // ── STAGE PROGRESS & TIMELINE ─────────────────────────
 function renderStageProgress(currentStatus) {
-  const stages = [
-    { key: 'Novo',        label: 'NOVO' },
-    { key: 'Contactado',  label: 'CONTACT.' },
-    { key: 'Qualificado', label: 'QUALIF' },
-    { key: 'Agendado',    label: 'AGEND.' },
-    { key: 'Proposta',    label: 'PROPOSTA' },
-    { key: 'Negociação',  label: 'NEGOC.' },
-    { key: 'Ganho',       label: 'GANHO' },
-  ];
+  const terminal = new Set(['Ganho','Perdido','Arquivado']);
+  const stages = getPipelineCols().filter(c=>!terminal.has(c.key))
+    .concat(getPipelineCols().filter(c=>c.key==='Ganho'))
+    .map(c=>({ key:c.key, label:c.label.slice(0,7) }));
   const el = document.getElementById('stageProgress');
   if (currentStatus === 'Perdido') {
     el.innerHTML = '<div style="width:100%;text-align:center;padding:8px 0 16px;font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;letter-spacing:1px">— LEAD PERDIDO —</div>';
@@ -1181,7 +1171,7 @@ function openPipelinePanel(id) {
   document.getElementById('ppValor').value      = l.valor || '';
   document.getElementById('ppFollowup').value   = l.followup || '';
   document.getElementById('ppObs').value        = l.obs || '';
-  document.getElementById('ppStatus').value     = l.status;
+  populateStatusSelect('ppStatus', l.status);
   updatePpWa();
   // Quick action buttons
   const next = nextStatus(l.status);
@@ -1302,11 +1292,35 @@ function openFullEditFromPanel() {
 function addCustomPipelineCol() {
   const name = prompt('Nome da nova coluna (ex: Reativação, Pós-venda):');
   if (!name || !name.trim()) return;
-  const cols = JSON.parse(localStorage.getItem('customPipelineCols') || '[]');
-  if (cols.find(c => c.key.toLowerCase() === name.trim().toLowerCase())) return;
+  const cols = getPipelineCols();
+  if (cols.find(c => c.key.toLowerCase() === name.trim().toLowerCase())) { alert('Já existe uma coluna com este nome!'); return; }
   const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A','#98D8C8','#DDA0DD'];
-  cols.push({ key: name.trim(), color: colors[cols.length % colors.length] });
-  localStorage.setItem('customPipelineCols', JSON.stringify(cols));
+  const customCount = cols.length - DEFAULT_PIPELINE_COLS.length;
+  cols.push({ key: name.trim(), label: name.trim().toUpperCase(), color: colors[Math.max(0,customCount) % colors.length] });
+  savePipelineCols(cols);
+  renderPipeline();
+}
+
+function renameKpiCol(key) {
+  const cols = getPipelineCols();
+  const col = cols.find(c => c.key === key);
+  if (!col) return;
+  const newLabel = prompt(`Novo nome de exibição para "${col.key}":`, col.label);
+  if (!newLabel || !newLabel.trim()) return;
+  col.label = newLabel.trim().toUpperCase();
+  savePipelineCols(cols);
+  if (_activeKpiKey === key) { _activeKpiKey = null; document.getElementById('pipeLeadsPanel').classList.remove('visible'); }
+  renderPipeline();
+}
+
+function deleteKpiCol(key) {
+  const cnt = leads.filter(l => l.status === key).length;
+  const msg = cnt > 0
+    ? `Excluir a coluna "${key}"?\n\n${cnt} lead(s) com este status não aparecerão no pipeline (registros não são apagados).`
+    : `Excluir a coluna "${key}"?`;
+  if (!confirm(msg)) return;
+  savePipelineCols(getPipelineCols().filter(c => c.key !== key));
+  if (_activeKpiKey === key) { _activeKpiKey = null; document.getElementById('pipeLeadsPanel').classList.remove('visible'); }
   renderPipeline();
 }
 
@@ -1335,27 +1349,48 @@ async function saveVenda() {
   finally { btn.disabled = false; btn.textContent = 'Registrar Venda'; }
 }
 
+// ── PIPELINE COLUMN CONFIG ─────────────────────────────
+const DEFAULT_PIPELINE_COLS = [
+  { key:'Novo',        label:'NOVO',        color:'#4488FF' },
+  { key:'Contactado',  label:'CONTACTADO',  color:'#00CCDD' },
+  { key:'Qualificado', label:'QUALIFICADO', color:'#F5A623' },
+  { key:'Agendado',    label:'AGENDADO',    color:'#9966FF' },
+  { key:'Proposta',    label:'PROPOSTA',    color:'#CC0000' },
+  { key:'Negociação',  label:'NEGOCIAÇÃO',  color:'#CC88FF' },
+  { key:'Ganho',       label:'GANHO',       color:'#00C87A' },
+  { key:'Perdido',     label:'PERDIDO',     color:'#888888' },
+  { key:'Arquivado',   label:'ARQUIVADO',   color:'#555555' },
+];
+function getPipelineCols() {
+  try { const s = localStorage.getItem('pipelineCols'); return s ? JSON.parse(s) : DEFAULT_PIPELINE_COLS.map(c=>({...c})); }
+  catch(e) { return DEFAULT_PIPELINE_COLS.map(c=>({...c})); }
+}
+function savePipelineCols(cols) { localStorage.setItem('pipelineCols', JSON.stringify(cols)); }
+function getColColor(key) { const c = getPipelineCols().find(c=>c.key===key); return c ? c.color : '#888'; }
+
 // ── HELPERS ────────────────────────────────────────────
-const BADGE_MAP = { 'Novo':'badge-new','Contactado':'badge-contact','Qualificado':'badge-qual','Agendado':'badge-sched','Proposta':'badge-prop','Negociação':'badge-neg','Ganho':'badge-won','Perdido':'badge-lost','Arquivado':'badge-arch' };
 function badgeHtml(status) {
-  return `<span class="badge ${BADGE_MAP[status]||'badge-new'}">${status}</span>`;
+  const color = getColColor(status);
+  return `<span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55">${status}</span>`;
 }
 
-const STATUS_COLORS = {
-  'Novo':'var(--blue)', 'Contactado':'#00CCDD', 'Qualificado':'var(--gold)',
-  'Agendado':'#9966FF', 'Proposta':'var(--red)', 'Negociação':'#CC88FF',
-  'Ganho':'var(--green)', 'Perdido':'var(--muted)', 'Arquivado':'#666'
-};
-const STATUS_LIST = ['Novo','Contactado','Qualificado','Agendado','Proposta','Negociação','Ganho','Perdido','Arquivado'];
-
 function statusDropdownHtml(id, status) {
-  const items = STATUS_LIST.map(s =>
-    `<button class="status-menu-item" style="color:${STATUS_COLORS[s]}" onclick="changeStatus(event,${id},'${s}')">${s}</button>`
+  const cols = getPipelineCols();
+  const items = cols.map(c =>
+    `<button class="status-menu-item" style="color:${c.color}" onclick="changeStatus(event,${id},'${c.key}')">${c.key}</button>`
   ).join('');
+  const color = getColColor(status);
   return `<div class="status-dropdown" onclick="toggleStatusMenu(event,${id})">
-    <span class="badge ${BADGE_MAP[status]||'badge-new'}" style="cursor:pointer">${status} ▾</span>
+    <span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55;cursor:pointer">${status} ▾</span>
     <div class="status-menu" id="sm-${id}">${items}</div>
   </div>`;
+}
+
+function populateStatusSelect(selectId, currentVal) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = getPipelineCols().map(c=>`<option value="${c.key}">${c.key}</option>`).join('');
+  if (currentVal !== undefined) sel.value = currentVal;
 }
 
 function toggleStatusMenu(e, id) {
@@ -1433,7 +1468,8 @@ function urgencyBadge(lead) {
 }
 
 function nextStatus(current) {
-  const flow = ['Novo','Contactado','Qualificado','Agendado','Proposta','Negociação','Ganho'];
+  const terminal = new Set(['Ganho','Perdido','Arquivado']);
+  const flow = getPipelineCols().filter(c=>!terminal.has(c.key)).map(c=>c.key);
   const idx = flow.indexOf(current);
   return idx >= 0 && idx < flow.length - 1 ? flow[idx + 1] : null;
 }
@@ -1607,21 +1643,8 @@ function renderLeadsTable(searchQ = '') {
 // ── PIPELINE KPI DASHBOARD ────────────────────────────
 let _activeKpiKey = null;
 
-const KPI_COLS = [
-  { key: 'Novo',        label: 'NOVO',       color: '#4488FF' },
-  { key: 'Contactado',  label: 'CONTACTADO', color: '#00CCDD' },
-  { key: 'Qualificado', label: 'QUALIFICADO',color: '#F5A623' },
-  { key: 'Agendado',    label: 'AGENDADO',   color: '#9966FF' },
-  { key: 'Proposta',    label: 'PROPOSTA',   color: '#CC0000' },
-  { key: 'Negociação',  label: 'NEGOCIAÇÃO', color: '#CC88FF' },
-  { key: 'Ganho',       label: 'GANHO',      color: '#00C87A' },
-  { key: 'Perdido',     label: 'PERDIDO',    color: '#888' },
-  { key: 'Arquivado',   label: 'ARQUIVADO',  color: '#555' },
-];
-
 function renderPipeline() {
-  const customCols = JSON.parse(localStorage.getItem('customPipelineCols') || '[]');
-  const allCols = [...KPI_COLS, ...customCols.map(c => ({ key: c.key, label: c.key.toUpperCase(), color: c.color || '#888', custom: true }))];
+  const allCols = getPipelineCols();
   const total = leads.length || 1;
 
   const row = document.getElementById('kpiRow');
@@ -1631,7 +1654,12 @@ function renderPipeline() {
     const pct = ((cnt / total) * 100).toFixed(0);
     const val = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
     const isActive = _activeKpiKey === col.key;
-    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color}" onclick="selectKpiCol('${col.key}')">
+    const keyEsc = col.key.replace(/'/g,"\\'");
+    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color}" onclick="selectKpiCol('${keyEsc}')">
+      <div class="kpi-card-controls" onclick="event.stopPropagation()">
+        <button class="kpi-ctrl-btn" onclick="renameKpiCol('${keyEsc}')" title="Renomear">✏</button>
+        <button class="kpi-ctrl-btn" onclick="deleteKpiCol('${keyEsc}')" title="Excluir">✕</button>
+      </div>
       <div class="kpi-label"><span class="kpi-dot" style="background:${col.color}"></span>${col.label}</div>
       <div class="kpi-count" style="color:${col.color}">${cnt}</div>
       <div class="kpi-pct">${pct}% do total</div>
@@ -1660,7 +1688,7 @@ function selectKpiCol(key, refresh) {
   _activeKpiKey = key;
   if (!refresh) renderPipeline();
 
-  const col = KPI_COLS.find(c => c.key === key) || { label: key, color: '#888' };
+  const col = getPipelineCols().find(c => c.key === key) || { label: key, color: '#888' };
   const colLeads = leads.filter(l => l.status === key);
   title.innerHTML = `<span style="color:${col.color}">${col.label}</span> <span style="color:var(--muted);font-weight:400;font-size:11px">${colLeads.length} leads</span>`;
 
@@ -1865,14 +1893,13 @@ function renderVendas() {
 
 // ── RENDER RELATÓRIOS ─────────────────────────────────
 function renderRelatorios() {
-  const statuses = ['Novo','Qualificado','Proposta','Negociação','Ganho','Perdido'];
-  const sCounts = statuses.map(s => leads.filter(l => l.status === s).length);
-  const sColors = ['#4488FF','#F5A623','#CC0000','#CC88FF','#00C87A','#555'];
+  const allCols = getPipelineCols();
+  const sCounts = allCols.map(c => leads.filter(l => l.status === c.key).length);
   const max1 = Math.max(...sCounts, 1);
-  document.getElementById('relStatus').innerHTML = statuses.map((s,i) => `
+  document.getElementById('relStatus').innerHTML = allCols.map((c,i) => `
     <div class="progress-row">
-      <div class="progress-label" style="font-size:11px">${s}</div>
-      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(sCounts[i]/max1)*100}%;background:${sColors[i]}"></div></div>
+      <div class="progress-label" style="font-size:11px">${c.key}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(sCounts[i]/max1)*100}%;background:${c.color}"></div></div>
       <div class="progress-val">${sCounts[i]}</div>
     </div>
   `).join('');
@@ -2090,7 +2117,7 @@ function applyTemplate(tmpl, lead) {
 }
 
 function statusBadgeClass(s) {
-  return BADGE_MAP[s] || 'badge-new';
+  return 'badge-new';
 }
 
 function formatTel(t) {
