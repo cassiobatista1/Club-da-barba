@@ -1103,12 +1103,11 @@ async function deleteLead(id) {
 
 // ── STAGE PROGRESS & TIMELINE ─────────────────────────
 function renderStageProgress(currentStatus) {
-  const terminal = new Set(['Ganho','Perdido','Arquivado']);
-  const stages = getPipelineCols().filter(c=>!terminal.has(c.key))
-    .concat(getPipelineCols().filter(c=>c.key==='Ganho'))
+  const cols = getPipelineCols();
+  const stages = cols.filter(c => !isLost(c.key) && !isArchived(c.key))
     .map(c=>({ key:c.key, label:c.label.slice(0,7) }));
   const el = document.getElementById('stageProgress');
-  if (currentStatus === 'Perdido') {
+  if (isLost(currentStatus)) {
     el.innerHTML = '<div style="width:100%;text-align:center;padding:8px 0 16px;font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace;letter-spacing:1px">— LEAD PERDIDO —</div>';
     return;
   }
@@ -1139,7 +1138,7 @@ function renderLeadTimeline(history) {
   }
   el.innerHTML = history.map((h, i) => {
     const isStatusChange = h.status !== 'nota';
-    const dotCls = h.status === 'Ganho' ? 'ganho' : h.status === 'Perdido' ? 'perdido' : isStatusChange ? 'status-chg' : 'nota';
+    const dotCls = isWon(h.status) ? 'ganho' : isLost(h.status) ? 'perdido' : isStatusChange ? 'status-chg' : 'nota';
     const label = isStatusChange ? `Status → <strong>${h.status}</strong>` : '📝 Nota';
     const showBar = i < history.length - 1;
     const ts = new Date(h.created_at);
@@ -1188,10 +1187,12 @@ function openPipelinePanel(id) {
   updatePpWa();
   // Quick action buttons
   const next = nextStatus(l.status);
+  const lostKey = getColsByRole('lost')[0] || null;
+  const archKey = getColsByRole('archived')[0] || null;
   document.getElementById('ppQuickBtns').innerHTML = [
     next ? `<button class="pp-qbtn" onclick="quickAdvancePP(${id},'${next}')">→ ${next}</button>` : '',
-    `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'Perdido')">✗ Perdido</button>`,
-    `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'Arquivado')">📁 Arquivar</button>`,
+    lostKey ? `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'${lostKey}')">✗ ${lostKey}</button>` : '',
+    archKey ? `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'${archKey}')">📁 Arquivar</button>` : '',
   ].join('');
   document.getElementById('ppTimeline').innerHTML = '<div class="tl-empty">Carregando...</div>';
   document.getElementById('ppNoteInput').value = '';
@@ -1217,10 +1218,12 @@ function updatePpBadge() {
   document.getElementById('ppBadge').innerHTML = badgeHtml(s);
   const id = parseInt(document.getElementById('ppLeadId').value);
   const next = nextStatus(s);
+  const lostKey2 = getColsByRole('lost')[0] || null;
+  const archKey2 = getColsByRole('archived')[0] || null;
   document.getElementById('ppQuickBtns').innerHTML = [
     next ? `<button class="pp-qbtn" onclick="quickAdvancePP(${id},'${next}')">→ ${next}</button>` : '',
-    `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'Perdido')">✗ Perdido</button>`,
-    `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'Arquivado')">📁 Arquivar</button>`,
+    lostKey2 ? `<button class="pp-qbtn lost" onclick="quickAdvancePP(${id},'${lostKey2}')">✗ ${lostKey2}</button>` : '',
+    archKey2 ? `<button class="pp-qbtn arch" onclick="quickAdvancePP(${id},'${archKey2}')">📁 Arquivar</button>` : '',
   ].join('');
 }
 
@@ -1270,7 +1273,7 @@ async function loadPanelHistory(id) {
     }
     el.innerHTML = history.map((h, i) => {
       const isStatus = h.status !== 'nota';
-      const dotCls = h.status === 'Ganho' ? 'ganho' : h.status === 'Perdido' ? 'perdido' : isStatus ? 'status-chg' : 'nota';
+      const dotCls = isWon(h.status) ? 'ganho' : isLost(h.status) ? 'perdido' : isStatus ? 'status-chg' : 'nota';
       const label  = isStatus ? `→ <strong>${h.status}</strong>` : '📝 Nota';
       const ts = new Date(h.created_at);
       const timeStr = ts.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -1371,11 +1374,11 @@ const DEFAULT_PIPELINE_COLS = [
   { key:'Contactado',  label:'CONTACTADO',  color:'#00CCDD' },
   { key:'Qualificado', label:'QUALIFICADO', color:'#F5A623' },
   { key:'Agendado',    label:'AGENDADO',    color:'#9966FF' },
-  { key:'Proposta',    label:'PROPOSTA',    color:'#CC0000' },
+  { key:'Proposta',    label:'PROPOSTA',    color:'#CC0000', role:'proposal' },
   { key:'Negociação',  label:'NEGOCIAÇÃO',  color:'#CC88FF' },
-  { key:'Ganho',       label:'GANHO',       color:'#00C87A' },
-  { key:'Perdido',     label:'PERDIDO',     color:'#888888' },
-  { key:'Arquivado',   label:'ARQUIVADO',   color:'#555555' },
+  { key:'Ganho',       label:'GANHO',       color:'#00C87A', role:'won' },
+  { key:'Perdido',     label:'PERDIDO',     color:'#888888', role:'lost' },
+  { key:'Arquivado',   label:'ARQUIVADO',   color:'#555555', role:'archived' },
 ];
 function getPipelineCols() {
   try {
@@ -1402,6 +1405,12 @@ function getColColor(key) { const c = getPipelineCols().find(c=>c.key===key); re
 
 // ── HELPERS ────────────────────────────────────────────
 function getColLabel(key) { const c = getPipelineCols().find(c=>c.key===key); return c ? (c.label||c.key) : key; }
+function getColRole(key)  { const c = getPipelineCols().find(c=>c.key===key); return c ? (c.role||null) : null; }
+function isWon(key)       { return getColRole(key) === 'won'; }
+function isLost(key)      { return getColRole(key) === 'lost'; }
+function isArchived(key)  { return getColRole(key) === 'archived'; }
+function isTerminal(key)  { const r = getColRole(key); return r === 'won' || r === 'lost' || r === 'archived'; }
+function getColsByRole(role) { return getPipelineCols().filter(c=>c.role===role).map(c=>c.key); }
 
 function badgeHtml(status) {
   const color = getColColor(status);
@@ -1508,7 +1517,7 @@ function formatHours(h) {
 }
 
 function urgencyBadge(lead) {
-  if (lead.status === 'Ganho' || lead.status === 'Perdido') return '';
+  if (isTerminal(lead.status)) return '';
   const h = hoursInStatus(lead);
   if (h < 12) return `<span class="pc-urgency ok">● ${formatHours(h)}</span>`;
   if (h < 48) return `<span class="pc-urgency warn">⏱ ${formatHours(h)}</span>`;
@@ -1516,14 +1525,14 @@ function urgencyBadge(lead) {
 }
 
 function nextStatus(current) {
-  const terminal = new Set(['Ganho','Perdido','Arquivado']);
-  const flow = getPipelineCols().filter(c=>!terminal.has(c.key)).map(c=>c.key);
+  // Flow = all non-lost, non-archived cols (includes 'won' as final step)
+  const flow = getPipelineCols().filter(c=>!isLost(c.key) && !isArchived(c.key)).map(c=>c.key);
   const idx = flow.indexOf(current);
   return idx >= 0 && idx < flow.length - 1 ? flow[idx + 1] : null;
 }
 
 function followupBadge(lead) {
-  if (!lead.followup || lead.status === 'Ganho' || lead.status === 'Perdido') return '';
+  if (!lead.followup || isTerminal(lead.status)) return '';
   const today = new Date(); today.setHours(0,0,0,0);
   const d = new Date(lead.followup + 'T00:00:00'); d.setHours(0,0,0,0);
   const diff = Math.round((d - today) / 86400000);
@@ -1552,7 +1561,7 @@ async function quickAdvance(id, newStatus, evt) {
 // ── BADGES ────────────────────────────────────────────
 function updateBadges() {
   const today = new Date(); today.setHours(0,0,0,0);
-  const active = leads.filter(l => l.status !== 'Ganho' && l.status !== 'Perdido');
+  const active = leads.filter(l => !isTerminal(l.status));
   const pend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today);
   document.getElementById('leadsBadge').textContent = active.length;
   document.getElementById('followBadge').textContent = pend.length;
@@ -1574,7 +1583,7 @@ function renderDashboard() {
   const mesNome = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   document.getElementById('statLeads').textContent  = leads.length;
-  document.getElementById('statProp').textContent   = leads.filter(l => l.status === 'Proposta').length;
+  document.getElementById('statProp').textContent   = leads.filter(l => getColsByRole('proposal').includes(l.status)).length;
   document.getElementById('statVendasSub').textContent = mesNome.charAt(0).toUpperCase() + mesNome.slice(1);
 
   const vendasMes = vendas.filter(v => {
@@ -1583,19 +1592,18 @@ function renderDashboard() {
   });
   document.getElementById('statVendas').textContent = vendasMes.length;
 
-  const followPend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today && l.status !== 'Ganho' && l.status !== 'Perdido');
+  const followPend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status));
   document.getElementById('statFollow').textContent = followPend.length;
 
-  // Funil
-  const statuses = ['Novo','Qualificado','Proposta','Negociação','Ganho'];
-  const counts = statuses.map(s => leads.filter(l => l.status === s).length);
-  const max = Math.max(...counts, 1);
-  const colors = ['#4488FF','#F5A623','#CC0000','#CC88FF','#00C87A'];
-  document.getElementById('funnelBars').innerHTML = statuses.map((s, i) => `
+  // Funil — dynamic from pipeline config (exclude archived)
+  const funnelCols = getPipelineCols().filter(c => !isArchived(c.key));
+  const fCounts = funnelCols.map(c => leads.filter(l => l.status === c.key).length);
+  const fMax = Math.max(...fCounts, 1);
+  document.getElementById('funnelBars').innerHTML = funnelCols.map((c, i) => `
     <div class="progress-row">
-      <div class="progress-label">${s}</div>
-      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(counts[i]/max)*100}%;background:${colors[i]}"></div></div>
-      <div class="progress-val">${counts[i]}</div>
+      <div class="progress-label">${c.label}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(fCounts[i]/fMax)*100}%;background:${c.color||'var(--primary)'}"></div></div>
+      <div class="progress-val">${fCounts[i]}</div>
     </div>
   `).join('');
 
@@ -1608,7 +1616,7 @@ function renderDashboard() {
   });
 
   // Follow-up list
-  const upcoming = leads.filter(l => l.followup && l.status !== 'Ganho' && l.status !== 'Perdido')
+  const upcoming = leads.filter(l => l.followup && !isTerminal(l.status))
     .sort((a,b) => new Date(a.followup) - new Date(b.followup)).slice(0, 5);
   const fEl = document.getElementById('dashFollowList');
   if (upcoming.length === 0) {
@@ -1905,7 +1913,7 @@ function openCalendarFromPanel() {
 // ── RENDER FOLLOWUP ───────────────────────────────────
 function renderFollowup() {
   const today = new Date(); today.setHours(0,0,0,0);
-  const withFollow = leads.filter(l => l.followup && l.status !== 'Ganho' && l.status !== 'Perdido')
+  const withFollow = leads.filter(l => l.followup && !isTerminal(l.status))
     .sort((a,b) => new Date(a.followup) - new Date(b.followup));
 
   const urgente = withFollow.filter(l => new Date(l.followup + 'T00:00:00') < today).length;
@@ -2037,7 +2045,7 @@ function renderRelatorios() {
     const e = l.exec || 'Cássio';
     if (!execs[e]) execs[e] = { leads: 0, props: 0, vendas: 0 };
     execs[e].leads++;
-    if (l.status === 'Proposta' || l.status === 'Negociação') execs[e].props++;
+    if (getColsByRole('proposal').includes(l.status)) execs[e].props++;
   });
   vendas.forEach(v => {
     const e = v.exec || 'Cássio';
