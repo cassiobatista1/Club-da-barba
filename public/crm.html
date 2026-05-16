@@ -1070,13 +1070,15 @@ async function updateLead() {
   if (idx === -1) return;
   const btn = document.getElementById('btnUpdateLead');
   btn.disabled = true; btn.textContent = 'Salvando...';
+  const newStatus = document.getElementById('editStatus').value;
   try {
+    autoVendaIfWon(leads[idx], newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', {
       nome:     document.getElementById('editNome').value,
       tel:      document.getElementById('editTel').value,
       carro:    document.getElementById('editCarro').value,
       cidade:   document.getElementById('editCidade').value,
-      status:   document.getElementById('editStatus').value,
+      status:   newStatus,
       origem:   document.getElementById('editOrigem').value,
       valor:    parseFloat(document.getElementById('editValor').value) || 0,
       followup: document.getElementById('editFollowup').value,
@@ -1232,7 +1234,9 @@ async function savePanelLead() {
   const idx = leads.findIndex(x => x.id === id);
   if (idx === -1) return;
   const l = leads[idx];
+  const newStatus = document.getElementById('ppStatus').value;
   try {
+    autoVendaIfWon(l, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', {
       nome: l.nome, exec: l.exec, origem: l.origem,
       tel:      document.getElementById('ppTel').value,
@@ -1241,7 +1245,7 @@ async function savePanelLead() {
       valor:    parseFloat(document.getElementById('ppValor').value) || 0,
       followup: document.getElementById('ppFollowup').value,
       obs:      document.getElementById('ppObs').value,
-      status:   document.getElementById('ppStatus').value,
+      status:   newStatus,
     });
     leads[idx] = updated;
     closePipelinePanel();
@@ -1255,6 +1259,7 @@ async function quickAdvancePP(id, newStatus) {
   if (idx === -1) return;
   const l = leads[idx];
   try {
+    autoVendaIfWon(l, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', { ...l, status: newStatus });
     leads[idx] = updated;
     closePipelinePanel();
@@ -1412,6 +1417,19 @@ function isArchived(key)  { return getColRole(key) === 'archived'; }
 function isTerminal(key)  { const r = getColRole(key); return r === 'won' || r === 'lost' || r === 'archived'; }
 function getColsByRole(role) { return getPipelineCols().filter(c=>c.role===role).map(c=>c.key); }
 
+function autoVendaIfWon(lead, newStatus) {
+  if (!isWon(newStatus) || isWon(lead.status)) return;
+  api('/api/vendas', 'POST', {
+    cliente: lead.nome,
+    data:    new Date().toISOString().split('T')[0],
+    carro:   lead.carro  || '',
+    plano:   'Completo',
+    valor:   lead.valor  || 0,
+    origem:  lead.origem || 'Outros',
+    exec:    lead.exec   || 'Cássio',
+  }).then(v => { if (v && v.id) vendas.unshift(v); }).catch(() => {});
+}
+
 function badgeHtml(status) {
   const color = getColColor(status);
   return `<span class="badge badge-new" style="background:${color}22;color:${color};border-color:${color}55">${getColLabel(status)}</span>`;
@@ -1468,6 +1486,7 @@ async function changeStatus(e, id, newStatus) {
   if (idx === -1) return;
   const lead = leads[idx];
   try {
+    autoVendaIfWon(lead, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', { ...lead, status: newStatus });
     leads[idx] = updated;
     renderPage(currentPage);
@@ -1547,6 +1566,7 @@ async function quickAdvance(id, newStatus, evt) {
   if (idx === -1) return;
   const l = leads[idx];
   try {
+    autoVendaIfWon(l, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', {
       nome: l.nome, tel: l.tel, carro: l.carro, cidade: l.cidade,
       status: newStatus, origem: l.origem, valor: l.valor,
@@ -1806,6 +1826,7 @@ async function plcChangeStatus(id, newStatus) {
   const l = leads[idx];
   if (l.status === newStatus) return;
   try {
+    autoVendaIfWon(l, newStatus);
     const updated = await api(`/api/leads/${id}`, 'PUT', {
       nome:l.nome, tel:l.tel, carro:l.carro, cidade:l.cidade,
       status:newStatus, origem:l.origem, valor:l.valor,
