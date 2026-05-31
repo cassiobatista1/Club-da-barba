@@ -2788,6 +2788,43 @@ async function importFromText(raw) {
   alert(`✅ ${count} leads importados com sucesso!`);
 }
 
+// ── PIPELINE ROLES CONFIG ────────────────────────────
+const ROLE_OPTIONS = [
+  { value: '',         label: '— Nenhuma',    color: 'var(--muted)',  bg: 'transparent' },
+  { value: 'proposal', label: '📋 Proposta',  color: '#F5A623',       bg: '#F5A62322' },
+  { value: 'won',      label: '✅ Venda',     color: 'var(--green)',  bg: 'var(--green)22' },
+  { value: 'lost',     label: '❌ Perdido',   color: 'var(--danger)', bg: 'var(--danger)22' },
+  { value: 'archived', label: '📁 Arquivado', color: 'var(--muted)',  bg: 'rgba(255,255,255,0.05)' },
+];
+
+function openRolesConfig() {
+  const cols = getPipelineCols();
+  const list = document.getElementById('rolesConfigList');
+  list.innerHTML = cols.map(col => {
+    const roleOpts = ROLE_OPTIONS.map(r =>
+      `<option value="${r.value}" ${(col.role||'') === r.value ? 'selected' : ''}>${r.label}</option>`
+    ).join('');
+    return `<div class="role-row">
+      <div class="role-dot" style="background:${col.color}"></div>
+      <div class="role-label">${col.label}</div>
+      <select class="role-select" data-key="${col.key}">${roleOpts}</select>
+    </div>`;
+  }).join('');
+  openModal('rolesConfig');
+}
+
+function saveRolesConfig() {
+  const cols = getPipelineCols();
+  document.querySelectorAll('#rolesConfigList .role-select').forEach(sel => {
+    const col = cols.find(c => c.key === sel.dataset.key);
+    if (col) { if (sel.value) col.role = sel.value; else delete col.role; }
+  });
+  savePipelineCols(cols);
+  closeModal('rolesConfig');
+  refreshAllStatusSelects();
+  renderPipeline();
+}
+
 // ── WHATSAPP INSTANCES ────────────────────────────────
 let _waInstances = [];
 let _waQrPollers = {};
