@@ -153,6 +153,12 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .uf-picker.open { display:grid;grid-template-columns:repeat(6,1fr);gap:4px; }
 .uf-btn { background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 2px;cursor:pointer;text-align:center;letter-spacing:0.5px; }
 .uf-btn:hover { background:var(--primary)22;border-color:var(--primary);color:var(--primary); }
+.role-row { display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px; }
+.role-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+.role-label { flex:1;font-size:13px;font-weight:600; }
+.role-select { background:var(--mid);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:11px;padding:5px 8px;font-family:'DM Mono',monospace; }
+.role-badge { font-size:9px;font-family:'DM Mono',monospace;letter-spacing:1px;padding:2px 6px;border-radius:4px;font-weight:700; }
+.kpi-role-badge { position:absolute;bottom:8px;left:8px;font-size:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px;padding:2px 5px;border-radius:3px;font-weight:700;opacity:0.85; }
 
 /* Pipeline side panel */
 .pipeline-panel { position:fixed; top:0; right:0; width:370px; height:100vh; background:var(--mid); border-left:1px solid var(--border); z-index:300; transform:translateX(100%); transition:transform 0.25s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.5); }
@@ -573,6 +579,9 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
     <!-- PIPELINE -->
     <div class="page" id="page-pipeline">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button class="btn btn-ghost" style="font-size:12px;gap:6px" onclick="openRolesConfig()">⚙ Configurar Funções das Etapas</button>
+      </div>
       <div class="kpi-row" id="kpiRow"></div>
       <div class="pipe-leads-panel" id="pipeLeadsPanel">
         <div class="pipe-leads-header">
@@ -708,6 +717,24 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
   </div>
 </main>
+
+<!-- MODAL CONFIGURAR FUNÇÕES DO PIPELINE -->
+<div class="modal-overlay" id="modal-rolesConfig" onclick="if(event.target===this)closeModal('rolesConfig')">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">⚙ Funções das Etapas do Pipeline</div>
+      <button class="modal-close" onclick="closeModal('rolesConfig')">✕</button>
+    </div>
+    <div style="padding:4px 0 12px;font-size:12px;color:var(--muted)">
+      Defina qual função cada etapa exerce. A etapa marcada como <strong style="color:var(--green)">Venda</strong> registra automaticamente na aba Vendas quando um lead é movido para ela.
+    </div>
+    <div id="rolesConfigList" style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('rolesConfig')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRolesConfig()">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL NOVO LEAD -->
 <div class="modal-overlay" id="modal-addLead">
@@ -1768,7 +1795,9 @@ function renderPipeline() {
     const val = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
     const isActive = _activeKpiKey === col.key;
     const keyEsc = col.key.replace(/'/g,"\\'");
-    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color}" onclick="selectKpiCol('${keyEsc}')">
+    const roleInfo = ROLE_OPTIONS.find(r => r.value === (col.role||''));
+    const roleBadge = col.role ? `<div class="kpi-role-badge" style="background:${roleInfo?.bg};color:${roleInfo?.color}">${roleInfo?.label}</div>` : '';
+    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color};position:relative" onclick="selectKpiCol('${keyEsc}')">
       <div class="kpi-card-controls" onclick="event.stopPropagation()">
         <button class="kpi-ctrl-btn" onclick="renameKpiCol('${keyEsc}')" title="Renomear">✏</button>
         <button class="kpi-ctrl-btn" onclick="deleteKpiCol('${keyEsc}')" title="Excluir">✕</button>
@@ -1777,6 +1806,7 @@ function renderPipeline() {
       <div class="kpi-count" style="color:${col.color}">${cnt}</div>
       <div class="kpi-pct">${pct}% do total</div>
       ${val > 0 ? `<div class="kpi-value">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>` : ''}
+      ${roleBadge}
     </div>`;
   }).join('') + `<div class="kpi-add-card kpi-card" onclick="addCustomPipelineCol()" title="Nova coluna">
     <div style="font-size:26px;color:var(--muted)">+</div>
@@ -2676,6 +2706,43 @@ async function importFromText(raw) {
   renderPage(currentPage);
   updateBadges();
   alert(`✅ ${count} leads importados com sucesso!`);
+}
+
+// ── PIPELINE ROLES CONFIG ────────────────────────────
+const ROLE_OPTIONS = [
+  { value: '',          label: '— Nenhuma',   color: 'var(--muted)',   bg: 'transparent' },
+  { value: 'proposal',  label: '📋 Proposta', color: '#F5A623',        bg: '#F5A62322' },
+  { value: 'won',       label: '✅ Venda',    color: 'var(--green)',   bg: 'var(--green)22' },
+  { value: 'lost',      label: '❌ Perdido',  color: 'var(--danger)',  bg: 'var(--danger)22' },
+  { value: 'archived',  label: '📁 Arquivado',color: 'var(--muted)',   bg: 'rgba(255,255,255,0.05)' },
+];
+
+function openRolesConfig() {
+  const cols = getPipelineCols();
+  const list = document.getElementById('rolesConfigList');
+  list.innerHTML = cols.map(col => {
+    const roleOpts = ROLE_OPTIONS.map(r =>
+      `<option value="${r.value}" ${(col.role||'') === r.value ? 'selected' : ''}>${r.label}</option>`
+    ).join('');
+    return `<div class="role-row">
+      <div class="role-dot" style="background:${col.color}"></div>
+      <div class="role-label">${col.label}</div>
+      <select class="role-select" data-key="${col.key}">${roleOpts}</select>
+    </div>`;
+  }).join('');
+  openModal('rolesConfig');
+}
+
+function saveRolesConfig() {
+  const cols = getPipelineCols();
+  document.querySelectorAll('#rolesConfigList .role-select').forEach(sel => {
+    const col = cols.find(c => c.key === sel.dataset.key);
+    if (col) col.role = sel.value || undefined;
+  });
+  savePipelineCols(cols);
+  closeModal('rolesConfig');
+  refreshAllStatusSelects();
+  renderPipeline();
 }
 
 // ── INIT ───────────────────────────────────────────────
