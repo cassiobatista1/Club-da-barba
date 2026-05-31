@@ -154,6 +154,27 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .uf-btn { background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 2px;cursor:pointer;text-align:center;letter-spacing:0.5px; }
 .uf-btn:hover { background:var(--primary)22;border-color:var(--primary);color:var(--primary); }
 
+/* WhatsApp Instances */
+.wa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:16px; }
+.wa-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.wa-card-header { display:flex; align-items:center; gap:12px; }
+.wa-avatar { width:44px; height:44px; border-radius:50%; background:var(--primary)22; border:2px solid var(--primary)55; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.wa-name { font-weight:700; font-size:14px; }
+.wa-status { font-size:10px; font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:2px; }
+.wa-status.open { color:var(--green); }
+.wa-status.close { color:var(--muted); }
+.wa-status.connecting { color:var(--gold); }
+.wa-qr { background:#fff; border-radius:8px; padding:8px; display:flex; align-items:center; justify-content:center; min-height:180px; }
+.wa-qr img { width:160px; height:160px; }
+.wa-qr-msg { font-size:11px; color:var(--muted); text-align:center; padding:16px; }
+.wa-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.wa-btn-sm { padding:6px 14px; border-radius:6px; border:none; font-size:11px; font-weight:600; font-family:'DM Mono',monospace; cursor:pointer; letter-spacing:0.5px; }
+.wa-btn-connect { background:var(--green)22; color:var(--green); border:1px solid var(--green)44; }
+.wa-btn-disconnect { background:var(--gold)22; color:var(--gold); border:1px solid var(--gold)44; }
+.wa-btn-delete { background:var(--danger)22; color:var(--danger); border:1px solid var(--danger)44; }
+.wa-add-card { background:var(--card); border:2px dashed var(--border); border-radius:12px; padding:32px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; cursor:pointer; color:var(--muted); transition:all 0.2s; }
+.wa-add-card:hover { border-color:var(--primary); color:var(--primary); }
+
 /* Pipeline side panel */
 .pipeline-panel { position:fixed; top:0; right:0; width:370px; height:100vh; background:var(--mid); border-left:1px solid var(--border); z-index:300; transform:translateX(100%); transition:transform 0.25s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.5); }
 .pipeline-panel.open { transform:translateX(0); }
@@ -443,6 +464,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <div class="nav-item" onclick="nav('relatorios', this)"><span class="icon">📈</span> Relatórios</div>
     <div class="nav-section">Ferramentas</div>
     <div class="nav-item" onclick="nav('disparos', this)"><span class="icon">📲</span> Disparos WA</div>
+    <div class="nav-item" onclick="nav('whatsapp', this)"><span class="icon">📱</span> Contas WA<span class="nav-badge" id="waBadge" style="background:var(--green);display:none">●</span></div>
     <div class="nav-section">Equipe</div>
     <div class="nav-item" onclick="nav('equipe', this)"><span class="icon">🏆</span> Ranking</div>
   </nav>
@@ -692,6 +714,11 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <!-- EQUIPE -->
     <div class="page" id="page-disparos">
       <div id="disparos-root"></div>
+    </div>
+
+    <!-- CONTAS WHATSAPP -->
+    <div class="page" id="page-whatsapp">
+      <div id="wa-root"></div>
     </div>
 
     <div class="page" id="page-equipe">
@@ -990,6 +1017,7 @@ function renderPage(page) {
   else if (page === 'vendas') renderVendas();
   else if (page === 'relatorios') renderRelatorios();
   else if (page === 'disparos') renderDisparos();
+  else if (page === 'whatsapp') renderWaPage();
   else if (page === 'equipe') renderEquipe();
 }
 
@@ -2174,10 +2202,23 @@ function renderDisparos() {
         <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparos WhatsApp</h2>
         <p style="font-size:12px;color:var(--muted);margin-top:4px">Selecione leads, escreva a mensagem e dispare com um clique</p>
       </div>
-      <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-        Iniciar Disparo ${previews.length>0?`(${previews.length})`:''}
-      </button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        ${(() => { const contas = waGetConnectedInstances(); return contas.length > 0
+          ? `<select class="form-select" id="dispWaInstance" style="width:auto;padding:8px 12px;font-size:12px">
+               ${contas.map(n=>`<option value="${n}">📱 ${n}</option>`).join('')}
+             </select>
+             <button class="btn" style="background:var(--green)22;color:var(--green);border:1px solid var(--green)44;gap:8px;padding:10px 22px" onclick="startDisparoAuto()" ${previews.length===0?'disabled':''}>
+               ⚡ Auto-enviar (${previews.length})
+             </button>`
+          : `<div style="font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px">
+               📱 <a onclick="nav('whatsapp',null)" style="cursor:pointer;color:var(--primary)">Conecte uma conta WA</a> para envio automático
+             </div>`
+        })()}
+        <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          Manual ${previews.length>0?`(${previews.length})`:''}
+        </button>
+      </div>
     </div>
 
     <div class="disp-layout">
@@ -2351,6 +2392,45 @@ function insertVar(v) {
   ta.focus();
   dispUpdateTemplate(val);
   dispState.template = val;
+}
+
+async function startDisparoAuto() {
+  const instance = document.getElementById('dispWaInstance')?.value;
+  if (!instance) { alert('Selecione uma conta WhatsApp conectada'); return; }
+  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
+  if (queue.length === 0) return;
+
+  const interval = dispState.interval || 5;
+  const root = document.getElementById('disparos-root');
+
+  dispState.queue = queue;
+  dispState.sent  = new Set();
+
+  for (let i = 0; i < queue.length; i++) {
+    const lead = queue[i];
+    const msg  = applyTemplate(dispState.template, lead);
+    root.innerHTML = `
+      <div style="max-width:480px;margin:40px auto;text-align:center">
+        <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px">⚡ Enviando automaticamente...</h2>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:24px">${i+1} de ${queue.length} — <strong>${lead.nome}</strong></p>
+        <div class="disp-progress-bar" style="margin-bottom:24px"><div class="disp-progress-fill" style="width:${Math.round((i/queue.length)*100)}%"></div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:left;font-size:13px;margin-bottom:16px">${escHtml(msg)}</div>
+        <p style="font-size:11px;color:var(--muted)">Conta: 📱 ${instance} · Próximo em ${interval}s</p>
+      </div>`;
+    try {
+      await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
+      dispState.sent.add(lead.id);
+    } catch(e) { console.warn('Erro ao enviar para', lead.nome, e.message); }
+    if (i < queue.length - 1) await new Promise(r => setTimeout(r, interval * 1000));
+  }
+
+  root.innerHTML = `
+    <div class="disp-panel" style="max-width:480px;margin:40px auto;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🎉</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px">Disparo Automático Concluído!</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">${dispState.sent.size} de ${queue.length} mensagens enviadas via 📱 ${instance}</p>
+      <button class="btn btn-primary" onclick="dispState.step='config';dispState.selected=new Set();renderDisparos()">Novo Disparo</button>
+    </div>`;
 }
 
 function startDisparoQueue() {
@@ -2676,6 +2756,143 @@ async function importFromText(raw) {
   renderPage(currentPage);
   updateBadges();
   alert(`✅ ${count} leads importados com sucesso!`);
+}
+
+// ── WHATSAPP INSTANCES ────────────────────────────────
+let _waInstances = [];
+let _waQrPollers = {};
+
+async function renderWaPage() {
+  const root = document.getElementById('wa-root');
+  root.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <h2 style="font-size:20px;font-weight:800;font-family:'Syne',sans-serif">Contas WhatsApp</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:2px">Gerencie múltiplos números simultaneamente</p>
+      </div>
+      <button class="btn btn-primary" onclick="waAddInstance()">+ Nova Conta</button>
+    </div>
+    <div class="wa-grid" id="waGrid"><div style="color:var(--muted);font-size:13px;padding:24px">Carregando...</div></div>`;
+  await waLoadInstances();
+}
+
+async function waLoadInstances() {
+  try {
+    const data = await api('/api/whatsapp/instances');
+    _waInstances = Array.isArray(data) ? data : [];
+    waRenderGrid();
+    waUpdateNavBadge();
+  } catch(e) {
+    document.getElementById('waGrid').innerHTML = `<div style="color:var(--muted);font-size:13px;padding:24px">Erro ao carregar instâncias: ${e.message}</div>`;
+  }
+}
+
+function waUpdateNavBadge() {
+  const badge = document.getElementById('waBadge');
+  if (!badge) return;
+  const connected = _waInstances.filter(i => (i.connectionStatus || i.instance?.state) === 'open').length;
+  badge.style.display = connected > 0 ? 'inline-flex' : 'none';
+  badge.textContent = connected > 0 ? connected : '';
+}
+
+function waRenderGrid() {
+  const grid = document.getElementById('waGrid');
+  if (!grid) return;
+  let html = _waInstances.map(inst => {
+    const name = inst.instance?.instanceName || inst.instanceName || inst.name || '?';
+    const state = inst.instance?.state || inst.connectionStatus || 'close';
+    const stateLabel = state === 'open' ? '● CONECTADO' : state === 'connecting' ? '◌ CONECTANDO...' : '○ DESCONECTADO';
+    const stateCls = state === 'open' ? 'open' : state === 'connecting' ? 'connecting' : 'close';
+    return `<div class="wa-card" id="waCard-${name}">
+      <div class="wa-card-header">
+        <div class="wa-avatar">📱</div>
+        <div>
+          <div class="wa-name">${name}</div>
+          <div class="wa-status ${stateCls}">${stateLabel}</div>
+        </div>
+      </div>
+      <div id="waQr-${name}">${state === 'open' ? `<div class="wa-qr-msg" style="color:var(--green)">✅ WhatsApp conectado e pronto para uso</div>` : `<div class="wa-qr-msg">Clique em "Conectar" para gerar o QR Code</div>`}</div>
+      <div class="wa-actions">
+        ${state !== 'open' ? `<button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Conectar / QR Code</button>` : ''}
+        ${state === 'open' ? `<button class="wa-btn-sm wa-btn-disconnect" onclick="waDisconnect('${name}')">⏏ Desconectar</button>` : ''}
+        <button class="wa-btn-sm wa-btn-delete" onclick="waDelete('${name}')">🗑 Remover</button>
+      </div>
+    </div>`;
+  }).join('');
+  html += `<div class="wa-add-card" onclick="waAddInstance()">
+    <div style="font-size:32px">➕</div>
+    <div style="font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px">NOVA CONTA</div>
+  </div>`;
+  grid.innerHTML = html;
+}
+
+async function waAddInstance() {
+  const name = prompt('Nome para esta conta (ex: Vendas01, Suporte, Cassio):');
+  if (!name?.trim()) return;
+  try {
+    const res = await api('/api/whatsapp/instances', 'POST', { name: name.trim() });
+    if (res.error) { alert('Erro: ' + res.error); return; }
+    await waLoadInstances();
+    setTimeout(() => waConnect(name.trim()), 500);
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function waConnect(name) {
+  const qrEl = document.getElementById(`waQr-${name}`);
+  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando QR Code...</div>`;
+  try {
+    const res = await api(`/api/whatsapp/instances/${name}?action=qrcode`);
+    if (res.base64) {
+      const src = res.base64.startsWith('data:') ? res.base64 : `data:image/png;base64,${res.base64}`;
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr"><img src="${src}" alt="QR Code"/></div>
+        <div style="font-size:11px;color:var(--muted);text-align:center">Abra o WhatsApp → Dispositivos conectados → Conectar dispositivo</div>`;
+      waStartPolling(name);
+    } else if (res.instance?.state === 'open') {
+      await waLoadInstances();
+    } else {
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⚠ Sem QR Code. Tente novamente.</div>`;
+    }
+  } catch(e) {
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${e.message}</div>`;
+  }
+}
+
+function waStartPolling(name) {
+  if (_waQrPollers[name]) clearInterval(_waQrPollers[name]);
+  let tries = 0;
+  _waQrPollers[name] = setInterval(async () => {
+    tries++;
+    if (tries > 30) { clearInterval(_waQrPollers[name]); return; }
+    try {
+      const res = await api(`/api/whatsapp/instances/${name}?action=status`);
+      const state = res.instance?.state || res.state;
+      if (state === 'open') {
+        clearInterval(_waQrPollers[name]);
+        await waLoadInstances();
+      }
+    } catch(e) {}
+  }, 4000);
+}
+
+async function waDisconnect(name) {
+  if (!confirm(`Desconectar a conta "${name}"?`)) return;
+  try {
+    await api(`/api/whatsapp/instances/${name}?action=disconnect`);
+    await waLoadInstances();
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function waDelete(name) {
+  if (!confirm(`Remover a conta "${name}" permanentemente?`)) return;
+  try {
+    await api(`/api/whatsapp/instances?name=${encodeURIComponent(name)}`, 'DELETE');
+    await waLoadInstances();
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+function waGetConnectedInstances() {
+  return _waInstances.filter(i => (i.instance?.state || i.connectionStatus) === 'open')
+    .map(i => i.instance?.instanceName || i.instanceName || i.name);
 }
 
 // ── INIT ───────────────────────────────────────────────
