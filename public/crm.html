@@ -153,12 +153,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .uf-picker.open { display:grid;grid-template-columns:repeat(6,1fr);gap:4px; }
 .uf-btn { background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:5px 2px;cursor:pointer;text-align:center;letter-spacing:0.5px; }
 .uf-btn:hover { background:var(--primary)22;border-color:var(--primary);color:var(--primary); }
-.role-row { display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px; }
-.role-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
-.role-label { flex:1;font-size:13px;font-weight:600; }
-.role-select { background:var(--mid);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:11px;padding:5px 8px;font-family:'DM Mono',monospace; }
-.role-badge { font-size:9px;font-family:'DM Mono',monospace;letter-spacing:1px;padding:2px 6px;border-radius:4px;font-weight:700; }
-.kpi-role-badge { position:absolute;bottom:8px;left:8px;font-size:8px;font-family:'DM Mono',monospace;letter-spacing:0.5px;padding:2px 5px;border-radius:3px;font-weight:700;opacity:0.85; }
 
 /* WhatsApp Instances */
 .wa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:16px; }
@@ -447,6 +441,22 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-summary-title { font-size:20px; font-weight:700; }
 .disp-summary-sub { font-size:13px; color:var(--muted); }
 @media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
+
+/* ── Follow-up multi-select ── */
+.fu-item-chk { width:18px;height:18px;border-radius:5px;border:2px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;transition:all 0.15s;appearance:none;-webkit-appearance:none; }
+.fu-item-chk:checked { background:var(--primary);border-color:var(--primary); }
+.fu-item-chk:checked::after { content:'✓';display:block;color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:14px; }
+.follow-item.fu-checked { background:rgba(204,0,0,0.07);border-radius:8px;margin:0 -4px;padding-left:8px;padding-right:8px; }
+.fu-bulk-bar { display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(204,0,0,0.08);border-top:2px solid rgba(204,0,0,0.2);flex-wrap:wrap; }
+.fu-bulk-count { font-size:12px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace;white-space:nowrap; }
+
+/* ── Disparos saved templates ── */
+.disp-tpl-list { display:flex;flex-wrap:wrap;gap:6px; }
+.disp-tpl-chip { display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;transition:all 0.15s;max-width:200px; }
+.disp-tpl-chip:hover { background:rgba(204,0,0,0.1);border-color:rgba(204,0,0,0.3); }
+.disp-tpl-chip .tpl-name { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.disp-tpl-del { font-size:13px;color:var(--muted);line-height:1;flex-shrink:0;opacity:0.5;padding:0 2px; }
+.disp-tpl-del:hover { opacity:1;color:var(--red); }
 </style>
 </head>
 <body>
@@ -601,9 +611,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
     <!-- PIPELINE -->
     <div class="page" id="page-pipeline">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-        <button class="btn btn-ghost" style="font-size:12px;gap:6px" onclick="openRolesConfig()">⚙ Configurar Funções das Etapas</button>
-      </div>
       <div class="kpi-row" id="kpiRow"></div>
       <div class="pipe-leads-panel" id="pipeLeadsPanel">
         <div class="pipe-leads-header">
@@ -675,7 +682,19 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <div class="stat-card"><div class="stat-label">Hoje</div><div class="stat-value gold" id="fuHoje">0</div></div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Lista de Follow-ups</span></div>
+        <div class="card-header">
+          <span class="card-title">Lista de Follow-ups</span>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px" id="fuSelectBtn" onclick="fuToggleSelectMode()">☑ Selecionar</button>
+        </div>
+        <div id="fuBulkBar" style="display:none" class="fu-bulk-bar">
+          <span class="fu-bulk-count" id="fuBulkCount">0 selecionados</span>
+          <select class="form-select" id="fuBulkStatus" style="font-size:11px;padding:5px 10px;width:auto;flex:1;min-width:140px">
+            <option value="">— Novo status —</option>
+            ${getPipelineCols ? getPipelineCols().map(c=>`<option value="${c.key}">${c.label||c.key}</option>`).join('') : ''}
+          </select>
+          <button class="btn btn-primary" style="font-size:11px;padding:6px 14px" onclick="fuBulkChangeStatus()">Alterar</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:6px 12px" onclick="fuClearSelection()">✕</button>
+        </div>
         <div class="card-body" id="followList"></div>
       </div>
     </div>
@@ -691,7 +710,10 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="card">
         <div class="card-header">
           <span class="card-title">Vendas por Mês</span>
-          <button class="btn btn-green" onclick="openModal('addVenda')">+ Registrar Venda</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn" style="border-color:var(--muted);color:var(--muted);font-size:12px" onclick="syncWonLeadsToVendas()">⟳ Sincronizar Pipeline</button>
+            <button class="btn btn-green" onclick="openModal('addVenda')">+ Registrar Venda</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
@@ -744,24 +766,6 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
   </div>
 </main>
-
-<!-- MODAL CONFIGURAR FUNÇÕES DO PIPELINE -->
-<div class="modal-overlay" id="modal-rolesConfig" onclick="if(event.target===this)closeModal('rolesConfig')">
-  <div class="modal" style="max-width:520px">
-    <div class="modal-header">
-      <div class="modal-title">⚙ Funções das Etapas do Pipeline</div>
-      <button class="modal-close" onclick="closeModal('rolesConfig')">✕</button>
-    </div>
-    <div style="padding:4px 0 12px;font-size:12px;color:var(--muted)">
-      Defina qual função cada etapa exerce. A etapa marcada como <strong style="color:var(--green)">Venda</strong> registra automaticamente na aba Vendas quando um lead é movido para ela.
-    </div>
-    <div id="rolesConfigList" style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-      <button class="btn btn-ghost" onclick="closeModal('rolesConfig')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveRolesConfig()">Salvar</button>
-    </div>
-  </div>
-</div>
 
 <!-- MODAL NOVO LEAD -->
 <div class="modal-overlay" id="modal-addLead">
@@ -1823,9 +1827,7 @@ function renderPipeline() {
     const val = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
     const isActive = _activeKpiKey === col.key;
     const keyEsc = col.key.replace(/'/g,"\\'");
-    const roleInfo = ROLE_OPTIONS.find(r => r.value === (col.role||''));
-    const roleBadge = col.role ? `<div class="kpi-role-badge" style="background:${roleInfo?.bg};color:${roleInfo?.color}">${roleInfo?.label}</div>` : '';
-    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color};position:relative" onclick="selectKpiCol('${keyEsc}')">
+    return `<div class="kpi-card${isActive ? ' active' : ''}" style="--kpi-color:${col.color}" onclick="selectKpiCol('${keyEsc}')">
       <div class="kpi-card-controls" onclick="event.stopPropagation()">
         <button class="kpi-ctrl-btn" onclick="renameKpiCol('${keyEsc}')" title="Renomear">✏</button>
         <button class="kpi-ctrl-btn" onclick="deleteKpiCol('${keyEsc}')" title="Excluir">✕</button>
@@ -1834,7 +1836,6 @@ function renderPipeline() {
       <div class="kpi-count" style="color:${col.color}">${cnt}</div>
       <div class="kpi-pct">${pct}% do total</div>
       ${val > 0 ? `<div class="kpi-value">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>` : ''}
-      ${roleBadge}
     </div>`;
   }).join('') + `<div class="kpi-add-card kpi-card" onclick="addCustomPipelineCol()" title="Nova coluna">
     <div style="font-size:26px;color:var(--muted)">+</div>
@@ -2027,6 +2028,60 @@ function openCalendarFromPanel() {
 }
 
 // ── RENDER FOLLOWUP ───────────────────────────────────
+let fuSelectMode = false;
+let fuSelected = new Set();
+
+function fuToggleSelectMode() {
+  fuSelectMode = !fuSelectMode;
+  fuSelected.clear();
+  const btn = document.getElementById('fuSelectBtn');
+  if (btn) btn.textContent = fuSelectMode ? '✕ Cancelar' : '☑ Selecionar';
+  const bar = document.getElementById('fuBulkBar');
+  if (bar) bar.style.display = fuSelectMode ? 'flex' : 'none';
+  renderFollowup();
+}
+
+function fuToggleItem(id) {
+  if (fuSelected.has(id)) fuSelected.delete(id);
+  else fuSelected.add(id);
+  const count = fuSelected.size;
+  const el = document.getElementById('fuBulkCount');
+  if (el) el.textContent = `${count} selecionado${count !== 1 ? 's' : ''}`;
+  // toggle highlight only — no full re-render
+  const row = document.querySelector(`[data-fu-id="${id}"]`);
+  if (row) row.classList.toggle('fu-checked', fuSelected.has(id));
+  const chk = document.querySelector(`[data-fu-chk="${id}"]`);
+  if (chk) chk.checked = fuSelected.has(id);
+}
+
+function fuClearSelection() {
+  fuSelectMode = false;
+  fuSelected.clear();
+  const btn = document.getElementById('fuSelectBtn');
+  if (btn) btn.textContent = '☑ Selecionar';
+  const bar = document.getElementById('fuBulkBar');
+  if (bar) bar.style.display = 'none';
+  renderFollowup();
+}
+
+async function fuBulkChangeStatus() {
+  const newStatus = document.getElementById('fuBulkStatus')?.value;
+  if (!newStatus) { alert('Selecione um status'); return; }
+  const ids = [...fuSelected];
+  if (ids.length === 0) return;
+  for (const id of ids) {
+    const idx = leads.findIndex(l => l.id === id);
+    if (idx < 0) continue;
+    const lead = leads[idx];
+    autoVendaIfWon(lead, newStatus);
+    const updated = await api(`/api/leads/${id}`, 'PUT', { status: newStatus });
+    if (updated) leads[idx] = { ...lead, ...updated };
+  }
+  fuClearSelection();
+  updateBadges();
+  renderFollowup();
+}
+
 function renderFollowup() {
   const today = new Date(); today.setHours(0,0,0,0);
   const withFollow = leads.filter(l => l.followup && !isTerminal(l.status))
@@ -2041,6 +2096,21 @@ function renderFollowup() {
   document.getElementById('fuUrgente').textContent = urgente;
   document.getElementById('fuHoje').textContent = hoje;
 
+  // keep bulk bar in sync with select mode
+  const bar = document.getElementById('fuBulkBar');
+  if (bar) {
+    bar.style.display = fuSelectMode ? 'flex' : 'none';
+    // re-populate status options dynamically
+    const sel = document.getElementById('fuBulkStatus');
+    if (sel && sel.options.length <= 1) {
+      getPipelineCols().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.key; opt.textContent = c.label || c.key;
+        sel.appendChild(opt);
+      });
+    }
+  }
+
   const el = document.getElementById('followList');
   if (withFollow.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><h3>Nenhum follow-up pendente!</h3></div>';
@@ -2048,16 +2118,20 @@ function renderFollowup() {
   }
   el.innerHTML = withFollow.map(l => {
     const fs = followStatus(l.followup);
-    return `<div class="follow-item">
-      <div class="follow-avatar">${l.nome[0]}</div>
-      <div class="follow-info">
+    const checked = fuSelected.has(l.id);
+    return `<div class="follow-item${checked ? ' fu-checked' : ''}" data-fu-id="${l.id}" onclick="${fuSelectMode ? `fuToggleItem(${l.id})` : ''}">
+      ${fuSelectMode
+        ? `<input type="checkbox" class="fu-item-chk" data-fu-chk="${l.id}" ${checked ? 'checked' : ''} onclick="event.stopPropagation();fuToggleItem(${l.id})">`
+        : `<div class="follow-avatar">${l.nome[0]}</div>`
+      }
+      <div class="follow-info" style="cursor:${fuSelectMode ? 'pointer' : 'default'}">
         <div class="follow-name">${l.nome}</div>
-        <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${l.status}</div>
+        <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${getColLabel(l.status)||l.status}</div>
         ${l.obs ? `<div class="follow-detail" style="margin-top:2px;font-style:italic">${l.obs.slice(0,60)}${l.obs.length>60?'...':''}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div class="follow-time ${fs.cls}">${fs.text}</div>
-        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button>
+        ${!fuSelectMode ? `<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -2182,6 +2256,35 @@ function renderRelatorios() {
 
 // ── RENDER DISPAROS ───────────────────────────────────
 let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5 };
+let dispTemplates = [];
+
+function initDispTemplates() {
+  try { dispTemplates = JSON.parse(localStorage.getItem('dispTemplates') || '[]'); } catch { dispTemplates = []; }
+}
+
+function saveDispTemplate() {
+  const ta = document.getElementById('dispTemplate');
+  const body = (ta ? ta.value : dispState.template).trim();
+  if (!body) { alert('Escreva uma mensagem antes de salvar o modelo'); return; }
+  const name = prompt('Nome do modelo:');
+  if (!name?.trim()) return;
+  dispTemplates.push({ id: Date.now(), name: name.trim(), body });
+  localStorage.setItem('dispTemplates', JSON.stringify(dispTemplates));
+  renderDisparos();
+}
+
+function loadDispTemplate(id) {
+  const tpl = dispTemplates.find(t => t.id === id);
+  if (!tpl) return;
+  dispState.template = tpl.body;
+  renderDisparos();
+}
+
+function deleteDispTemplate(id) {
+  dispTemplates = dispTemplates.filter(t => t.id !== id);
+  localStorage.setItem('dispTemplates', JSON.stringify(dispTemplates));
+  renderDisparos();
+}
 
 function renderDisparos() {
   const root = document.getElementById('disparos-root');
@@ -2308,7 +2411,19 @@ function renderDisparos() {
         <div class="disp-panel">
           <div class="disp-panel-header">
             <span class="disp-panel-title">Mensagem Template</span>
+            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="saveDispTemplate()">+ Salvar modelo</button>
           </div>
+          ${dispTemplates.length > 0 ? `
+          <div style="padding:12px 18px;border-bottom:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace">Modelos salvos</div>
+            <div class="disp-tpl-list">
+              ${dispTemplates.map(t => `
+                <div class="disp-tpl-chip" onclick="loadDispTemplate(${t.id})" title="${escHtml(t.body.slice(0,100))}">
+                  <span class="tpl-name">${escHtml(t.name)}</span>
+                  <span class="disp-tpl-del" onclick="event.stopPropagation();deleteDispTemplate(${t.id})" title="Excluir">×</span>
+                </div>`).join('')}
+            </div>
+          </div>` : ''}
           <div class="disp-template-area">
             <div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Clique para inserir variável:</div>
@@ -2466,10 +2581,11 @@ async function startDisparoAuto() {
 function startDisparoQueue() {
   const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
   if (queue.length === 0) return;
-  dispState.queue   = queue;
-  dispState.current = 0;
-  dispState.sent    = new Set();
-  dispState.step    = 'queue';
+  dispState.queue    = queue;
+  dispState.current  = 0;
+  dispState.sent     = new Set();
+  dispState.step     = 'queue';
+  dispState.instance = document.getElementById('dispWaInstance')?.value || '';
   renderDisparoQueue();
 }
 
@@ -2502,13 +2618,26 @@ function renderDisparoQueue() {
     return;
   }
 
+  const connectedInstances = waGetConnectedInstances();
+
   root.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
       <div>
         <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparando...</h2>
         <p style="font-size:12px;color:var(--muted);margin-top:4px">${done} de ${total} mensagens enviadas</p>
       </div>
-      <button class="btn btn-ghost" onclick="if(dispAutoTimer)clearTimeout(dispAutoTimer);dispState.step='config';renderDisparos()">← Voltar</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        ${connectedInstances.length > 0
+          ? `<div style="display:flex;align-items:center;gap:8px;background:rgba(0,200,122,0.08);border:1px solid rgba(0,200,122,0.2);border-radius:8px;padding:6px 12px">
+               <span style="font-size:11px;color:var(--muted)">📱 Conta:</span>
+               <select id="queueWaInstance" style="background:transparent;border:none;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;outline:none" onchange="dispState.instance=this.value">
+                 ${connectedInstances.map(n=>`<option value="${n}" ${dispState.instance===n?'selected':''}>${n}</option>`).join('')}
+               </select>
+             </div>`
+          : `<span style="font-size:11px;color:var(--gold);background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px">⚠️ Nenhuma conta WA conectada</span>`
+        }
+        <button class="btn btn-ghost" onclick="if(dispAutoTimer)clearTimeout(dispAutoTimer);dispState.step='config';renderDisparos()">← Voltar</button>
+      </div>
     </div>
 
     <div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
@@ -2541,10 +2670,12 @@ function renderDisparoQueue() {
         <div class="disp-queue-actions">
           ${isSent
             ? `<span class="disp-sent-badge">✓ Enviado</span>`
-            : `<a href="${waUrl}" target="_blank" class="btn btn-primary" style="gap:8px;text-decoration:none" onclick="markDisparoSent(${lead.id})">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Abrir WhatsApp
-              </a>`
+            : connectedInstances.length > 0
+              ? `<button class="btn btn-primary" style="gap:8px" onclick="dispSendViaApi(${lead.id})">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Enviar agora
+                </button>`
+              : `<span style="font-size:11px;color:var(--gold)">Conecte uma conta WA para enviar</span>`
           }
           <div class="disp-nav-btns">
             <button class="btn btn-ghost" style="padding:8px 14px" ${cur===0?'disabled':''} onclick="dispNav(-1)">← Ant.</button>
@@ -2595,6 +2726,26 @@ function dispNav(dir) {
 }
 
 function dispGoto(i) { dispState.current = i; renderDisparoQueue(); }
+
+async function dispSendViaApi(leadId) {
+  const lead = dispState.queue.find(l => l.id === leadId);
+  if (!lead) return;
+  // always read the live dropdown in case user changed it
+  const sel = document.getElementById('queueWaInstance');
+  const instance = (sel ? sel.value : dispState.instance) || dispState.instance;
+  if (!instance) { alert('Selecione uma conta WhatsApp conectada'); return; }
+  dispState.instance = instance;
+  const msg = applyTemplate(dispState.template, lead);
+  const btn = document.querySelector(`[onclick="dispSendViaApi(${leadId})"]`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+  try {
+    await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
+    markDisparoSent(leadId);
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
+    alert('Erro ao enviar: ' + (e.message || 'tente novamente'));
+  }
+}
 
 // ── RENDER EQUIPE ─────────────────────────────────────
 function renderEquipe() {
@@ -2823,6 +2974,47 @@ function saveRolesConfig() {
   closeModal('rolesConfig');
   refreshAllStatusSelects();
   renderPipeline();
+  syncWonLeadsToVendas();
+}
+
+async function syncWonLeadsToVendas() {
+  const wonKeys = getColsByRole('won');
+  if (wonKeys.length === 0) return;
+  const wonLeads = leads.filter(l => wonKeys.includes(l.status));
+  if (wonLeads.length === 0) return;
+  const existingClients = new Set(vendas.map(v => (v.cliente||'').toLowerCase().trim()));
+  const missing = wonLeads.filter(l => !existingClients.has((l.nome||'').toLowerCase().trim()));
+  if (missing.length === 0) return;
+  const confirmed = confirm(
+    `${missing.length} lead${missing.length > 1 ? 's estão' : ' está'} na coluna de Venda mas não ${missing.length > 1 ? 'foram registrados' : 'foi registrado'} em Vendas.\n\nDeseja registrá-los agora?`
+  );
+  if (!confirmed) return;
+  let count = 0;
+  for (const lead of missing) {
+    try {
+      const v = await api('/api/vendas', 'POST', {
+        cliente: lead.nome,
+        data:    new Date().toISOString().split('T')[0],
+        carro:   lead.carro  || '',
+        plano:   'Completo',
+        valor:   lead.valor  || 0,
+        origem:  lead.origem || 'Outros',
+        exec:    lead.exec   || 'Cássio',
+      });
+      if (v && v.id) { vendas.unshift(v); count++; }
+    } catch {}
+  }
+  if (count > 0) {
+    renderVendas();
+    const now = new Date();
+    const vendasMes = vendas.filter(v => {
+      const d = new Date(v.data);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const el = document.getElementById('statVendas');
+    if (el) el.textContent = vendasMes.length;
+    alert(`${count} venda${count > 1 ? 's registradas' : ' registrada'} com sucesso!`);
+  }
 }
 
 // ── WHATSAPP INSTANCES ────────────────────────────────
@@ -2964,6 +3156,7 @@ function waGetConnectedInstances() {
 
 // ── INIT ───────────────────────────────────────────────
 document.getElementById('leadFollowup').value = new Date().toISOString().split('T')[0];
+initDispTemplates();
 loadData();
 </script>
 <div class="uf-picker" id="ufPicker"></div>
