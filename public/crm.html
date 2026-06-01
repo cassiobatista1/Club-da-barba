@@ -442,7 +442,27 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-summary-sub { font-size:13px; color:var(--muted); }
 @media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
 
-/* ── Abas por conta WA ── */
+/* ── Disparos — bloqueio de segurança de conta ── */
+.disp-steps { display:flex;gap:0;margin-bottom:20px;border-radius:12px;overflow:hidden;border:1px solid var(--border); }
+.disp-step { flex:1;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;background:var(--card);border-right:1px solid var(--border);transition:all 0.2s; }
+.disp-step:last-child { border-right:none; }
+.disp-step.done { background:rgba(0,200,122,0.06); }
+.disp-step.active { background:rgba(204,0,0,0.08); }
+.disp-step-num { width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:rgba(255,255,255,0.08);color:var(--muted);flex-shrink:0; }
+.disp-step.done .disp-step-num { background:var(--green);color:#fff; }
+.disp-step.active .disp-step-num { background:var(--primary);color:#fff; }
+.disp-step-label { flex:1; }
+.disp-step-sub { font-size:9px;font-weight:400;color:var(--muted);margin-top:1px; }
+.disp-account-banner { border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
+.disp-account-banner.locked { background:rgba(245,166,35,0.07);border:2px dashed rgba(245,166,35,0.35); }
+.disp-account-banner.confirmed { background:rgba(0,200,122,0.07);border:2px solid rgba(0,200,122,0.35); }
+.disp-lock-icon { font-size:28px;flex-shrink:0; }
+.btn-confirm-account { background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px; }
+.btn-confirm-account:hover { background:#00a866; }
+.btn-change-account { background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;transition:all 0.15s; }
+.btn-change-account:hover { border-color:var(--primary);color:var(--primary); }
+.disp-send-locked { opacity:0.35;pointer-events:none;cursor:not-allowed; }
+</style>
 .wa-tabs { display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px; }
 .wa-tab { display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all 0.15s;user-select:none;white-space:nowrap; }
 .wa-tab:hover { border-color:rgba(204,0,0,0.4);color:var(--text); }
@@ -2335,7 +2355,22 @@ function renderRelatorios() {
 }
 
 // ── RENDER DISPAROS ───────────────────────────────────
-let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5 };
+let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '' };
+
+function confirmDispAccount() {
+  const sel = document.getElementById('dispWaInstance');
+  const inst = sel ? sel.value : '';
+  if (!inst) { alert('Selecione uma conta WhatsApp'); return; }
+  dispState.instanceConfirmed = true;
+  dispState.confirmedInstance = inst;
+  renderDisparos();
+}
+
+function changeDispAccount() {
+  dispState.instanceConfirmed = false;
+  dispState.confirmedInstance = '';
+  renderDisparos();
+}
 let dispTemplates = [];
 
 function initDispTemplates() {
@@ -2409,52 +2444,108 @@ function renderDisparos() {
         </div>`;
       }).join('');
 
+  const contas = waGetConnectedInstances();
+  const confirmed = dispState.instanceConfirmed && dispState.confirmedInstance;
+  const hasLeads = previews.length > 0;
+  const hasTemplate = template.trim().length > 0;
+  const canSend = confirmed && hasLeads && hasTemplate;
+
+  // Step indicators
+  const step1done = confirmed;
+  const step2done = hasLeads;
+  const step3done = hasTemplate;
+
   root.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-      <div>
-        <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">📲 Disparos WhatsApp</h2>
-        <p style="font-size:12px;color:var(--muted);margin-top:4px">Selecione leads, escreva a mensagem e dispare com um clique</p>
+    <div style="margin-bottom:20px">
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px">📲 Disparos WhatsApp</h2>
+      <p style="font-size:12px;color:var(--muted)">Siga as 3 etapas abaixo para disparar com segurança</p>
+    </div>
+
+    <!-- ETAPAS -->
+    <div class="disp-steps">
+      <div class="disp-step ${step1done?'done':'active'}">
+        <div class="disp-step-num">${step1done?'✓':'1'}</div>
+        <div class="disp-step-label">
+          <div>Conta WA</div>
+          <div class="disp-step-sub">${step1done ? `📱 ${dispState.confirmedInstance}` : 'Nenhuma confirmada'}</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        ${(() => { const contas = waGetConnectedInstances(); return contas.length > 0
-          ? `<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
-               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                 <select class="form-select" id="dispWaInstance" style="width:auto;padding:8px 12px;font-size:12px">
-                   ${contas.map(n=>`<option value="${n}">📱 ${n}</option>`).join('')}
-                 </select>
-                 <button class="btn" style="background:var(--green)22;color:var(--green);border:1px solid var(--green)44;gap:8px;padding:10px 22px" onclick="startDisparoAuto()" ${previews.length===0?'disabled':''}>
-                   ⚡ Auto-enviar (${previews.length})
-                 </button>
-                 <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-                   Manual ${previews.length>0?`(${previews.length})`:''}
-                 </button>
-               </div>
-               <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;flex-wrap:wrap">
-                 <span>⏱ Intervalo entre envios:</span>
-                 <select class="form-select" id="dispIntervalMode" style="width:auto;padding:4px 8px;font-size:11px;background:transparent;border-color:rgba(245,166,35,0.3)" onchange="dispState.intervalMode=this.value">
-                   <option value="30"  ${(dispState.intervalMode||'rand1')==='30'   ?'selected':''}>30 seg</option>
-                   <option value="60"  ${(dispState.intervalMode||'rand1')==='60'   ?'selected':''}>1 minuto</option>
-                   <option value="120" ${(dispState.intervalMode||'rand1')==='120'  ?'selected':''}>2 minutos</option>
-                   <option value="300" ${(dispState.intervalMode||'rand1')==='300'  ?'selected':''}>5 minutos</option>
-                   <option value="rand1" ${(dispState.intervalMode||'rand1')==='rand1'?'selected':''}>🎲 Aleatório 30s–90s (recomendado)</option>
-                   <option value="rand2" ${(dispState.intervalMode||'rand1')==='rand2'?'selected':''}>🎲 Aleatório 1–3 min (mais seguro)</option>
-                 </select>
-                 <span style="color:var(--gold)">⚠️ Menos de 30s pode gerar bloqueio</span>
-               </div>
-             </div>`
-          : `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-               <div style="font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px">
-                 📱 <a onclick="nav('whatsapp',null)" style="cursor:pointer;color:var(--primary)">Conecte uma conta WA</a> para envio automático
-               </div>
-               <button class="btn btn-primary" style="gap:8px;padding:10px 22px" onclick="startDisparoQueue()" ${previews.length===0?'disabled':''}>
-                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-                 Manual ${previews.length>0?`(${previews.length})`:''}
-               </button>
-             </div>`
-        })()}
+      <div class="disp-step ${step2done?'done':step1done?'active':''}">
+        <div class="disp-step-num">${step2done?'✓':'2'}</div>
+        <div class="disp-step-label">
+          <div>Leads</div>
+          <div class="disp-step-sub">${step2done ? `${previews.length} selecionado${previews.length!==1?'s':''}` : 'Nenhum selecionado'}</div>
+        </div>
+      </div>
+      <div class="disp-step ${step3done?'done':step2done?'active':''}">
+        <div class="disp-step-num">${step3done?'✓':'3'}</div>
+        <div class="disp-step-label">
+          <div>Mensagem</div>
+          <div class="disp-step-sub">${step3done ? `${template.length} caracteres` : 'Não preenchida'}</div>
+        </div>
       </div>
     </div>
+
+    <!-- BANNER DE CONTA -->
+    ${contas.length > 0 ? `
+    <div class="disp-account-banner ${confirmed?'confirmed':'locked'}">
+      <div class="disp-lock-icon">${confirmed ? '🔒' : '🔓'}</div>
+      <div style="flex:1;min-width:200px">
+        ${confirmed
+          ? `<div style="font-size:14px;font-weight:700;color:var(--green)">Conta confirmada para envio</div>
+             <div style="font-size:13px;margin-top:4px">📱 <strong>${dispState.confirmedInstance}</strong></div>`
+          : `<div style="font-size:14px;font-weight:700;color:var(--gold)">⚠️ Confirme a conta antes de disparar</div>
+             <div style="font-size:12px;color:var(--muted);margin-top:4px">Selecione o número abaixo e confirme para liberar os botões de envio</div>`
+        }
+      </div>
+      ${confirmed
+        ? `<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+               <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;flex-wrap:wrap">
+                 <span>⏱</span>
+                 <select class="form-select" id="dispIntervalMode" style="width:auto;padding:4px 8px;font-size:11px;background:transparent;border-color:rgba(245,166,35,0.3)" onchange="dispState.intervalMode=this.value">
+                   <option value="30"   ${(dispState.intervalMode||'rand1')==='30'   ?'selected':''}>30 seg</option>
+                   <option value="60"   ${(dispState.intervalMode||'rand1')==='60'   ?'selected':''}>1 minuto</option>
+                   <option value="120"  ${(dispState.intervalMode||'rand1')==='120'  ?'selected':''}>2 minutos</option>
+                   <option value="300"  ${(dispState.intervalMode||'rand1')==='300'  ?'selected':''}>5 minutos</option>
+                   <option value="rand1" ${(dispState.intervalMode||'rand1')==='rand1'?'selected':''}>🎲 Aleatório 30–90s</option>
+                   <option value="rand2" ${(dispState.intervalMode||'rand1')==='rand2'?'selected':''}>🎲 Aleatório 1–3 min</option>
+                 </select>
+               </div>
+             </div>
+             <div style="display:flex;align-items:center;gap:8px">
+               <button class="btn-change-account" onclick="changeDispAccount()">🔄 Trocar conta</button>
+               <button class="btn" style="background:var(--green)22;color:var(--green);border:1px solid var(--green)44;gap:8px;padding:10px 22px${canSend?'':';opacity:.4;pointer-events:none'}" onclick="startDisparoAuto()" ${canSend?'':'disabled'}>
+                 ⚡ Auto-enviar (${previews.length})
+               </button>
+               <button class="btn btn-primary" style="gap:8px;padding:10px 22px${canSend?'':';opacity:.4;pointer-events:none'}" onclick="startDisparoQueue()" ${canSend?'':'disabled'}>
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                 Manual (${previews.length})
+               </button>
+             </div>
+           </div>`
+        : `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+             <select class="form-select" id="dispWaInstance" style="width:auto;padding:8px 14px;font-size:13px;font-weight:600">
+               ${contas.map(n=>`<option value="${n}">📱 ${n}</option>`).join('')}
+             </select>
+             <button class="btn-confirm-account" onclick="confirmDispAccount()">
+               🔒 Confirmar esta conta
+             </button>
+           </div>`
+      }
+    </div>` : `
+    <div class="disp-account-banner locked">
+      <div class="disp-lock-icon">📵</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--muted)">Nenhuma conta WA conectada</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">
+          <a onclick="nav('whatsapp',null)" style="cursor:pointer;color:var(--primary)">Conectar conta WhatsApp</a> antes de disparar
+        </div>
+      </div>
+    </div>`}
+    ${!confirmed && contas.length > 0 ? `<div style="background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:12px;color:var(--gold);display:flex;align-items:center;gap:8px">
+      🔒 Os botões de envio ficam bloqueados até você confirmar a conta — isso evita disparar pelo número errado acidentalmente.
+    </div>` : ''}
 
     <div class="disp-layout">
       <!-- COLUNA LEADS -->
@@ -2658,8 +2749,11 @@ let _autoStopFlag = false;
 function stopDisparoAuto() { _autoStopFlag = true; }
 
 async function startDisparoAuto() {
-  const instance = document.getElementById('dispWaInstance')?.value;
-  if (!instance) { alert('Selecione uma conta WhatsApp conectada'); return; }
+  if (!dispState.instanceConfirmed || !dispState.confirmedInstance) {
+    alert('⚠️ Confirme a conta WhatsApp antes de disparar');
+    return;
+  }
+  const instance = dispState.confirmedInstance;
   const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
   if (queue.length === 0) return;
 
@@ -2759,13 +2853,17 @@ async function startDisparoAuto() {
 }
 
 function startDisparoQueue() {
+  if (!dispState.instanceConfirmed || !dispState.confirmedInstance) {
+    alert('⚠️ Confirme a conta WhatsApp antes de disparar');
+    return;
+  }
   const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
   if (queue.length === 0) return;
   dispState.queue    = queue;
   dispState.current  = 0;
   dispState.sent     = new Set();
   dispState.step     = 'queue';
-  dispState.instance = document.getElementById('dispWaInstance')?.value || '';
+  dispState.instance = dispState.confirmedInstance;
   renderDisparoQueue();
 }
 
