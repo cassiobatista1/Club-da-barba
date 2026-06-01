@@ -999,6 +999,19 @@ let vendas = [];
 let contaWaMap = {}; // { leadId: instanceName } — persistido em settings
 let activeWaTab = ''; // '' = Todos
 
+// Paleta fixa — cada conta WA recebe uma cor estável pelo índice
+const WA_PALETTE = ['#5A78FF','#F5A623','#00C87A','#FF6B6B','#54D9F3','#C084FC','#FF8C42','#4ECDC4'];
+function getWaColor(instance) {
+  if (!instance) return '#888';
+  const idx = getWaTabInstances().indexOf(instance);
+  return idx >= 0 ? WA_PALETTE[idx % WA_PALETTE.length] : WA_PALETTE[0];
+}
+function waBadgeHtml(instance, extraStyle) {
+  if (!instance) return '';
+  const c = getWaColor(instance);
+  return `<span style="font-size:9px;color:${c};background:${c}18;border:1px solid ${c}44;border-radius:10px;padding:1px 7px;font-family:'DM Mono',monospace;white-space:nowrap;${extraStyle||''}">● ${instance}</span>`;
+}
+
 function getWaTabInstances() {
   return [...new Set(Object.values(contaWaMap))].filter(Boolean).sort();
 }
@@ -1011,13 +1024,13 @@ function getWaFilteredLeads(arr) {
 function setWaTab(inst, page) {
   activeWaTab = inst;
   renderWaTabs();
-  if (page === 'leads' || document.getElementById('page-leads')?.style.display !== 'none') {
+  if (page === 'leads' || document.getElementById('page-leads')?.classList.contains('active')) {
     refreshAllStatusSelects(); renderLeadsTable();
   }
-  if (page === 'pipeline' || document.getElementById('page-pipeline')?.style.display !== 'none') {
+  if (page === 'pipeline' || document.getElementById('page-pipeline')?.classList.contains('active')) {
     renderPipeline();
   }
-  if (page === 'followup' || document.getElementById('page-followup')?.style.display !== 'none') {
+  if (page === 'followup' || document.getElementById('page-followup')?.classList.contains('active')) {
     renderFollowup();
   }
 }
@@ -1025,15 +1038,19 @@ function setWaTab(inst, page) {
 function waTabsHtml(pageKey) {
   const instances = getWaTabInstances();
   if (instances.length < 2) return '';
-  const base = !activeWaTab ? leads : leads.filter(l => (contaWaMap[String(l.id)]||contaWaMap[l.id]) === activeWaTab);
   return `<div class="wa-tabs">
     <div class="wa-tab${!activeWaTab?' active':''}" onclick="setWaTab('','${pageKey}')">
       🌐 Todos <span class="wa-tab-badge">${leads.length}</span>
     </div>
     ${instances.map(inst => {
       const cnt = leads.filter(l => (contaWaMap[String(l.id)]||contaWaMap[l.id]) === inst).length;
-      return `<div class="wa-tab${activeWaTab===inst?' active':''}" onclick="setWaTab('${inst}','${pageKey}')">
-        📱 ${inst} <span class="wa-tab-badge">${cnt}</span>
+      const c = getWaColor(inst);
+      const active = activeWaTab === inst;
+      return `<div class="wa-tab${active?' active':''}"
+        style="${active ? `background:${c}18;border-color:${c};color:${c}` : `border-color:${c}55`}"
+        onclick="setWaTab('${inst}','${pageKey}')">
+        <span style="width:8px;height:8px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0"></span>
+        ${inst} <span class="wa-tab-badge" style="background:${c}22;color:${c}">${cnt}</span>
       </div>`;
     }).join('')}
   </div>`;
@@ -1059,6 +1076,32 @@ function assignLeadToWa(leadId, instance) {
   contaWaMap[String(leadId)] = instance;
   saveContaWaMap();
   renderWaTabs();
+}
+
+async function assignAllUntaggedLeads(instance) {
+  if (!instance) return;
+  const untagged = leads.filter(l => !contaWaMap[String(l.id)]);
+  if (untagged.length === 0) {
+    alert('Todos os leads já têm conta atribuída.');
+    return;
+  }
+  const ok = confirm(`Atribuir ${untagged.length} lead${untagged.length!==1?'s':''} sem conta para 📱 ${instance}?`);
+  if (!ok) return;
+  untagged.forEach(l => { contaWaMap[String(l.id)] = instance; });
+  await saveContaWaMap();
+  renderWaTabs();
+  const activeId = document.querySelector('.page.active')?.id?.replace('page-','');
+  if (activeId === 'leads') { refreshAllStatusSelects(); renderLeadsTable(); }
+  if (activeId === 'pipeline') renderPipeline();
+  if (activeId === 'followup') renderFollowup();
+  if (activeId === 'disparos') renderDisparos();
+  const c = getWaColor(instance);
+  // show inline toast
+  const toast = document.createElement('div');
+  toast.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:${c};color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3)`;
+  toast.textContent = `✓ ${untagged.length} leads atribuídos a ${instance}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 let currentPage = 'dashboard';
 
@@ -1895,7 +1938,7 @@ function renderLeadsTable(searchQ = '') {
     </a>` : '';
     const ufDisplay = l.cidade ? (BR_STATES.includes(l.cidade.trim().toUpperCase()) ? l.cidade.trim().toUpperCase() : l.cidade.trim().slice(0,2).toUpperCase()) : '—';
     return `<tr>
-      <td><strong>${l.nome}</strong>${contaWaMap[String(l.id)] ? `<span style="font-size:9px;color:var(--muted);background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;padding:1px 6px;margin-left:4px;font-family:'DM Mono',monospace">📱 ${contaWaMap[String(l.id)]}</span>` : ''}${l.tel ? `<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:2px">${l.tel}${waBtn}</div>` : ''}</td>
+      <td><strong>${l.nome}</strong>${contaWaMap[String(l.id)] ? waBadgeHtml(contaWaMap[String(l.id)],'margin-left:5px;vertical-align:middle') : ''}${l.tel ? `<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:2px;margin-top:2px">${l.tel}${waBtn}</div>` : ''}</td>
       <td><span class="uf-badge-cell" onclick="openUfPicker(event,${l.id})">${ufDisplay}</span></td>
       <td style="font-size:12px">${l.carro || '—'}</td>
       <td>${statusDropdownHtml(l.id, l.status)}</td>
@@ -1989,7 +2032,7 @@ function selectKpiCol(key, refresh) {
         <div class="plc-row" onclick="openPipelinePanel(${l.id})">
           <div class="plc-avatar" style="background:${avatarColor}">${initials}</div>
           <div class="plc-info">
-            <div class="plc-name">${l.nome}${contaWaMap[String(l.id)] ? `<span style="font-size:9px;color:var(--muted);background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace">📱 ${contaWaMap[String(l.id)]}</span>` : ''}</div>
+            <div class="plc-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${l.nome}${waBadgeHtml(contaWaMap[String(l.id)])}</div>
             <div class="plc-sub">${subParts.join(' · ')||'—'}</div>
           </div>
           <div class="plc-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">${statusLabel}</div>
@@ -2492,8 +2535,17 @@ function renderDisparos() {
       <div class="disp-lock-icon">${confirmed ? '🔒' : '🔓'}</div>
       <div style="flex:1;min-width:200px">
         ${confirmed
-          ? `<div style="font-size:14px;font-weight:700;color:var(--green)">Conta confirmada para envio</div>
-             <div style="font-size:13px;margin-top:4px">📱 <strong>${dispState.confirmedInstance}</strong></div>`
+          ? (() => {
+              const _c = getWaColor(dispState.confirmedInstance);
+              const _untagged = leads.filter(l => !contaWaMap[String(l.id)]).length;
+              return `<div>
+                <div style="font-size:14px;font-weight:700;color:var(--green)">Conta confirmada para envio</div>
+                <div style="margin-top:6px">${waBadgeHtml(dispState.confirmedInstance,'font-size:12px;padding:3px 10px')}</div>
+                ${_untagged > 0 ? `<button onclick="assignAllUntaggedLeads('${dispState.confirmedInstance}')" style="margin-top:8px;background:${_c}18;color:${_c};border:1px solid ${_c}44;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">
+                  🏷️ Atribuir ${_untagged} lead${_untagged!==1?'s':''} sem conta a este número
+                </button>` : `<div style="font-size:10px;color:var(--green);margin-top:6px">✓ Todos os leads estão atribuídos</div>`}
+              </div>`;
+            })()
           : `<div style="font-size:14px;font-weight:700;color:var(--gold)">⚠️ Confirme a conta antes de disparar</div>
              <div style="font-size:12px;color:var(--muted);margin-top:4px">Selecione o número abaixo e confirme para liberar os botões de envio</div>`
         }
