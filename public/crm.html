@@ -442,6 +442,13 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-summary-sub { font-size:13px; color:var(--muted); }
 @media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
 
+/* ── Abas por conta WA ── */
+.wa-tabs { display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px; }
+.wa-tab { display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:all 0.15s;user-select:none;white-space:nowrap; }
+.wa-tab:hover { border-color:rgba(204,0,0,0.4);color:var(--text); }
+.wa-tab.active { background:rgba(204,0,0,0.12);border-color:var(--primary);color:var(--primary);font-weight:700; }
+.wa-tab-badge { font-family:'DM Mono',monospace;font-size:10px;background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:10px; }
+
 /* ── Follow-up multi-select ── */
 .fu-item-chk { width:18px;height:18px;border-radius:5px;border:2px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;transition:all 0.15s;appearance:none;-webkit-appearance:none; }
 .fu-item-chk:checked { background:var(--primary);border-color:var(--primary); }
@@ -586,6 +593,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
     <!-- LEADS -->
     <div class="page" id="page-leads">
+      <div id="waTabsLeads"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <select class="form-select" style="width:auto;padding:8px 12px" id="filterStatus" onchange="renderLeadsTable()">
           <option value="">Todas as jornadas</option>
@@ -611,6 +619,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
     <!-- PIPELINE -->
     <div class="page" id="page-pipeline">
+      <div id="waTabsPipeline"></div>
       <div class="kpi-row" id="kpiRow"></div>
       <div class="pipe-leads-panel" id="pipeLeadsPanel">
         <div class="pipe-leads-header">
@@ -681,6 +690,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <div class="stat-card"><div class="stat-label">Urgente (vencidos)</div><div class="stat-value red" id="fuUrgente">0</div></div>
         <div class="stat-card"><div class="stat-label">Hoje</div><div class="stat-value gold" id="fuHoje">0</div></div>
       </div>
+      <div id="waTabsFollowup"></div>
       <div class="card">
         <div class="card-header">
           <span class="card-title">Lista de Follow-ups</span>
@@ -966,6 +976,70 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 // ── STATE ──────────────────────────────────────────────
 let leads = [];
 let vendas = [];
+let contaWaMap = {}; // { leadId: instanceName } — persistido em settings
+let activeWaTab = ''; // '' = Todos
+
+function getWaTabInstances() {
+  return [...new Set(Object.values(contaWaMap))].filter(Boolean).sort();
+}
+
+function getWaFilteredLeads(arr) {
+  if (!activeWaTab) return arr;
+  return arr.filter(l => (contaWaMap[String(l.id)] || contaWaMap[l.id]) === activeWaTab);
+}
+
+function setWaTab(inst, page) {
+  activeWaTab = inst;
+  renderWaTabs();
+  if (page === 'leads' || document.getElementById('page-leads')?.style.display !== 'none') {
+    refreshAllStatusSelects(); renderLeadsTable();
+  }
+  if (page === 'pipeline' || document.getElementById('page-pipeline')?.style.display !== 'none') {
+    renderPipeline();
+  }
+  if (page === 'followup' || document.getElementById('page-followup')?.style.display !== 'none') {
+    renderFollowup();
+  }
+}
+
+function waTabsHtml(pageKey) {
+  const instances = getWaTabInstances();
+  if (instances.length < 2) return '';
+  const base = !activeWaTab ? leads : leads.filter(l => (contaWaMap[String(l.id)]||contaWaMap[l.id]) === activeWaTab);
+  return `<div class="wa-tabs">
+    <div class="wa-tab${!activeWaTab?' active':''}" onclick="setWaTab('','${pageKey}')">
+      🌐 Todos <span class="wa-tab-badge">${leads.length}</span>
+    </div>
+    ${instances.map(inst => {
+      const cnt = leads.filter(l => (contaWaMap[String(l.id)]||contaWaMap[l.id]) === inst).length;
+      return `<div class="wa-tab${activeWaTab===inst?' active':''}" onclick="setWaTab('${inst}','${pageKey}')">
+        📱 ${inst} <span class="wa-tab-badge">${cnt}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderWaTabs() {
+  const els = {
+    waTabsLeads: 'leads',
+    waTabsPipeline: 'pipeline',
+    waTabsFollowup: 'followup',
+  };
+  Object.entries(els).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = waTabsHtml(key);
+  });
+}
+
+async function saveContaWaMap() {
+  await api('/api/settings?key=contaWaMap', 'PUT', contaWaMap).catch(()=>{});
+}
+
+function assignLeadToWa(leadId, instance) {
+  contaWaMap[String(leadId)] = instance;
+  saveContaWaMap();
+  renderWaTabs();
+}
 let currentPage = 'dashboard';
 
 // ── API HELPER ─────────────────────────────────────────
@@ -998,13 +1072,15 @@ function hideLoading() {
 async function loadData() {
   showLoading();
   try {
-    const [leadsData, vendasData, dbCols] = await Promise.all([
+    const [leadsData, vendasData, dbCols, waMapData] = await Promise.all([
       api('/api/leads'),
       api('/api/vendas'),
       api('/api/settings?key=pipelineCols').catch(()=>null),
+      api('/api/settings?key=contaWaMap').catch(()=>null),
     ]);
     leads  = leadsData  || [];
     vendas = vendasData || [];
+    contaWaMap = (waMapData && typeof waMapData === 'object' && !Array.isArray(waMapData)) ? waMapData : {};
     // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
     if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
       localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
@@ -1020,6 +1096,7 @@ async function loadData() {
   hideLoading();
   refreshAllStatusSelects();
   renderDashboard();
+  renderWaTabs();
   updateBadges();
 }
 
@@ -1775,7 +1852,7 @@ function renderLeadsTable(searchQ = '') {
   const origemFilter = document.getElementById('filterOrigem')?.value || '';
   const q = searchQ || document.getElementById('globalSearch')?.value.toLowerCase() || '';
 
-  const filtered = leads.filter(l => {
+  const filtered = getWaFilteredLeads(leads).filter(l => {
     if (statusFilter && l.status !== statusFilter) return false;
     if (origemFilter && l.origem !== origemFilter) return false;
     if (q && !l.nome.toLowerCase().includes(q) && !(l.carro||'').toLowerCase().includes(q) && !(l.cidade||'').toLowerCase().includes(q)) return false;
@@ -1798,7 +1875,7 @@ function renderLeadsTable(searchQ = '') {
     </a>` : '';
     const ufDisplay = l.cidade ? (BR_STATES.includes(l.cidade.trim().toUpperCase()) ? l.cidade.trim().toUpperCase() : l.cidade.trim().slice(0,2).toUpperCase()) : '—';
     return `<tr>
-      <td><strong>${l.nome}</strong>${l.tel ? `<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:2px">${l.tel}${waBtn}</div>` : ''}</td>
+      <td><strong>${l.nome}</strong>${contaWaMap[String(l.id)] ? `<span style="font-size:9px;color:var(--muted);background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;padding:1px 6px;margin-left:4px;font-family:'DM Mono',monospace">📱 ${contaWaMap[String(l.id)]}</span>` : ''}${l.tel ? `<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:2px">${l.tel}${waBtn}</div>` : ''}</td>
       <td><span class="uf-badge-cell" onclick="openUfPicker(event,${l.id})">${ufDisplay}</span></td>
       <td style="font-size:12px">${l.carro || '—'}</td>
       <td>${statusDropdownHtml(l.id, l.status)}</td>
@@ -1817,11 +1894,13 @@ let _activeKpiKey = null;
 
 function renderPipeline() {
   const allCols = getPipelineCols();
-  const total = leads.length || 1;
+  const visLeads = getWaFilteredLeads(leads);
+  const total = visLeads.length || 1;
 
+  renderWaTabs();
   const row = document.getElementById('kpiRow');
   row.innerHTML = allCols.map(col => {
-    const colLeads = leads.filter(l => l.status === col.key);
+    const colLeads = visLeads.filter(l => l.status === col.key);
     const cnt = colLeads.length;
     const pct = ((cnt / total) * 100).toFixed(0);
     const val = colLeads.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
@@ -1861,7 +1940,7 @@ function selectKpiCol(key, refresh) {
   if (!refresh) renderPipeline();
 
   const col = getPipelineCols().find(c => c.key === key) || { label: key, color: '#888' };
-  const colLeads = leads.filter(l => l.status === key);
+  const colLeads = getWaFilteredLeads(leads).filter(l => l.status === key);
   title.innerHTML = `<span style="color:${col.color}">${col.label}</span> <span style="color:var(--muted);font-weight:400;font-size:11px">${colLeads.length} leads</span>`;
 
   if (colLeads.length === 0) {
@@ -1890,7 +1969,7 @@ function selectKpiCol(key, refresh) {
         <div class="plc-row" onclick="openPipelinePanel(${l.id})">
           <div class="plc-avatar" style="background:${avatarColor}">${initials}</div>
           <div class="plc-info">
-            <div class="plc-name">${l.nome}</div>
+            <div class="plc-name">${l.nome}${contaWaMap[String(l.id)] ? `<span style="font-size:9px;color:var(--muted);background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace">📱 ${contaWaMap[String(l.id)]}</span>` : ''}</div>
             <div class="plc-sub">${subParts.join(' · ')||'—'}</div>
           </div>
           <div class="plc-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">${statusLabel}</div>
@@ -2084,7 +2163,8 @@ async function fuBulkChangeStatus() {
 
 function renderFollowup() {
   const today = new Date(); today.setHours(0,0,0,0);
-  const withFollow = leads.filter(l => l.followup && !isTerminal(l.status))
+  renderWaTabs();
+  const withFollow = getWaFilteredLeads(leads).filter(l => l.followup && !isTerminal(l.status))
     .sort((a,b) => new Date(a.followup) - new Date(b.followup));
 
   const urgente = withFollow.filter(l => new Date(l.followup + 'T00:00:00') < today).length;
@@ -2643,6 +2723,7 @@ async function startDisparoAuto() {
     try {
       await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
       dispState.sent.add(lead.id);
+      contaWaMap[String(lead.id)] = instance;
     } catch(e) { console.warn('Erro ao enviar para', lead.nome, e.message); }
 
     if (i < queue.length - 1 && !_autoStopFlag) {
@@ -2665,6 +2746,7 @@ async function startDisparoAuto() {
   }
 
   if (cdTimer) clearInterval(cdTimer);
+  if (dispState.sent.size > 0) { await saveContaWaMap(); renderWaTabs(); }
   root.innerHTML = `
     <div class="disp-panel" style="max-width:480px;margin:40px auto">
       <div class="disp-summary">
@@ -2838,6 +2920,8 @@ async function dispSendViaApi(leadId) {
   if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
   try {
     await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
+    contaWaMap[String(leadId)] = instance;
+    saveContaWaMap();
     markDisparoSent(leadId);
   } catch(e) {
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
