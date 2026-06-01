@@ -441,6 +441,22 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-summary-title { font-size:20px; font-weight:700; }
 .disp-summary-sub { font-size:13px; color:var(--muted); }
 @media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
+
+/* ── Follow-up multi-select ── */
+.fu-item-chk { width:18px;height:18px;border-radius:5px;border:2px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;transition:all 0.15s;appearance:none;-webkit-appearance:none; }
+.fu-item-chk:checked { background:var(--primary);border-color:var(--primary); }
+.fu-item-chk:checked::after { content:'✓';display:block;color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:14px; }
+.follow-item.fu-checked { background:rgba(204,0,0,0.07);border-radius:8px;margin:0 -4px;padding-left:8px;padding-right:8px; }
+.fu-bulk-bar { display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(204,0,0,0.08);border-top:2px solid rgba(204,0,0,0.2);flex-wrap:wrap; }
+.fu-bulk-count { font-size:12px;font-weight:700;color:var(--primary);font-family:'DM Mono',monospace;white-space:nowrap; }
+
+/* ── Disparos saved templates ── */
+.disp-tpl-list { display:flex;flex-wrap:wrap;gap:6px; }
+.disp-tpl-chip { display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;transition:all 0.15s;max-width:200px; }
+.disp-tpl-chip:hover { background:rgba(204,0,0,0.1);border-color:rgba(204,0,0,0.3); }
+.disp-tpl-chip .tpl-name { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.disp-tpl-del { font-size:13px;color:var(--muted);line-height:1;flex-shrink:0;opacity:0.5;padding:0 2px; }
+.disp-tpl-del:hover { opacity:1;color:var(--red); }
 </style>
 </head>
 <body>
@@ -666,7 +682,19 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
         <div class="stat-card"><div class="stat-label">Hoje</div><div class="stat-value gold" id="fuHoje">0</div></div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Lista de Follow-ups</span></div>
+        <div class="card-header">
+          <span class="card-title">Lista de Follow-ups</span>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px" id="fuSelectBtn" onclick="fuToggleSelectMode()">☑ Selecionar</button>
+        </div>
+        <div id="fuBulkBar" style="display:none" class="fu-bulk-bar">
+          <span class="fu-bulk-count" id="fuBulkCount">0 selecionados</span>
+          <select class="form-select" id="fuBulkStatus" style="font-size:11px;padding:5px 10px;width:auto;flex:1;min-width:140px">
+            <option value="">— Novo status —</option>
+            ${getPipelineCols ? getPipelineCols().map(c=>`<option value="${c.key}">${c.label||c.key}</option>`).join('') : ''}
+          </select>
+          <button class="btn btn-primary" style="font-size:11px;padding:6px 14px" onclick="fuBulkChangeStatus()">Alterar</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:6px 12px" onclick="fuClearSelection()">✕</button>
+        </div>
         <div class="card-body" id="followList"></div>
       </div>
     </div>
@@ -2000,6 +2028,60 @@ function openCalendarFromPanel() {
 }
 
 // ── RENDER FOLLOWUP ───────────────────────────────────
+let fuSelectMode = false;
+let fuSelected = new Set();
+
+function fuToggleSelectMode() {
+  fuSelectMode = !fuSelectMode;
+  fuSelected.clear();
+  const btn = document.getElementById('fuSelectBtn');
+  if (btn) btn.textContent = fuSelectMode ? '✕ Cancelar' : '☑ Selecionar';
+  const bar = document.getElementById('fuBulkBar');
+  if (bar) bar.style.display = fuSelectMode ? 'flex' : 'none';
+  renderFollowup();
+}
+
+function fuToggleItem(id) {
+  if (fuSelected.has(id)) fuSelected.delete(id);
+  else fuSelected.add(id);
+  const count = fuSelected.size;
+  const el = document.getElementById('fuBulkCount');
+  if (el) el.textContent = `${count} selecionado${count !== 1 ? 's' : ''}`;
+  // toggle highlight only — no full re-render
+  const row = document.querySelector(`[data-fu-id="${id}"]`);
+  if (row) row.classList.toggle('fu-checked', fuSelected.has(id));
+  const chk = document.querySelector(`[data-fu-chk="${id}"]`);
+  if (chk) chk.checked = fuSelected.has(id);
+}
+
+function fuClearSelection() {
+  fuSelectMode = false;
+  fuSelected.clear();
+  const btn = document.getElementById('fuSelectBtn');
+  if (btn) btn.textContent = '☑ Selecionar';
+  const bar = document.getElementById('fuBulkBar');
+  if (bar) bar.style.display = 'none';
+  renderFollowup();
+}
+
+async function fuBulkChangeStatus() {
+  const newStatus = document.getElementById('fuBulkStatus')?.value;
+  if (!newStatus) { alert('Selecione um status'); return; }
+  const ids = [...fuSelected];
+  if (ids.length === 0) return;
+  for (const id of ids) {
+    const idx = leads.findIndex(l => l.id === id);
+    if (idx < 0) continue;
+    const lead = leads[idx];
+    autoVendaIfWon(lead, newStatus);
+    const updated = await api(`/api/leads/${id}`, 'PUT', { status: newStatus });
+    if (updated) leads[idx] = { ...lead, ...updated };
+  }
+  fuClearSelection();
+  updateBadges();
+  renderFollowup();
+}
+
 function renderFollowup() {
   const today = new Date(); today.setHours(0,0,0,0);
   const withFollow = leads.filter(l => l.followup && !isTerminal(l.status))
@@ -2014,6 +2096,21 @@ function renderFollowup() {
   document.getElementById('fuUrgente').textContent = urgente;
   document.getElementById('fuHoje').textContent = hoje;
 
+  // keep bulk bar in sync with select mode
+  const bar = document.getElementById('fuBulkBar');
+  if (bar) {
+    bar.style.display = fuSelectMode ? 'flex' : 'none';
+    // re-populate status options dynamically
+    const sel = document.getElementById('fuBulkStatus');
+    if (sel && sel.options.length <= 1) {
+      getPipelineCols().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.key; opt.textContent = c.label || c.key;
+        sel.appendChild(opt);
+      });
+    }
+  }
+
   const el = document.getElementById('followList');
   if (withFollow.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><h3>Nenhum follow-up pendente!</h3></div>';
@@ -2021,16 +2118,20 @@ function renderFollowup() {
   }
   el.innerHTML = withFollow.map(l => {
     const fs = followStatus(l.followup);
-    return `<div class="follow-item">
-      <div class="follow-avatar">${l.nome[0]}</div>
-      <div class="follow-info">
+    const checked = fuSelected.has(l.id);
+    return `<div class="follow-item${checked ? ' fu-checked' : ''}" data-fu-id="${l.id}" onclick="${fuSelectMode ? `fuToggleItem(${l.id})` : ''}">
+      ${fuSelectMode
+        ? `<input type="checkbox" class="fu-item-chk" data-fu-chk="${l.id}" ${checked ? 'checked' : ''} onclick="event.stopPropagation();fuToggleItem(${l.id})">`
+        : `<div class="follow-avatar">${l.nome[0]}</div>`
+      }
+      <div class="follow-info" style="cursor:${fuSelectMode ? 'pointer' : 'default'}">
         <div class="follow-name">${l.nome}</div>
-        <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${l.status}</div>
+        <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${getColLabel(l.status)||l.status}</div>
         ${l.obs ? `<div class="follow-detail" style="margin-top:2px;font-style:italic">${l.obs.slice(0,60)}${l.obs.length>60?'...':''}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div class="follow-time ${fs.cls}">${fs.text}</div>
-        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button>
+        ${!fuSelectMode ? `<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="editLead(${l.id})">Editar</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -2155,6 +2256,35 @@ function renderRelatorios() {
 
 // ── RENDER DISPAROS ───────────────────────────────────
 let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5 };
+let dispTemplates = [];
+
+function initDispTemplates() {
+  try { dispTemplates = JSON.parse(localStorage.getItem('dispTemplates') || '[]'); } catch { dispTemplates = []; }
+}
+
+function saveDispTemplate() {
+  const ta = document.getElementById('dispTemplate');
+  const body = (ta ? ta.value : dispState.template).trim();
+  if (!body) { alert('Escreva uma mensagem antes de salvar o modelo'); return; }
+  const name = prompt('Nome do modelo:');
+  if (!name?.trim()) return;
+  dispTemplates.push({ id: Date.now(), name: name.trim(), body });
+  localStorage.setItem('dispTemplates', JSON.stringify(dispTemplates));
+  renderDisparos();
+}
+
+function loadDispTemplate(id) {
+  const tpl = dispTemplates.find(t => t.id === id);
+  if (!tpl) return;
+  dispState.template = tpl.body;
+  renderDisparos();
+}
+
+function deleteDispTemplate(id) {
+  dispTemplates = dispTemplates.filter(t => t.id !== id);
+  localStorage.setItem('dispTemplates', JSON.stringify(dispTemplates));
+  renderDisparos();
+}
 
 function renderDisparos() {
   const root = document.getElementById('disparos-root');
@@ -2281,7 +2411,19 @@ function renderDisparos() {
         <div class="disp-panel">
           <div class="disp-panel-header">
             <span class="disp-panel-title">Mensagem Template</span>
+            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="saveDispTemplate()">+ Salvar modelo</button>
           </div>
+          ${dispTemplates.length > 0 ? `
+          <div style="padding:12px 18px;border-bottom:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace">Modelos salvos</div>
+            <div class="disp-tpl-list">
+              ${dispTemplates.map(t => `
+                <div class="disp-tpl-chip" onclick="loadDispTemplate(${t.id})" title="${escHtml(t.body.slice(0,100))}">
+                  <span class="tpl-name">${escHtml(t.name)}</span>
+                  <span class="disp-tpl-del" onclick="event.stopPropagation();deleteDispTemplate(${t.id})" title="Excluir">×</span>
+                </div>`).join('')}
+            </div>
+          </div>` : ''}
           <div class="disp-template-area">
             <div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Clique para inserir variável:</div>
@@ -2978,6 +3120,7 @@ function waGetConnectedInstances() {
 
 // ── INIT ───────────────────────────────────────────────
 document.getElementById('leadFollowup').value = new Date().toISOString().split('T')[0];
+initDispTemplates();
 loadData();
 </script>
 <div class="uf-picker" id="ufPicker"></div>
