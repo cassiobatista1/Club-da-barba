@@ -2460,7 +2460,7 @@ function renderRelatorios() {
 }
 
 // ── RENDER DISPAROS ───────────────────────────────────
-let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '' };
+let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '', filterWa: '' };
 
 function confirmDispAccount() {
   const sel = document.getElementById('dispWaInstance');
@@ -2517,12 +2517,14 @@ function renderDisparos() {
   const sfVal = dispState.filterStatus || '';
   const ofVal = dispState.filterOrigem || '';
   const efVal = dispState.filterExec   || '';
+  const wfVal = dispState.filterWa     || '';
 
   const filtered = leads.filter(l => {
     if (!l.tel || l.tel.replace(/\D/g,'').length < 8) return false;
     if (sfVal && l.status !== sfVal) return false;
     if (ofVal && l.origem !== ofVal) return false;
     if (efVal && l.exec   !== efVal) return false;
+    if (wfVal && (contaWaMap[String(l.id)] || '') !== wfVal) return false;
     return true;
   });
 
@@ -2670,6 +2672,25 @@ function renderDisparos() {
             <span style="font-size:11px;color:var(--muted)">${filtered.length} disponíveis</span>
           </div>
           <div class="disp-filters">
+            ${(() => {
+              const waInsts = getWaTabInstances();
+              if (waInsts.length < 2) return '';
+              const allWithTel = leads.filter(l => l.tel && l.tel.replace(/\D/g,'').length >= 8);
+              return `<div style="display:flex;gap:5px;flex-wrap:wrap;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:2px">
+                <div onclick="dispFilterWa('')" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid ${!wfVal?'var(--primary)':'var(--border)'};background:${!wfVal?'rgba(90,120,255,0.1)':'transparent'};color:${!wfVal?'var(--primary)':'var(--muted)'};font-weight:${!wfVal?'700':'400'};white-space:nowrap">
+                  🌐 Todos <span style="background:rgba(255,255,255,0.1);padding:0 5px;border-radius:8px;font-size:9px">${allWithTel.length}</span>
+                </div>
+                ${waInsts.map(inst => {
+                  const cnt = allWithTel.filter(l => (contaWaMap[String(l.id)]||'') === inst).length;
+                  const c = getWaColor(inst);
+                  const active = wfVal === inst;
+                  return `<div onclick="dispFilterWa('${inst}')" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid ${active?c:c+'55'};background:${active?c+'18':'transparent'};color:${active?c:c+'bb'};font-weight:${active?'700':'400'};white-space:nowrap">
+                    <span style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0"></span>
+                    ${inst} <span style="background:${c}22;padding:0 5px;border-radius:8px;font-size:9px;color:${c}">${cnt}</span>
+                  </div>`;
+                }).join('')}
+              </div>`;
+            })()}
             <select class="form-select" style="font-size:11px;padding:6px 10px" onchange="dispFilter('status',this.value)">
               <option value="">Todos os status</option>
               ${statusOpts.map(c=>`<option value="${c.key}" ${sfVal===c.key?'selected':''}>${c.label||c.key}</option>`).join('')}
@@ -2695,11 +2716,16 @@ function renderDisparos() {
               : filtered.map(l => {
                   const checked = dispState.selected.has(l.id);
                   const telClean = l.tel.replace(/\D/g,'');
+                  const waInst = contaWaMap[String(l.id)];
+                  const waC = waInst ? getWaColor(waInst) : null;
                   return `<div class="disp-lead-item" onclick="dispToggle(${l.id})">
                     <input type="checkbox" class="disp-check" ${checked?'checked':''} onclick="event.stopPropagation();dispToggle(${l.id})">
                     <div style="flex:1;min-width:0">
                       <div class="disp-lead-name">${l.nome}</div>
-                      <div class="disp-lead-tel">${formatTel(telClean)}</div>
+                      <div style="display:flex;align-items:center;gap:5px;margin-top:1px;flex-wrap:wrap">
+                        <span class="disp-lead-tel">${formatTel(telClean)}</span>
+                        ${waInst ? `<span style="font-size:9px;color:${waC};background:${waC}15;border:1px solid ${waC}44;border-radius:8px;padding:0 5px;white-space:nowrap;font-family:'DM Mono',monospace">● ${waInst}</span>` : ''}
+                      </div>
                     </div>
                     <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span>
                   </div>`;
@@ -2784,6 +2810,12 @@ function escHtml(s) {
 
 function dispFilter(field, val) {
   dispState['filter' + field.charAt(0).toUpperCase() + field.slice(1)] = val;
+  dispState.selected.clear();
+  renderDisparos();
+}
+
+function dispFilterWa(inst) {
+  dispState.filterWa = inst;
   dispState.selected.clear();
   renderDisparos();
 }
