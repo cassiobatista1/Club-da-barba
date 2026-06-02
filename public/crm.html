@@ -537,6 +537,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
     <div class="nav-section">Equipe</div>
     <div class="nav-item" onclick="nav('equipe', this)"><span class="icon">🏆</span> Ranking</div>
   </nav>
+  <div id="sidebarDdFilter"></div>
   <div class="sidebar-user">
     <div class="user-avatar">CJ</div>
     <div class="user-info">
@@ -566,6 +567,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
+      <div id="waTabsDashboard"></div>
       <div class="stats-row">
         <div class="stat-card highlight">
           <div class="stat-label">Leads Ativos</div>
@@ -1049,7 +1051,7 @@ function getWaFilteredLeads(arr) {
 
 function setWaTab(inst, page) {
   activeWaTab = inst;
-  renderWaTabs();
+  renderWaTabs(); // also calls renderSidebarDdFilter
   if (page === 'leads' || document.getElementById('page-leads')?.classList.contains('active')) {
     refreshAllStatusSelects(); renderLeadsTable();
   }
@@ -1087,11 +1089,13 @@ function renderWaTabs() {
     waTabsLeads: 'leads',
     waTabsPipeline: 'pipeline',
     waTabsFollowup: 'followup',
+    waTabsDashboard: 'dashboard',
   };
   Object.entries(els).forEach(([id, key]) => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = waTabsHtml(key);
   });
+  renderSidebarDdFilter();
 }
 
 async function saveContaWaMap() {
@@ -1863,22 +1867,34 @@ function renderDashboard() {
   const mes = today.getMonth(); const ano = today.getFullYear();
   const mesNome = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
-  document.getElementById('statLeads').textContent  = leads.length;
-  document.getElementById('statProp').textContent   = leads.filter(l => getColsByRole('proposal').includes(l.status)).length;
+  // Respect global DDD filter
+  const fLeads = getWaFilteredLeads(leads);
+
+  // Dashboard WA tabs
+  const dashTabsEl = document.getElementById('waTabsDashboard');
+  if (dashTabsEl) dashTabsEl.innerHTML = waTabsHtml('dashboard');
+
+  document.getElementById('statLeads').textContent  = fLeads.length;
+  document.getElementById('statProp').textContent   = fLeads.filter(l => getColsByRole('proposal').includes(l.status)).length;
   document.getElementById('statVendasSub').textContent = mesNome.charAt(0).toUpperCase() + mesNome.slice(1);
 
-  const vendasMes = vendas.filter(v => {
+  // Filter vendas by matching lead names in filtered set
+  const fLeadNames = new Set(fLeads.map(l => (l.nome||'').toLowerCase().trim()));
+  const vendasFilt = activeWaTab
+    ? vendas.filter(v => fLeadNames.has((v.cliente||'').toLowerCase().trim()))
+    : vendas;
+  const vendasMes = vendasFilt.filter(v => {
     const d = new Date(v.data);
     return d.getMonth() === mes && d.getFullYear() === ano;
   });
   document.getElementById('statVendas').textContent = vendasMes.length;
 
-  const followPend = leads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status));
+  const followPend = fLeads.filter(l => l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status));
   document.getElementById('statFollow').textContent = followPend.length;
 
   // Funil — dynamic from pipeline config (exclude archived)
   const funnelCols = getPipelineCols().filter(c => !isArchived(c.key));
-  const fCounts = funnelCols.map(c => leads.filter(l => l.status === c.key).length);
+  const fCounts = funnelCols.map(c => fLeads.filter(l => l.status === c.key).length);
   const fMax = Math.max(...fCounts, 1);
   document.getElementById('funnelBars').innerHTML = funnelCols.map((c, i) => `
     <div class="progress-row">
@@ -1889,15 +1905,15 @@ function renderDashboard() {
   `).join('');
 
   // Origem %
-  const total = leads.length || 1;
+  const total = fLeads.length || 1;
   const origens = ['Site LOOVI','Indicação','WhatsApp','Outros'];
-  const oCounts = origens.map(o => leads.filter(l => l.origem === o).length);
+  const oCounts = origens.map(o => fLeads.filter(l => l.origem === o).length);
   ['pctSite','pctInd','pctWa','pctOut'].forEach((id, i) => {
     document.getElementById(id).textContent = Math.round((oCounts[i]/total)*100) + '%';
   });
 
   // Follow-up list
-  const upcoming = leads.filter(l => l.followup && !isTerminal(l.status))
+  const upcoming = fLeads.filter(l => l.followup && !isTerminal(l.status))
     .sort((a,b) => new Date(a.followup) - new Date(b.followup)).slice(0, 5);
   const fEl = document.getElementById('dashFollowList');
   if (upcoming.length === 0) {
@@ -2440,6 +2456,101 @@ function changeDispAccount() {
   dispState.confirmedInstance = '';
   renderDisparos();
 }
+// ── DISPARO HISTORY (localStorage) ─────────────────────
+let dispHistory = [];
+
+function initDispHistory() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('dispHistory') || '[]');
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    dispHistory = saved.filter(r => r.ts > cutoff);
+  } catch { dispHistory = []; }
+}
+
+function addDispHistoryEntry(entry) {
+  dispHistory.push({ ts: Date.now(), date: new Date().toLocaleDateString('pt-BR'), ...entry });
+  if (dispHistory.length > 1000) dispHistory = dispHistory.slice(-1000);
+  localStorage.setItem('dispHistory', JSON.stringify(dispHistory));
+}
+
+function renderDispHistory() {
+  const today = new Date().toLocaleDateString('pt-BR');
+  const todayEntries = dispHistory.filter(r => r.date === today);
+  if (todayEntries.length === 0) return '';
+
+  const byInst = {};
+  todayEntries.forEach(r => {
+    if (!byInst[r.instance]) byInst[r.instance] = { ok: [], fail: [] };
+    if (r.success) byInst[r.instance].ok.push(r);
+    else byInst[r.instance].fail.push(r);
+  });
+
+  return `<div class="disp-panel" style="margin-top:20px">
+    <div class="disp-panel-header">
+      <span class="disp-panel-title">Histórico de hoje</span>
+      <span style="font-size:11px;color:var(--muted)">${todayEntries.length} disparos</span>
+    </div>
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">
+      ${Object.entries(byInst).map(([inst, data]) => {
+        const c = getWaColor(inst);
+        return `<div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></span>
+            <span style="font-size:12px;font-weight:700;color:${c}">${inst}</span>
+            <span style="font-size:11px;color:var(--green);margin-left:4px">✓ ${data.ok.length} enviados</span>
+            ${data.fail.length > 0 ? `<span style="font-size:11px;color:var(--red)">✗ ${data.fail.length} falhas</span>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;max-height:160px;overflow-y:auto">
+            ${[...data.ok, ...data.fail].sort((a,b)=>b.ts-a.ts).map(r => `
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:4px 8px;border-radius:6px;background:${r.success?'rgba(0,200,122,0.05)':'rgba(255,51,68,0.05)'}">
+                <span style="color:${r.success?'var(--green)':'var(--red)'};flex-shrink:0">${r.success?'✓':'✗'}</span>
+                <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">${r.leadName}</span>
+                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;white-space:nowrap">${new Date(r.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+              </div>`).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ── SIDEBAR DDD FILTER ──────────────────────────────────
+function renderSidebarDdFilter() {
+  const el = document.getElementById('sidebarDdFilter');
+  if (!el) return;
+  const instances = getWaTabInstances();
+  if (instances.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="padding:10px 12px;border-top:1px solid var(--border)">
+    <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;padding:0 8px 6px">Filtrar por DDD</div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div onclick="setGlobalWaTab('')" style="padding:7px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:${!activeWaTab?'700':'400'};background:${!activeWaTab?'rgba(90,120,255,0.15)':'transparent'};color:${!activeWaTab?'var(--primary)':'var(--muted)'}">🌐 Todos os DDD</div>
+      ${instances.map(inst => {
+        const c = getWaColor(inst);
+        const active = activeWaTab === inst;
+        const cnt = leads.filter(l => (contaWaMap[String(l.id)]||'') === inst).length;
+        return `<div onclick="setGlobalWaTab('${inst}')" style="padding:7px 10px;border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;font-weight:${active?'700':'400'};background:${active?c+'18':'transparent'};color:${active?c:'var(--muted)'}">
+          <span style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></span>
+          <span style="flex:1">${inst}</span>
+          <span style="font-size:10px;font-family:'DM Mono',monospace;background:${c}22;color:${c};padding:1px 6px;border-radius:8px">${cnt}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function setGlobalWaTab(inst) {
+  activeWaTab = inst;
+  renderSidebarDdFilter();
+  renderWaTabs();
+  const activeId = document.querySelector('.page.active')?.id?.replace('page-','');
+  if (activeId === 'dashboard') renderDashboard();
+  else if (activeId === 'leads') { refreshAllStatusSelects(); renderLeadsTable(); }
+  else if (activeId === 'pipeline') renderPipeline();
+  else if (activeId === 'followup') renderFollowup();
+  else if (activeId === 'vendas') renderVendas();
+  else if (activeId === 'relatorios') renderRelatorios();
+}
+
 let dispTemplates = [];
 
 function initDispTemplates() {
@@ -2718,7 +2829,8 @@ function renderDisparos() {
           <div class="disp-preview-grid">${previewHtml}</div>
         </div>` : ''}
       </div>
-    </div>`;
+    </div>
+    ${renderDispHistory()}`;
 }
 
 function applyTemplate(tmpl, lead) {
@@ -2897,8 +3009,10 @@ async function startDisparoAuto() {
       await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
       dispState.sent.add(lead.id);
       contaWaMap[String(lead.id)] = instance;
+      addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: true });
     } catch(e) {
       failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
+      addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: false, error: e.message });
       console.warn('Erro ao enviar para', lead.nome, e.message);
     }
 
@@ -3108,8 +3222,10 @@ async function dispSendViaApi(leadId) {
     await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
     contaWaMap[String(leadId)] = instance;
     saveContaWaMap();
+    addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: true });
     markDisparoSent(leadId);
   } catch(e) {
+    addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: false, error: e.message });
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
     alert('Erro ao enviar: ' + (e.message || 'tente novamente'));
   }
@@ -3525,6 +3641,7 @@ function waGetConnectedInstances() {
 // ── INIT ───────────────────────────────────────────────
 document.getElementById('leadFollowup').value = new Date().toISOString().split('T')[0];
 initDispTemplates();
+initDispHistory();
 loadData();
 </script>
 <div class="uf-picker" id="ufPicker"></div>
