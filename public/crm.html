@@ -2841,6 +2841,7 @@ async function startDisparoAuto() {
 
   const root = document.getElementById('disparos-root');
   let cdTimer = null;
+  const failedLeads = [];
 
   function renderAutoProgress(i, lead, msg, countdown, waiting) {
     const pct = Math.round((dispState.sent.size / queue.length) * 100);
@@ -2896,7 +2897,10 @@ async function startDisparoAuto() {
       await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
       dispState.sent.add(lead.id);
       contaWaMap[String(lead.id)] = instance;
-    } catch(e) { console.warn('Erro ao enviar para', lead.nome, e.message); }
+    } catch(e) {
+      failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
+      console.warn('Erro ao enviar para', lead.nome, e.message);
+    }
 
     if (i < queue.length - 1 && !_autoStopFlag) {
       const secs = getDispInterval();
@@ -2919,13 +2923,19 @@ async function startDisparoAuto() {
 
   if (cdTimer) clearInterval(cdTimer);
   if (dispState.sent.size > 0) { await saveContaWaMap(); renderWaTabs(); }
+  const failedHtml = failedLeads.length > 0 ? `
+    <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
+      <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
+      ${failedLeads.map(f=>`<div style="font-size:11px;margin-bottom:6px;border-bottom:1px solid rgba(255,51,68,0.1);padding-bottom:6px"><span style="font-weight:600">${escHtml(f.nome)}</span><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;margin-left:6px">${f.tel}</span><div style="color:var(--red);font-size:10px;margin-top:2px">${escHtml(f.erro)}</div></div>`).join('')}
+    </div>` : '';
   root.innerHTML = `
     <div class="disp-panel" style="max-width:480px;margin:40px auto">
       <div class="disp-summary">
-        <div class="disp-summary-icon">${_autoStopFlag ? '⏹' : '🎉'}</div>
+        <div class="disp-summary-icon">${_autoStopFlag ? '⏹' : failedLeads.length > 0 ? '⚠️' : '🎉'}</div>
         <div class="disp-summary-title">${_autoStopFlag ? 'Disparo pausado' : 'Disparo Concluído!'}</div>
-        <div class="disp-summary-sub">${dispState.sent.size} de ${queue.length} mensagens enviadas via 📱 ${instance}</div>
-        <button class="btn btn-primary" style="margin-top:8px" onclick="dispState.step='config';dispState.selected=new Set();_autoStopFlag=false;renderDisparos()">Novo Disparo</button>
+        <div class="disp-summary-sub">${dispState.sent.size} de ${queue.length} enviadas com sucesso via 📱 ${instance}</div>
+        ${failedHtml}
+        <button class="btn btn-primary" style="margin-top:16px" onclick="dispState.step='config';dispState.selected=new Set();_autoStopFlag=false;renderDisparos()">Novo Disparo</button>
       </div>
     </div>`;
 }
