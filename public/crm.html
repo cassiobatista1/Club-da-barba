@@ -381,14 +381,40 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
 #loadingBar { position: fixed; top: 0; left: 0; height: 2px; background: var(--primary); z-index: 999; transition: width 0.3s ease, opacity 0.3s; width: 0; opacity: 0; }
 
-@media (max-width: 768px) {
+/* Sidebar collapses on tablet + mobile */
+@media (max-width: 1024px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; }
   .hamburger { display: block; }
+}
+/* Mobile phone layout */
+@media (max-width: 768px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .pipeline { flex-wrap: nowrap; }
+}
+/* Tablet layout (769px – 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .content { padding: 20px 22px; }
+  .topbar { padding: 12px 20px; }
+  .stats-row { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat-value { font-size: 30px; }
+  .stat-label { font-size: 11px; }
+  .kpi-row { gap: 12px; padding-bottom: 12px; }
+  .kpi-card { min-width: 155px; padding: 18px 14px 14px; }
+  .kpi-count { font-size: 40px; }
+  .kpi-label { font-size: 10px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .pipe-charts { grid-template-columns: 1fr 1fr; }
+  .disp-layout { grid-template-columns: 260px 1fr; gap: 16px; }
+  .pipeline-panel { width: min(370px, 92vw); }
+  .wa-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .modal { width: min(500px, 90vw); }
+  .page-title { font-size: 17px; }
+  .topbar { padding: 12px 20px; }
+  .nav-item { font-size: 14px; padding: 11px 13px; }
 }
 
 /* ── DISPAROS ── */
@@ -440,7 +466,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 .disp-summary-icon { font-size:48px; }
 .disp-summary-title { font-size:20px; font-weight:700; }
 .disp-summary-sub { font-size:13px; color:var(--muted); }
-@media(max-width:768px) { .disp-layout { grid-template-columns:1fr; } }
+@media(max-width:640px) { .disp-layout { grid-template-columns:1fr; } }
 
 /* ── Disparos — bloqueio de segurança de conta ── */
 .disp-steps { display:flex;gap:0;margin-bottom:20px;border-radius:12px;overflow:hidden;border:1px solid var(--border); }
@@ -2816,6 +2842,7 @@ async function startDisparoAuto() {
 
   const root = document.getElementById('disparos-root');
   let cdTimer = null;
+  const failedLeads = [];
 
   function renderAutoProgress(i, lead, msg, countdown, waiting) {
     const pct = Math.round((dispState.sent.size / queue.length) * 100);
@@ -2871,7 +2898,10 @@ async function startDisparoAuto() {
       await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
       dispState.sent.add(lead.id);
       contaWaMap[String(lead.id)] = instance;
-    } catch(e) { console.warn('Erro ao enviar para', lead.nome, e.message); }
+    } catch(e) {
+      failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
+      console.warn('Erro ao enviar para', lead.nome, e.message);
+    }
 
     if (i < queue.length - 1 && !_autoStopFlag) {
       const secs = getDispInterval();
@@ -2894,13 +2924,19 @@ async function startDisparoAuto() {
 
   if (cdTimer) clearInterval(cdTimer);
   if (dispState.sent.size > 0) { await saveContaWaMap(); renderWaTabs(); }
+  const failedHtml = failedLeads.length > 0 ? `
+    <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
+      <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
+      ${failedLeads.map(f=>`<div style="font-size:11px;margin-bottom:6px;border-bottom:1px solid rgba(255,51,68,0.1);padding-bottom:6px"><span style="font-weight:600">${escHtml(f.nome)}</span><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;margin-left:6px">${f.tel}</span><div style="color:var(--red);font-size:10px;margin-top:2px">${escHtml(f.erro)}</div></div>`).join('')}
+    </div>` : '';
   root.innerHTML = `
     <div class="disp-panel" style="max-width:480px;margin:40px auto">
       <div class="disp-summary">
-        <div class="disp-summary-icon">${_autoStopFlag ? '⏹' : '🎉'}</div>
+        <div class="disp-summary-icon">${_autoStopFlag ? '⏹' : failedLeads.length > 0 ? '⚠️' : '🎉'}</div>
         <div class="disp-summary-title">${_autoStopFlag ? 'Disparo pausado' : 'Disparo Concluído!'}</div>
-        <div class="disp-summary-sub">${dispState.sent.size} de ${queue.length} mensagens enviadas via 📱 ${instance}</div>
-        <button class="btn btn-primary" style="margin-top:8px" onclick="dispState.step='config';dispState.selected=new Set();_autoStopFlag=false;renderDisparos()">Novo Disparo</button>
+        <div class="disp-summary-sub">${dispState.sent.size} de ${queue.length} enviadas com sucesso via 📱 ${instance}</div>
+        ${failedHtml}
+        <button class="btn btn-primary" style="margin-top:16px" onclick="dispState.step='config';dispState.selected=new Set();_autoStopFlag=false;renderDisparos()">Novo Disparo</button>
       </div>
     </div>`;
 }
