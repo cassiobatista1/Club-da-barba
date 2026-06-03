@@ -2791,11 +2791,17 @@ function renderDisparos() {
               : filtered.map(l => {
                   const checked = dispState.selected.has(l.id);
                   const telClean = l.tel.replace(/\D/g,'');
+                  const waInst = contaWaMap[String(l.id)] || '';
+                  const waColor = waInst ? getWaColor(waInst) : '#888';
+                  const waBadge = waInst
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis" title="${waInst}">📱 ${waInst}</span>`
+                    : `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844;font-weight:600">❓ sem DDD</span>`;
                   return `<div class="disp-lead-item" onclick="dispToggle(${l.id})">
                     <input type="checkbox" class="disp-check" ${checked?'checked':''} onclick="event.stopPropagation();dispToggle(${l.id})">
                     <div style="flex:1;min-width:0">
                       <div class="disp-lead-name">${l.nome}</div>
                       <div class="disp-lead-tel">${formatTel(telClean)}</div>
+                      <div style="margin-top:2px">${waBadge}</div>
                     </div>
                     <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span>
                   </div>`;
