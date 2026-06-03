@@ -2440,7 +2440,7 @@ function renderRelatorios() {
 }
 
 // ── RENDER DISPAROS ───────────────────────────────────
-let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '' };
+let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '', filterWa: '', filterFu: '' };
 
 function confirmDispAccount() {
   const sel = document.getElementById('dispWaInstance');
@@ -2592,12 +2592,17 @@ function renderDisparos() {
   const sfVal = dispState.filterStatus || '';
   const ofVal = dispState.filterOrigem || '';
   const efVal = dispState.filterExec   || '';
+  const wfVal = dispState.filterWa     || '';
+  const ffVal = dispState.filterFu     || '';
+  const today = new Date(); today.setHours(0,0,0,0);
 
   const filtered = leads.filter(l => {
     if (!l.tel || l.tel.replace(/\D/g,'').length < 8) return false;
     if (sfVal && l.status !== sfVal) return false;
     if (ofVal && l.origem !== ofVal) return false;
     if (efVal && l.exec   !== efVal) return false;
+    if (wfVal && (contaWaMap[String(l.id)] || '') !== wfVal) return false;
+    if (ffVal === 'pending' && !(l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status))) return false;
     return true;
   });
 
@@ -2758,6 +2763,22 @@ function renderDisparos() {
                 <option value="">Todos exec.</option>
                 ${execOpts.map(e=>`<option value="${e}" ${efVal===e?'selected':''}>${e}</option>`).join('')}
               </select>
+            </div>
+            <!-- DDD filter chips -->
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px">DDD:</span>
+              <button onclick="dispState.filterWa='';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:${!wfVal?'var(--accent)':'transparent'};color:${!wfVal?'#fff':'var(--text)'};cursor:pointer;font-weight:${!wfVal?700:400}">Todos</button>
+              ${waGetConnectedInstances().map(inst => {
+                const c = getWaColor(inst);
+                const active = wfVal === inst;
+                return `<button onclick="dispState.filterWa='${inst}';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid ${c}66;background:${active?c+'cc':'transparent'};color:${active?'#fff':c};cursor:pointer;font-weight:${active?700:500}">${inst}</button>`;
+              }).join('')}
+            </div>
+            <!-- Follow-up filter chips -->
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px">Follow-up:</span>
+              <button onclick="dispState.filterFu='';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:${ffVal===''?'var(--accent)':'transparent'};color:${ffVal===''?'#fff':'var(--text)'};cursor:pointer;font-weight:${ffVal===''?700:400}">Todos</button>
+              <button onclick="dispState.filterFu='pending';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--gold);background:${ffVal==='pending'?'var(--gold)':'transparent'};color:${ffVal==='pending'?'#000':'var(--gold)'};cursor:pointer;font-weight:${ffVal==='pending'?700:500}">⏰ A partir do 1º Follow-up</button>
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispSelectAll(${JSON.stringify(filtered.map(l=>l.id))})">✓ Sel. todos</button>
