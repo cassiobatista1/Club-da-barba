@@ -1025,6 +1025,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 let leads = [];
 let vendas = [];
 let contaWaMap = {}; // { leadId: instanceName } — persistido em settings
+let lastContactedMap = {}; // { leadId: timestamp } — persistido em settings
 let activeWaTab = ''; // '' = Todos
 
 // Paleta fixa — cada conta WA recebe uma cor estável pelo índice
@@ -1101,6 +1102,9 @@ function renderWaTabs() {
 async function saveContaWaMap() {
   await api('/api/settings?key=contaWaMap', 'PUT', contaWaMap).catch(()=>{});
 }
+async function saveLastContactedMap() {
+  await api('/api/settings?key=lastContactedMap', 'PUT', lastContactedMap).catch(()=>{});
+}
 
 function assignLeadToWa(leadId, instance) {
   contaWaMap[String(leadId)] = instance;
@@ -1165,15 +1169,17 @@ function hideLoading() {
 async function loadData() {
   showLoading();
   try {
-    const [leadsData, vendasData, dbCols, waMapData] = await Promise.all([
+    const [leadsData, vendasData, dbCols, waMapData, lcMapData] = await Promise.all([
       api('/api/leads'),
       api('/api/vendas'),
       api('/api/settings?key=pipelineCols').catch(()=>null),
       api('/api/settings?key=contaWaMap').catch(()=>null),
+      api('/api/settings?key=lastContactedMap').catch(()=>null),
     ]);
     leads  = leadsData  || [];
     vendas = vendasData || [];
     contaWaMap = (waMapData && typeof waMapData === 'object' && !Array.isArray(waMapData)) ? waMapData : {};
+    lastContactedMap = (lcMapData && typeof lcMapData === 'object' && !Array.isArray(lcMapData)) ? lcMapData : {};
     // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
     if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
       localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
@@ -2053,7 +2059,10 @@ function selectKpiCol(key, refresh) {
   } else {
     const allCols = getPipelineCols();
     const AVATAR_COLORS = ['#5A78FF','#54D9F3','#DAADFF','#00C87A','#F5A623','#FF6B6B','#4ECDC4','#45B7D1'];
-    grid.innerHTML = colLeads.map((l, li) => {
+    const sortedColLeads = [...colLeads].sort((a,b) =>
+      (lastContactedMap[String(b.id)] || 0) - (lastContactedMap[String(a.id)] || 0)
+    );
+    grid.innerHTML = sortedColLeads.map((l, li) => {
       const telClean = (l.tel || '').replace(/\D/g, '');
       const waHref   = telClean ? `https://wa.me/55${telClean}` : null;
       const initials = l.nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
@@ -2070,12 +2079,14 @@ function selectKpiCol(key, refresh) {
           onclick="event.stopPropagation();plcChangeStatus(${l.id},'${c.key.replace(/'/g,"\\'")}')"
           title="${c.label||c.key}">${c.label||c.key}</button>`;
       }).join('');
+      const lcTs = lastContactedMap[String(l.id)];
+      const lcLabel = lcTs ? `📤 ${new Date(lcTs).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} ${new Date(lcTs).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}` : '';
       return `<div class="plc" id="plc-${l.id}">
         <div class="plc-row" onclick="openPipelinePanel(${l.id})">
           <div class="plc-avatar" style="background:${avatarColor}">${initials}</div>
           <div class="plc-info">
             <div class="plc-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${l.nome}${waBadgeHtml(contaWaMap[String(l.id)])}</div>
-            <div class="plc-sub">${subParts.join(' · ')||'—'}</div>
+            <div class="plc-sub">${subParts.join(' · ')||'—'}${lcLabel ? ` · <span style="color:#5A78FF;font-size:9px">${lcLabel}</span>` : ''}</div>
           </div>
           <div class="plc-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">${statusLabel}</div>
         </div>
@@ -2609,7 +2620,7 @@ function renderDisparos() {
     if (wfVal && (contaWaMap[String(l.id)] || '') !== wfVal) return false;
     if (ffVal === 'pending' && !(l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status))) return false;
     return true;
-  });
+  }).sort((a,b) => (lastContactedMap[String(a.id)] || 0) - (lastContactedMap[String(b.id)] || 0));
 
   const selCount = [...dispState.selected].filter(id => filtered.find(l => l.id === id)).length;
   const template = dispState.template || '';
@@ -2799,14 +2810,18 @@ function renderDisparos() {
                   const waInst = contaWaMap[String(l.id)] || '';
                   const waColor = waInst ? getWaColor(waInst) : '#888';
                   const waBadge = waInst
-                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis" title="${waInst}">📱 ${waInst}</span>`
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap" title="${waInst}">📱 ${waInst}</span>`
                     : `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844;font-weight:600">❓ sem DDD</span>`;
+                  const lcTs = lastContactedMap[String(l.id)];
+                  const lcBadge = lcTs
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:rgba(90,120,255,0.12);color:#5A78FF;border:1px solid rgba(90,120,255,0.3);font-weight:600">📤 ${new Date(lcTs).toLocaleDateString('pt-BR')}</span>`
+                    : '';
                   return `<div class="disp-lead-item" onclick="dispToggle(${l.id})">
                     <input type="checkbox" class="disp-check" ${checked?'checked':''} onclick="event.stopPropagation();dispToggle(${l.id})">
                     <div style="flex:1;min-width:0">
                       <div class="disp-lead-name">${l.nome}</div>
                       <div class="disp-lead-tel">${formatTel(telClean)}</div>
-                      <div style="margin-top:2px">${waBadge}</div>
+                      <div style="margin-top:2px;display:flex;flex-wrap:wrap;gap:4px">${waBadge}${lcBadge}</div>
                     </div>
                     <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span>
                   </div>`;
@@ -3041,6 +3056,7 @@ async function startDisparoAuto() {
       await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
       dispState.sent.add(lead.id);
       contaWaMap[String(lead.id)] = instance;
+      lastContactedMap[String(lead.id)] = Date.now();
       addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: true });
     } catch(e) {
       failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
@@ -3068,7 +3084,7 @@ async function startDisparoAuto() {
   }
 
   if (cdTimer) clearInterval(cdTimer);
-  if (dispState.sent.size > 0) { await saveContaWaMap(); renderWaTabs(); }
+  if (dispState.sent.size > 0) { await saveContaWaMap(); await saveLastContactedMap(); renderWaTabs(); }
   const failedHtml = failedLeads.length > 0 ? `
     <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
       <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
@@ -3253,7 +3269,9 @@ async function dispSendViaApi(leadId) {
   try {
     await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
     contaWaMap[String(leadId)] = instance;
+    lastContactedMap[String(leadId)] = Date.now();
     saveContaWaMap();
+    saveLastContactedMap();
     addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: true });
     markDisparoSent(leadId);
   } catch(e) {
