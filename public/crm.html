@@ -2617,7 +2617,7 @@ function renderDisparos() {
     if (sfVal && l.status !== sfVal) return false;
     if (ofVal && l.origem !== ofVal) return false;
     if (efVal && l.exec   !== efVal) return false;
-    if (wfVal && (contaWaMap[String(l.id)] || '') !== wfVal) return false;
+    if (wfVal && contaWaMap[String(l.id)] && contaWaMap[String(l.id)] !== wfVal) return false;
     if (ffVal === 'pending' && !(l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status))) return false;
     return true;
   }).sort((a,b) => (lastContactedMap[String(a.id)] || 0) - (lastContactedMap[String(b.id)] || 0));
@@ -2803,7 +2803,7 @@ function renderDisparos() {
           </div>
           <div class="disp-lead-list">
             ${filtered.length===0
-              ? `<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Nenhum lead com telefone neste filtro</div>`
+              ? `<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Nenhum lead encontrado${wfVal?' — todos os leads deste status já estão em outro DDD':''}${ffVal==='pending'?' — nenhum lead com follow-up pendente':''}</div>`
               : filtered.map(l => {
                   const checked = dispState.selected.has(l.id);
                   const telClean = l.tel.replace(/\D/g,'');
