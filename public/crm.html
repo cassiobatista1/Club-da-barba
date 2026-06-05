@@ -2318,7 +2318,7 @@ function renderFollowup() {
     const waInst = contaWaMap[String(l.id)] || '';
     const waColor = waInst ? getWaColor(waInst) : '#888';
     const waBadge = waInst
-      ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 7px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700">📱 ${waInst}</span>`
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 7px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700">📱 ${escHtml(waInst)}</span>`
       : `<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844">❓ sem DDD</span>`;
     return `<div class="follow-item${checked ? ' fu-checked' : ''}" data-fu-id="${l.id}" onclick="${fuSelectMode ? `fuToggleItem(${l.id})` : ''}">
       ${fuSelectMode
@@ -2613,7 +2613,7 @@ function renderDisparos() {
   const today = new Date(); today.setHours(0,0,0,0);
 
   const filtered = leads.filter(l => {
-    if (!l.tel || l.tel.replace(/\D/g,'').length < 8) return false;
+    if (!l.tel || l.tel.replace(/\D/g,'').length < 10) return false;
     if (sfVal && l.status !== sfVal) return false;
     if (ofVal && l.origem !== ofVal) return false;
     if (efVal && l.exec   !== efVal) return false;
@@ -2787,7 +2787,7 @@ function renderDisparos() {
               ${waGetConnectedInstances().map(inst => {
                 const c = getWaColor(inst);
                 const active = wfVal === inst;
-                return `<button onclick="dispState.filterWa='${inst}';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid ${c}66;background:${active?c+'cc':'transparent'};color:${active?'#fff':c};cursor:pointer;font-weight:${active?700:500}">${inst}</button>`;
+                return `<button onclick="dispState.filterWa=${JSON.stringify(inst)};dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid ${c}66;background:${active?c+'cc':'transparent'};color:${active?'#fff':c};cursor:pointer;font-weight:${active?700:500}">${escHtml(inst)}</button>`;
               }).join('')}
             </div>
             <!-- Follow-up filter chips -->
@@ -2810,7 +2810,7 @@ function renderDisparos() {
                   const waInst = contaWaMap[String(l.id)] || '';
                   const waColor = waInst ? getWaColor(waInst) : '#888';
                   const waBadge = waInst
-                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap" title="${waInst}">📱 ${waInst}</span>`
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap" title="${escHtml(waInst)}">📱 ${escHtml(waInst)}</span>`
                     : `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844;font-weight:600">❓ sem DDD</span>`;
                   const lcTs = lastContactedMap[String(l.id)];
                   const lcBadge = lcTs
@@ -2902,7 +2902,7 @@ function formatTel(t) {
 }
 
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function dispFilter(field, val) {
@@ -2991,7 +2991,7 @@ async function startDisparoAuto() {
     return;
   }
   const instance = dispState.confirmedInstance;
-  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
+  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 10);
   if (queue.length === 0) return;
 
   dispState.queue = queue;
@@ -3107,7 +3107,7 @@ function startDisparoQueue() {
     alert('⚠️ Confirme a conta WhatsApp antes de disparar');
     return;
   }
-  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
+  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 10);
   if (queue.length === 0) return;
   dispState.queue    = queue;
   dispState.current  = 0;
@@ -3270,8 +3270,7 @@ async function dispSendViaApi(leadId) {
     await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
     contaWaMap[String(leadId)] = instance;
     lastContactedMap[String(leadId)] = Date.now();
-    saveContaWaMap();
-    saveLastContactedMap();
+    await Promise.all([saveContaWaMap(), saveLastContactedMap()]);
     addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: true });
     markDisparoSent(leadId);
   } catch(e) {
