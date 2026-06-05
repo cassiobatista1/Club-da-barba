@@ -3405,8 +3405,11 @@ async function processImportRows(rows) {
   const btn         = document.getElementById('btnImport');
   btn.disabled = true; btn.textContent = 'Importando...';
 
+  // Build set of existing phone numbers to block duplicates
+  const existingTels = new Set(leads.map(l => (l.tel || '').replace(/\D/g,'')).filter(t => t.length >= 8));
+
   const dataRows = rows.slice(headerRow + 1);
-  let count = 0;
+  let count = 0, skipped = 0;
 
   for (const row of dataRows) {
     const nome = String(row[colMap.nome] || '').trim();
@@ -3429,9 +3432,16 @@ async function processImportRows(rows) {
       obs:      colMap.obs     !== undefined ? String(row[colMap.obs]     || '').trim() : 'Importado via planilha',
     };
 
+    // Block duplicate phone numbers
+    if (payload.tel && payload.tel.length >= 8 && existingTels.has(payload.tel)) {
+      skipped++;
+      continue;
+    }
+
     try {
       const saved = await api('/api/leads', 'POST', payload);
       leads.unshift(saved);
+      if (payload.tel) existingTels.add(payload.tel); // prevent duplicates within same import
       count++;
     } catch(e) { console.warn('Linha ignorada:', e.message); }
   }
@@ -3442,7 +3452,10 @@ async function processImportRows(rows) {
   document.getElementById('csvInput').value = '';
   renderPage(currentPage);
   updateBadges();
-  alert(`✅ ${count} leads importados com sucesso!`);
+  const msg = skipped > 0
+    ? `✅ ${count} leads importados.\n⚠️ ${skipped} número${skipped>1?'s':''} duplicado${skipped>1?'s':''} ignorado${skipped>1?'s':''} (já existiam na base).`
+    : `✅ ${count} leads importados com sucesso!`;
+  alert(msg);
 }
 
 async function importFromText(raw) {
@@ -3453,7 +3466,10 @@ async function importFromText(raw) {
   btn.disabled = true; btn.textContent = 'Importando...';
 
   const lines = raw.split('\n').filter(l => l.trim());
-  let count = 0;
+  let count = 0, skipped = 0;
+
+  // Build set of existing phone numbers to block duplicates
+  const existingTels = new Set(leads.map(l => (l.tel || '').replace(/\D/g,'')).filter(t => t.length >= 8));
 
   for (const line of lines) {
     const parts = line.split(/\t|,|;/).map(p => p.trim()).filter(p => p);
@@ -3465,14 +3481,23 @@ async function importFromText(raw) {
     } else { nome = parts[0]; }
     if (!nome) continue;
 
+    const telClean = tel.replace(/\D/g,'');
+
+    // Block duplicate phone numbers
+    if (telClean && telClean.length >= 8 && existingTels.has(telClean)) {
+      skipped++;
+      continue;
+    }
+
     try {
       const saved = await api('/api/leads', 'POST', {
-        nome, tel: tel.replace(/\D/g,''), carro:'', cidade:'',
+        nome, tel: telClean, carro:'', cidade:'',
         status: statusDef, origem: origemDef, valor: 0,
         followup: new Date().toISOString().split('T')[0],
         exec: execDef, obs: 'Importado via texto',
       });
       leads.unshift(saved);
+      if (telClean) existingTels.add(telClean); // prevent duplicates within same import
       count++;
     } catch(e) { console.warn('Linha ignorada:', e.message); }
   }
@@ -3482,7 +3507,10 @@ async function importFromText(raw) {
   document.getElementById('csvInput').value = '';
   renderPage(currentPage);
   updateBadges();
-  alert(`✅ ${count} leads importados com sucesso!`);
+  const msg = skipped > 0
+    ? `✅ ${count} leads importados.\n⚠️ ${skipped} número${skipped>1?'s':''} duplicado${skipped>1?'s':''} ignorado${skipped>1?'s':''} (já existiam na base).`
+    : `✅ ${count} leads importados com sucesso!`;
+  alert(msg);
 }
 
 // ── PIPELINE ROLES CONFIG ────────────────────────────
