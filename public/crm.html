@@ -2304,13 +2304,18 @@ function renderFollowup() {
   el.innerHTML = withFollow.map(l => {
     const fs = followStatus(l.followup);
     const checked = fuSelected.has(l.id);
+    const waInst = contaWaMap[String(l.id)] || '';
+    const waColor = waInst ? getWaColor(waInst) : '#888';
+    const waBadge = waInst
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 7px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700">📱 ${waInst}</span>`
+      : `<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844">❓ sem DDD</span>`;
     return `<div class="follow-item${checked ? ' fu-checked' : ''}" data-fu-id="${l.id}" onclick="${fuSelectMode ? `fuToggleItem(${l.id})` : ''}">
       ${fuSelectMode
         ? `<input type="checkbox" class="fu-item-chk" data-fu-chk="${l.id}" ${checked ? 'checked' : ''} onclick="event.stopPropagation();fuToggleItem(${l.id})">`
         : `<div class="follow-avatar">${l.nome[0]}</div>`
       }
       <div class="follow-info" style="cursor:${fuSelectMode ? 'pointer' : 'default'}">
-        <div class="follow-name">${l.nome}</div>
+        <div class="follow-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${l.nome} ${waBadge}</div>
         <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${getColLabel(l.status)||l.status}</div>
         ${l.obs ? `<div class="follow-detail" style="margin-top:2px;font-style:italic">${l.obs.slice(0,60)}${l.obs.length>60?'...':''}</div>` : ''}
       </div>
