@@ -2269,7 +2269,11 @@ async function fuBulkChangeStatus() {
     if (idx < 0) continue;
     const lead = leads[idx];
     autoVendaIfWon(lead, newStatus);
-    const updated = await api(`/api/leads/${id}`, 'PUT', { status: newStatus });
+    const updated = await api(`/api/leads/${id}`, 'PUT', {
+      nome: lead.nome, tel: lead.tel, carro: lead.carro, cidade: lead.cidade,
+      status: newStatus, origem: lead.origem, valor: lead.valor,
+      followup: lead.followup, exec: lead.exec, obs: lead.obs
+    });
     if (updated) leads[idx] = { ...lead, ...updated };
   }
   fuClearSelection();
