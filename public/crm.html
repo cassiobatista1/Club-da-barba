@@ -1100,9 +1100,11 @@ function renderWaTabs() {
 }
 
 async function saveContaWaMap() {
+  try { localStorage.setItem('contaWaMap_bk', JSON.stringify(contaWaMap)); } catch {}
   await api('/api/settings?key=contaWaMap', 'PUT', contaWaMap).catch(()=>{});
 }
 async function saveLastContactedMap() {
+  try { localStorage.setItem('lastContactedMap_bk', JSON.stringify(lastContactedMap)); } catch {}
   await api('/api/settings?key=lastContactedMap', 'PUT', lastContactedMap).catch(()=>{});
 }
 
@@ -1178,8 +1180,15 @@ async function loadData() {
     ]);
     leads  = leadsData  || [];
     vendas = vendasData || [];
-    contaWaMap = (waMapData && typeof waMapData === 'object' && !Array.isArray(waMapData)) ? waMapData : {};
-    lastContactedMap = (lcMapData && typeof lcMapData === 'object' && !Array.isArray(lcMapData)) ? lcMapData : {};
+    // Supabase is source of truth; fall back to localStorage if DB returns empty
+    const _lsWa  = () => { try { return JSON.parse(localStorage.getItem('contaWaMap_bk')  || 'null'); } catch { return null; } };
+    const _lsLc  = () => { try { return JSON.parse(localStorage.getItem('lastContactedMap_bk') || 'null'); } catch { return null; } };
+    const _isMap = v => v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0;
+    contaWaMap      = _isMap(waMapData)  ? waMapData  : (_isMap(_lsWa())  ? _lsWa()  : {});
+    lastContactedMap = _isMap(lcMapData) ? lcMapData  : (_isMap(_lsLc())  ? _lsLc()  : {});
+    // Back-fill: if Supabase was empty but we recovered from localStorage, save back immediately
+    if (!_isMap(waMapData)  && _isMap(contaWaMap))      saveContaWaMap();
+    if (!_isMap(lcMapData)  && _isMap(lastContactedMap)) saveLastContactedMap();
     // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
     if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
       localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
