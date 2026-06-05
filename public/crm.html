@@ -1025,6 +1025,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 let leads = [];
 let vendas = [];
 let contaWaMap = {}; // { leadId: instanceName } — persistido em settings
+let lastContactedMap = {}; // { leadId: timestamp } — persistido em settings
 let activeWaTab = ''; // '' = Todos
 
 // Paleta fixa — cada conta WA recebe uma cor estável pelo índice
@@ -1099,7 +1100,12 @@ function renderWaTabs() {
 }
 
 async function saveContaWaMap() {
+  try { localStorage.setItem('contaWaMap_bk', JSON.stringify(contaWaMap)); } catch {}
   await api('/api/settings?key=contaWaMap', 'PUT', contaWaMap).catch(()=>{});
+}
+async function saveLastContactedMap() {
+  try { localStorage.setItem('lastContactedMap_bk', JSON.stringify(lastContactedMap)); } catch {}
+  await api('/api/settings?key=lastContactedMap', 'PUT', lastContactedMap).catch(()=>{});
 }
 
 function assignLeadToWa(leadId, instance) {
@@ -1165,15 +1171,24 @@ function hideLoading() {
 async function loadData() {
   showLoading();
   try {
-    const [leadsData, vendasData, dbCols, waMapData] = await Promise.all([
+    const [leadsData, vendasData, dbCols, waMapData, lcMapData] = await Promise.all([
       api('/api/leads'),
       api('/api/vendas'),
       api('/api/settings?key=pipelineCols').catch(()=>null),
       api('/api/settings?key=contaWaMap').catch(()=>null),
+      api('/api/settings?key=lastContactedMap').catch(()=>null),
     ]);
     leads  = leadsData  || [];
     vendas = vendasData || [];
-    contaWaMap = (waMapData && typeof waMapData === 'object' && !Array.isArray(waMapData)) ? waMapData : {};
+    // Supabase is source of truth; fall back to localStorage if DB returns empty
+    const _lsWa  = () => { try { return JSON.parse(localStorage.getItem('contaWaMap_bk')  || 'null'); } catch { return null; } };
+    const _lsLc  = () => { try { return JSON.parse(localStorage.getItem('lastContactedMap_bk') || 'null'); } catch { return null; } };
+    const _isMap = v => v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0;
+    contaWaMap      = _isMap(waMapData)  ? waMapData  : (_isMap(_lsWa())  ? _lsWa()  : {});
+    lastContactedMap = _isMap(lcMapData) ? lcMapData  : (_isMap(_lsLc())  ? _lsLc()  : {});
+    // Back-fill: if Supabase was empty but we recovered from localStorage, save back immediately
+    if (!_isMap(waMapData)  && _isMap(contaWaMap))      saveContaWaMap();
+    if (!_isMap(lcMapData)  && _isMap(lastContactedMap)) saveLastContactedMap();
     // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
     if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
       localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
@@ -2053,7 +2068,10 @@ function selectKpiCol(key, refresh) {
   } else {
     const allCols = getPipelineCols();
     const AVATAR_COLORS = ['#5A78FF','#54D9F3','#DAADFF','#00C87A','#F5A623','#FF6B6B','#4ECDC4','#45B7D1'];
-    grid.innerHTML = colLeads.map((l, li) => {
+    const sortedColLeads = [...colLeads].sort((a,b) =>
+      (lastContactedMap[String(b.id)] || 0) - (lastContactedMap[String(a.id)] || 0)
+    );
+    grid.innerHTML = sortedColLeads.map((l, li) => {
       const telClean = (l.tel || '').replace(/\D/g, '');
       const waHref   = telClean ? `https://wa.me/55${telClean}` : null;
       const initials = l.nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
@@ -2070,12 +2088,14 @@ function selectKpiCol(key, refresh) {
           onclick="event.stopPropagation();plcChangeStatus(${l.id},'${c.key.replace(/'/g,"\\'")}')"
           title="${c.label||c.key}">${c.label||c.key}</button>`;
       }).join('');
+      const lcTs = lastContactedMap[String(l.id)];
+      const lcLabel = lcTs ? `📤 ${new Date(lcTs).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} ${new Date(lcTs).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}` : '';
       return `<div class="plc" id="plc-${l.id}">
         <div class="plc-row" onclick="openPipelinePanel(${l.id})">
           <div class="plc-avatar" style="background:${avatarColor}">${initials}</div>
           <div class="plc-info">
             <div class="plc-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${l.nome}${waBadgeHtml(contaWaMap[String(l.id)])}</div>
-            <div class="plc-sub">${subParts.join(' · ')||'—'}</div>
+            <div class="plc-sub">${subParts.join(' · ')||'—'}${lcLabel ? ` · <span style="color:#5A78FF;font-size:9px">${lcLabel}</span>` : ''}</div>
           </div>
           <div class="plc-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">${statusLabel}</div>
         </div>
@@ -2258,7 +2278,11 @@ async function fuBulkChangeStatus() {
     if (idx < 0) continue;
     const lead = leads[idx];
     autoVendaIfWon(lead, newStatus);
-    const updated = await api(`/api/leads/${id}`, 'PUT', { status: newStatus });
+    const updated = await api(`/api/leads/${id}`, 'PUT', {
+      nome: lead.nome, tel: lead.tel, carro: lead.carro, cidade: lead.cidade,
+      status: newStatus, origem: lead.origem, valor: lead.valor,
+      followup: lead.followup, exec: lead.exec, obs: lead.obs
+    });
     if (updated) leads[idx] = { ...lead, ...updated };
   }
   fuClearSelection();
@@ -2304,13 +2328,18 @@ function renderFollowup() {
   el.innerHTML = withFollow.map(l => {
     const fs = followStatus(l.followup);
     const checked = fuSelected.has(l.id);
+    const waInst = contaWaMap[String(l.id)] || '';
+    const waColor = waInst ? getWaColor(waInst) : '#888';
+    const waBadge = waInst
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 7px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700">📱 ${escHtml(waInst)}</span>`
+      : `<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844">❓ sem DDD</span>`;
     return `<div class="follow-item${checked ? ' fu-checked' : ''}" data-fu-id="${l.id}" onclick="${fuSelectMode ? `fuToggleItem(${l.id})` : ''}">
       ${fuSelectMode
         ? `<input type="checkbox" class="fu-item-chk" data-fu-chk="${l.id}" ${checked ? 'checked' : ''} onclick="event.stopPropagation();fuToggleItem(${l.id})">`
         : `<div class="follow-avatar">${l.nome[0]}</div>`
       }
       <div class="follow-info" style="cursor:${fuSelectMode ? 'pointer' : 'default'}">
-        <div class="follow-name">${l.nome}</div>
+        <div class="follow-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${l.nome} ${waBadge}</div>
         <div class="follow-detail">${l.carro||'—'} · ${l.cidade||'—'} · ${getColLabel(l.status)||l.status}</div>
         ${l.obs ? `<div class="follow-detail" style="margin-top:2px;font-style:italic">${l.obs.slice(0,60)}${l.obs.length>60?'...':''}</div>` : ''}
       </div>
@@ -2440,7 +2469,7 @@ function renderRelatorios() {
 }
 
 // ── RENDER DISPAROS ───────────────────────────────────
-let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '' };
+let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '', filterWa: '', filterFu: '' };
 
 function confirmDispAccount() {
   const sel = document.getElementById('dispWaInstance');
@@ -2592,14 +2621,19 @@ function renderDisparos() {
   const sfVal = dispState.filterStatus || '';
   const ofVal = dispState.filterOrigem || '';
   const efVal = dispState.filterExec   || '';
+  const wfVal = dispState.filterWa     || '';
+  const ffVal = dispState.filterFu     || '';
+  const today = new Date(); today.setHours(0,0,0,0);
 
   const filtered = leads.filter(l => {
-    if (!l.tel || l.tel.replace(/\D/g,'').length < 8) return false;
+    if (!l.tel || l.tel.replace(/\D/g,'').length < 10) return false;
     if (sfVal && l.status !== sfVal) return false;
     if (ofVal && l.origem !== ofVal) return false;
     if (efVal && l.exec   !== efVal) return false;
+    if (wfVal && contaWaMap[String(l.id)] && contaWaMap[String(l.id)] !== wfVal) return false;
+    if (ffVal === 'pending' && !(l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status))) return false;
     return true;
-  });
+  }).sort((a,b) => (lastContactedMap[String(a.id)] || 0) - (lastContactedMap[String(b.id)] || 0));
 
   const selCount = [...dispState.selected].filter(id => filtered.find(l => l.id === id)).length;
   const template = dispState.template || '';
@@ -2759,6 +2793,22 @@ function renderDisparos() {
                 ${execOpts.map(e=>`<option value="${e}" ${efVal===e?'selected':''}>${e}</option>`).join('')}
               </select>
             </div>
+            <!-- DDD filter chips -->
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px">DDD:</span>
+              <button onclick="dispState.filterWa='';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:${!wfVal?'var(--accent)':'transparent'};color:${!wfVal?'#fff':'var(--text)'};cursor:pointer;font-weight:${!wfVal?700:400}">Todos</button>
+              ${waGetConnectedInstances().map(inst => {
+                const c = getWaColor(inst);
+                const active = wfVal === inst;
+                return `<button onclick="dispState.filterWa=${JSON.stringify(inst)};dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid ${c}66;background:${active?c+'cc':'transparent'};color:${active?'#fff':c};cursor:pointer;font-weight:${active?700:500}">${escHtml(inst)}</button>`;
+              }).join('')}
+            </div>
+            <!-- Follow-up filter chips -->
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px">Follow-up:</span>
+              <button onclick="dispState.filterFu='';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:${ffVal===''?'var(--accent)':'transparent'};color:${ffVal===''?'#fff':'var(--text)'};cursor:pointer;font-weight:${ffVal===''?700:400}">Todos</button>
+              <button onclick="dispState.filterFu='pending';dispState.selected.clear();renderDisparos()" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--gold);background:${ffVal==='pending'?'var(--gold)':'transparent'};color:${ffVal==='pending'?'#000':'var(--gold)'};cursor:pointer;font-weight:${ffVal==='pending'?700:500}">⏰ A partir do 1º Follow-up</button>
+            </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispSelectAll(${JSON.stringify(filtered.map(l=>l.id))})">✓ Sel. todos</button>
               <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispClearAll()">✕ Limpar</button>
@@ -2766,15 +2816,25 @@ function renderDisparos() {
           </div>
           <div class="disp-lead-list">
             ${filtered.length===0
-              ? `<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Nenhum lead com telefone neste filtro</div>`
+              ? `<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">Nenhum lead encontrado${wfVal?' — todos os leads deste status já estão em outro DDD':''}${ffVal==='pending'?' — nenhum lead com follow-up pendente':''}</div>`
               : filtered.map(l => {
                   const checked = dispState.selected.has(l.id);
                   const telClean = l.tel.replace(/\D/g,'');
+                  const waInst = contaWaMap[String(l.id)] || '';
+                  const waColor = waInst ? getWaColor(waInst) : '#888';
+                  const waBadge = waInst
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap" title="${escHtml(waInst)}">📱 ${escHtml(waInst)}</span>`
+                    : `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844;font-weight:600">❓ sem DDD</span>`;
+                  const lcTs = lastContactedMap[String(l.id)];
+                  const lcBadge = lcTs
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:rgba(90,120,255,0.12);color:#5A78FF;border:1px solid rgba(90,120,255,0.3);font-weight:600">📤 ${new Date(lcTs).toLocaleDateString('pt-BR')}</span>`
+                    : '';
                   return `<div class="disp-lead-item" onclick="dispToggle(${l.id})">
                     <input type="checkbox" class="disp-check" ${checked?'checked':''} onclick="event.stopPropagation();dispToggle(${l.id})">
                     <div style="flex:1;min-width:0">
                       <div class="disp-lead-name">${l.nome}</div>
                       <div class="disp-lead-tel">${formatTel(telClean)}</div>
+                      <div style="margin-top:2px;display:flex;flex-wrap:wrap;gap:4px">${waBadge}${lcBadge}</div>
                     </div>
                     <span class="badge ${statusBadgeClass(l.status)}" style="font-size:9px">${l.status}</span>
                   </div>`;
@@ -2855,7 +2915,7 @@ function formatTel(t) {
 }
 
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function dispFilter(field, val) {
@@ -2944,7 +3004,7 @@ async function startDisparoAuto() {
     return;
   }
   const instance = dispState.confirmedInstance;
-  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
+  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 10);
   if (queue.length === 0) return;
 
   dispState.queue = queue;
@@ -3009,6 +3069,7 @@ async function startDisparoAuto() {
       await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
       dispState.sent.add(lead.id);
       contaWaMap[String(lead.id)] = instance;
+      lastContactedMap[String(lead.id)] = Date.now();
       addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: true });
     } catch(e) {
       failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
@@ -3036,7 +3097,7 @@ async function startDisparoAuto() {
   }
 
   if (cdTimer) clearInterval(cdTimer);
-  if (dispState.sent.size > 0) { await saveContaWaMap(); renderWaTabs(); }
+  if (dispState.sent.size > 0) { await saveContaWaMap(); await saveLastContactedMap(); renderWaTabs(); }
   const failedHtml = failedLeads.length > 0 ? `
     <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
       <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
@@ -3059,7 +3120,7 @@ function startDisparoQueue() {
     alert('⚠️ Confirme a conta WhatsApp antes de disparar');
     return;
   }
-  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 8);
+  const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 10);
   if (queue.length === 0) return;
   dispState.queue    = queue;
   dispState.current  = 0;
@@ -3221,7 +3282,8 @@ async function dispSendViaApi(leadId) {
   try {
     await api('/api/whatsapp/send', 'POST', { instance, phone: lead.tel, message: msg });
     contaWaMap[String(leadId)] = instance;
-    saveContaWaMap();
+    lastContactedMap[String(leadId)] = Date.now();
+    await Promise.all([saveContaWaMap(), saveLastContactedMap()]);
     addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: true });
     markDisparoSent(leadId);
   } catch(e) {
