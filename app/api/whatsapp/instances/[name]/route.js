@@ -24,3 +24,23 @@ export async function GET(req, { params }) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
+
+// POST /api/whatsapp/instances/[name] — gera código de pareamento (sem câmera)
+export async function POST(req, { params }) {
+  if (!EVO_URL) return Response.json({ error: 'Evolution API não configurada' }, { status: 503 });
+  const { name } = await params;
+  const body = await req.json().catch(() => ({}));
+  const phone = (body.phone || '').replace(/\D/g, '');
+  if (!phone) return Response.json({ error: 'phone obrigatório' }, { status: 400 });
+  try {
+    const res = await fetch(`${EVO_URL}/instance/pairingCode/${name}`, {
+      method: 'POST',
+      headers: evoHeaders(),
+      body: JSON.stringify({ number: phone }),
+    });
+    const data = await res.json();
+    return Response.json(data, { status: res.ok ? 200 : 400 });
+  } catch (e) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}
