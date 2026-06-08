@@ -18,17 +18,15 @@ export async function GET() {
 
 export async function POST(req) {
   if (!EVO_URL) return Response.json({ error: 'Evolution API não configurada' }, { status: 503 });
-  const { name } = await req.json();
+  const { name, phone } = await req.json();
   if (!name?.trim()) return Response.json({ error: 'Nome obrigatório' }, { status: 400 });
   try {
+    const payload = { instanceName: name.trim(), qrcode: true, integration: 'WHATSAPP-BAILEYS' };
+    if (phone) payload.number = String(phone).replace(/\D/g, '');
     const res = await fetch(`${EVO_URL}/instance/create`, {
       method: 'POST',
       headers: evoHeaders(),
-      body: JSON.stringify({
-        instanceName: name.trim(),
-        qrcode: true,
-        integration: 'WHATSAPP-BAILEYS',
-      }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     return Response.json(data, { status: res.ok ? 201 : 400 });

@@ -3692,17 +3692,27 @@ async function waConnect(name) {
 
 async function waPairingCode(name) {
   const qrEl = document.getElementById(`waQr-${name}`);
-  const phone = prompt('Digite seu número do WhatsApp com DDD (ex: 11999998888):');
+  const phone = prompt(
+    'Digite o número do WhatsApp desta conta (com DDD, ex: 11999998888):\n\n' +
+    'ATENÇÃO: a conta será removida e recriada vinculada a este número para gerar o código de pareamento.'
+  );
   if (!phone?.trim()) return;
   const digits = phone.replace(/\D/g,'');
   if (digits.length < 10) { alert('Número inválido. Digite DDD + número (ex: 11999998888)'); return; }
   const fullPhone = digits.startsWith('55') ? digits : '55' + digits;
-  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
+  if (!confirm(`Recriar a conta "${name}" vinculada ao número ${fullPhone}?\n\nIsso é necessário para gerar o código de pareamento.`)) return;
+
+  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Removendo conta antiga...</div>`;
   try {
-    // Passa o número ao connect — Evolution API chama requestPairingCode(number) internamente
-    const res = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=qrcode&number=${fullPhone}`);
-    const code = res.pairingCode || res.code;
-    if (code && !/^data:/.test(code) && code.length <= 12) {
+    await api(`/api/whatsapp/instances?name=${encodeURIComponent(name)}`, 'DELETE').catch(()=>{});
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Recriando conta com número vinculado...</div>`;
+    const created = await api('/api/whatsapp/instances', 'POST', { name, phone: fullPhone });
+    if (created.error) throw new Error(created.error);
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
+    await new Promise(r => setTimeout(r, 2500));
+    const res = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=qrcode`);
+    const code = res.pairingCode;
+    if (code) {
       if (qrEl) qrEl.innerHTML = `
         <div style="text-align:center;padding:16px">
           <div style="font-size:11px;color:var(--muted);margin-bottom:8px">CÓDIGO DE PAREAMENTO</div>
@@ -3710,19 +3720,18 @@ async function waPairingCode(name) {
           <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
             Abra o WhatsApp → <b>Configurações</b> → <b>Dispositivos conectados</b><br>
             → <b>Conectar dispositivo</b> → <b>Conectar com número de telefone</b><br>
-            → Digite o código acima
+            → Digite o código acima (válido ~2 minutos)
           </div>
         </div>`;
       waStartPolling(name);
     } else if (res.base64) {
-      // API não retornou pairing code — mostrar QR como fallback e informar
       const src = res.base64.startsWith('data:') ? res.base64 : `data:image/png;base64,${res.base64}`;
       if (qrEl) qrEl.innerHTML = `
-        <div class="wa-qr-msg" style="color:var(--warn,#f59e0b);margin-bottom:8px">⚠ Esta instância não suporta código — use o QR abaixo:</div>
+        <div class="wa-qr-msg" style="color:var(--warn,#f59e0b);margin-bottom:8px">⚠ Código não disponível — escaneie o QR:</div>
         <div class="wa-qr"><img src="${src}" alt="QR Code"/></div>`;
       waStartPolling(name);
     } else {
-      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${escHtml(JSON.stringify(res))}</div>`;
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Resposta: ${escHtml(JSON.stringify(res))}</div>`;
     }
   } catch(e) {
     if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${escHtml(e.message)}</div>`;
