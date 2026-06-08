@@ -3646,7 +3646,7 @@ function waRenderGrid() {
       </div>
       <div id="waQr-${name}">${state === 'open' ? `<div class="wa-qr-msg" style="color:var(--green)">✅ WhatsApp conectado e pronto para uso</div>` : `<div class="wa-qr-msg">Clique em "Conectar" para gerar o QR Code</div>`}</div>
       <div class="wa-actions">
-        ${state !== 'open' ? `<button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Conectar / QR Code</button>` : ''}
+        ${state !== 'open' ? `<button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Conectar / QR Code</button><button class="wa-btn-sm wa-btn-connect" onclick="waPairingCode('${name}')" style="background:var(--accent2,#7c5cbf)">📱 Código (sem câmera)</button>` : ''}
         ${state === 'open' ? `<button class="wa-btn-sm wa-btn-disconnect" onclick="waDisconnect('${name}')">⏏ Desconectar</button>` : ''}
         <button class="wa-btn-sm wa-btn-delete" onclick="waDelete('${name}')">🗑 Remover</button>
       </div>
@@ -3687,6 +3687,38 @@ async function waConnect(name) {
     }
   } catch(e) {
     if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${e.message}</div>`;
+  }
+}
+
+async function waPairingCode(name) {
+  const qrEl = document.getElementById(`waQr-${name}`);
+  const phone = prompt('Digite seu número do WhatsApp com DDD (ex: 11999998888):');
+  if (!phone?.trim()) return;
+  const digits = phone.replace(/\D/g,'');
+  if (digits.length < 10) { alert('Número inválido. Digite DDD + número (ex: 11999998888)'); return; }
+  const fullPhone = digits.startsWith('55') ? digits : '55' + digits;
+  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
+  try {
+    const res = await api(`/api/whatsapp/instances/${name}`, 'POST', { phone: fullPhone });
+    if (res.code) {
+      if (qrEl) qrEl.innerHTML = `
+        <div style="text-align:center;padding:16px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">CÓDIGO DE PAREAMENTO</div>
+          <div style="font-size:36px;font-weight:900;letter-spacing:8px;font-family:'DM Mono',monospace;color:var(--accent)">${escHtml(res.code)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
+            Abra o WhatsApp → <b>Configurações</b> → <b>Dispositivos conectados</b><br>
+            → <b>Conectar dispositivo</b> → <b>Conectar com número de telefone</b><br>
+            → Digite o código acima
+          </div>
+        </div>`;
+      waStartPolling(name);
+    } else if (res.error) {
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${escHtml(res.error)}</div>`;
+    } else {
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⚠ Resposta inesperada. Tente novamente.</div>`;
+    }
+  } catch(e) {
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Erro: ${escHtml(e.message)}</div>`;
   }
 }
 
