@@ -315,7 +315,7 @@
     grid.className = 'partners-grid';
 
     parceiros.forEach(p => {
-      const url = `${BASE_URL}/indicacao?ref=${encodeURIComponent(p.ref)}`;
+      const url = `${BASE_URL}/indicacao?p=${encodeURIComponent(p.ref)}`;
       const count = countLeads(p.ref);
       const card = document.createElement('div');
       card.className = 'partner-card';
@@ -345,7 +345,7 @@
 
     // Generate QR codes after DOM insertion
     parceiros.forEach(p => {
-      const url = `${BASE_URL}/indicacao?ref=${encodeURIComponent(p.ref)}`;
+      const url = `${BASE_URL}/indicacao?p=${encodeURIComponent(p.ref)}`;
       new QRCode(document.getElementById(`qr-${p.ref}`), {
         text: url,
         width: 160,

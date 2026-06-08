@@ -2,7 +2,7 @@ import { initDb } from '@/lib/db';
 
 export async function POST(req) {
   try {
-    const { nome, placa, uso, tel, ref } = await req.json();
+    const { nome, placa, uso, tel, p } = await req.json();
 
     if (!nome?.trim() || !placa?.trim() || !uso) {
       return Response.json({ error: 'Campos obrigatórios ausentes' }, { status: 400 });
@@ -12,11 +12,11 @@ export async function POST(req) {
 
     const { data, error } = await db.from('leads').insert({
       nome: nome.trim(),
-      tel: tel?.trim() || '',
+      tel: tel?.replace(/\D/g, '') || '',
       carro: placa.trim().toUpperCase(),
       cidade: '',
       status: 'Novo',
-      origem: `QR-${ref || 'direto'}`,
+      origem: `QR-${p || 'direto'}`,
       valor: 0,
       followup: '',
       exec: '',
