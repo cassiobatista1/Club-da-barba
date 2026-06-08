@@ -3697,8 +3697,11 @@ async function waPairingCode(name) {
   const digits = phone.replace(/\D/g,'');
   if (digits.length < 10) { alert('Número inválido. Digite DDD + número (ex: 11999998888)'); return; }
   const fullPhone = digits.startsWith('55') ? digits : '55' + digits;
-  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
+  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Iniciando sessão...</div>`;
   try {
+    // Evolution API exige que connect seja chamado primeiro para inicializar a sessão
+    await api(`/api/whatsapp/instances/${name}?action=qrcode`).catch(()=>{});
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
     const res = await api(`/api/whatsapp/instances/${name}`, 'POST', { phone: fullPhone });
     if (res.code) {
       if (qrEl) qrEl.innerHTML = `
