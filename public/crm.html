@@ -1142,18 +1142,27 @@ async function assignAllUntaggedLeads(instance) {
 let currentPage = 'dashboard';
 
 // ── API HELPER ─────────────────────────────────────────
-async function api(url, method = 'GET', body = null) {
+async function api(url, method = 'GET', body = null, _attempt = 0) {
   const opts = { method, headers: {} };
   if (body) {
     opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);
   }
-  const res = await fetch(url, opts);
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(txt || res.statusText);
+  try {
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || res.statusText);
+    }
+    return res.json();
+  } catch(e) {
+    // Retry once on transient network errors (Failed to fetch / connection reset)
+    if (_attempt === 0 && (e.message === 'Failed to fetch' || e.message === 'NetworkError' || e.name === 'TypeError')) {
+      await new Promise(r => setTimeout(r, 2000));
+      return api(url, method, body, 1);
+    }
+    throw e;
   }
-  return res.json();
 }
 
 // ── LOADING BAR ────────────────────────────────────────
