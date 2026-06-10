@@ -2578,6 +2578,7 @@ function setGlobalWaTab(inst) {
   else if (activeId === 'followup') renderFollowup();
   else if (activeId === 'vendas') renderVendas();
   else if (activeId === 'relatorios') renderRelatorios();
+  else if (activeId === 'disparos') { dispState.filterWa = inst; dispState.selected.clear(); saveDispFilters(); renderDisparos(); }
 }
 
 let dispTemplates = [];
@@ -2802,7 +2803,7 @@ function renderDisparos() {
               ${waGetConnectedInstances().map(inst => {
                 const c = getWaColor(inst);
                 const active = wfVal === inst;
-                return `<button onclick="setDispFilterWa(${JSON.stringify(inst)})" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid ${c}66;background:${active?c+'cc':'transparent'};color:${active?'#fff':c};cursor:pointer;font-weight:${active?700:500}">${escHtml(inst)}</button>`;
+                return `<button onclick="setDispFilterWa('${inst.replace(/'/g,"\\'")}')` + `" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid ${c}66;background:${active?c+'cc':'transparent'};color:${active?'#fff':c};cursor:pointer;font-weight:${active?700:500}">${escHtml(inst)}</button>`;
               }).join('')}
             </div>
             <!-- Follow-up filter chips -->
