@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Parceiros – Club da Barba</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0d0d0d;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #111;
+      border-bottom: 2px solid #c9a227;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { font-size: 18px; font-weight: 800; color: #c9a227; letter-spacing: 2px; text-transform: uppercase; }
+    .brand-sub { font-size: 9px; color: #555; letter-spacing: 3px; text-transform: uppercase; }
+    .header-link {
+      font-size: 12px; color: #666; text-decoration: none;
+      border: 1px solid #2a2a2a; padding: 6px 12px; border-radius: 6px;
+      transition: color .2s, border-color .2s;
+    }
+    .header-link:hover { color: #c9a227; border-color: #c9a227; }
+
+    main { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* Stats bar */
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      flex: 1; min-width: 120px;
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .stat-value { font-size: 28px; font-weight: 800; color: #c9a227; }
+    .stat-label { font-size: 11px; color: #666; margin-top: 2px; }
+
+    /* Add form */
+    .add-section {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .section-title { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .add-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .add-row input {
+      flex: 1; min-width: 180px;
+      background: #1a1a1a;
+      border: 1.5px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 14px;
+      color: #fff;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .add-row input:focus { border-color: #c9a227; }
+    .add-row input::placeholder { color: #444; }
+    .btn-add {
+      padding: 11px 20px;
+      background: #c9a227;
+      color: #0d0d0d;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .btn-add:hover { background: #d9b030; }
+    .hint { font-size: 11px; color: #555; margin-top: 8px; }
+
+    /* Partner cards */
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .partner-card {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .partner-name { font-size: 15px; font-weight: 600; }
+    .ref-code {
+      font-size: 11px;
+      background: rgba(201,162,39,.1);
+      color: #c9a227;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: nowrap;
+    }
+
+    .btn-delete {
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #666;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+      flex-shrink: 0;
+    }
+    .btn-delete:hover { color: #e05050; border-color: #e05050; }
+
+    .qr-wrap {
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+    }
+
+    .card-url {
+      font-size: 11px;
+      color: #555;
+      font-family: monospace;
+      word-break: break-all;
+      line-height: 1.5;
+      background: #0d0d0d;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #1e1e1e;
+    }
+
+    .card-actions { display: flex; gap: 8px; }
+    .btn-action {
+      flex: 1;
+      padding: 9px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: #aaa;
+      transition: color .2s, border-color .2s, background .2s;
+      text-align: center;
+    }
+    .btn-action:hover { border-color: #c9a227; color: #c9a227; }
+    .btn-action.primary { background: rgba(201,162,39,.1); border-color: #c9a227; color: #c9a227; }
+    .btn-action.primary:hover { background: rgba(201,162,39,.2); }
+
+    .lead-count {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      padding-top: 2px;
+    }
+    .lead-count strong { color: #c9a227; font-size: 14px; }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 48px 24px;
+      color: #444;
+    }
+    .empty svg { margin-bottom: 12px; opacity: .3; }
+    .empty p { font-size: 14px; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 60px; color: #444; font-size: 14px; }
+    .spin {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid #2a2a2a; border-top-color: #c9a227;
+      border-radius: 50%; animation: rot .7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1e1e1e; border: 1px solid #333; color: #e0e0e0;
+      padding: 10px 20px; border-radius: 8px; font-size: 13px;
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+      white-space: nowrap; z-index: 999;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">✂ Club da Barba</div>
+    <div class="brand-sub">Gestão de QR Parceiros</div>
+  </div>
+  <a href="/crm.html" class="header-link">← Voltar ao CRM</a>
+</header>
+
+<main>
+
+  <div class="stats" id="statsBar">
+    <div class="stat-card">
+      <div class="stat-value" id="statTotal">–</div>
+      <div class="stat-label">Parceiros ativos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statLeads">–</div>
+      <div class="stat-label">Leads via QR Code</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statMes">–</div>
+      <div class="stat-label">Leads este mês</div>
+    </div>
+  </div>
+
+  <div class="add-section">
+    <div class="section-title">Adicionar parceiro</div>
+    <div class="add-row">
+      <input type="text" id="inputNome" placeholder="Nome do parceiro / carro (ex: João – Gol Prata)"
+             autocomplete="off" autocapitalize="words">
+      <input type="text" id="inputRef" placeholder="Código (ex: joao-gol) – opcional"
+             autocomplete="off" autocapitalize="none"
+             oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-{2,}/g,'-')">
+      <button class="btn-add" onclick="addParceiro()">+ Adicionar</button>
+    </div>
+    <div class="hint">O código deve ser único. Se deixado em branco, será gerado automaticamente.</div>
+  </div>
+
+  <div id="gridContainer">
+    <div class="loading"><span class="spin"></span>Carregando parceiros…</div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let parceiros = [];
+  let allLeads = [];
+  const BASE_URL = location.origin;
+
+  async function load() {
+    try {
+      const [pRes, lRes] = await Promise.all([
+        fetch('/api/settings?key=parceiros'),
+        fetch('/api/leads'),
+      ]);
+      const pData = await pRes.json();
+      allLeads = lRes.ok ? await lRes.json() : [];
+      parceiros = Array.isArray(pData?.value) ? pData.value : [];
+    } catch {
+      parceiros = [];
+      allLeads = [];
+    }
+    updateStats();
+    renderGrid();
+  }
+
+  function updateStats() {
+    const qrLeads = allLeads.filter(l => l.origem?.startsWith('QR-'));
+    const now = new Date();
+    const mesLeads = qrLeads.filter(l => {
+      if (!l.status_at) return false;
+      const d = new Date(l.status_at);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    document.getElementById('statTotal').textContent = parceiros.length;
+    document.getElementById('statLeads').textContent = qrLeads.length;
+    document.getElementById('statMes').textContent = mesLeads.length;
+  }
+
+  function countLeads(ref) {
+    return allLeads.filter(l => l.origem === `QR-${ref}`).length;
+  }
+
+  function renderGrid() {
+    const container = document.getElementById('gridContainer');
+    if (!parceiros.length) {
+      container.innerHTML = `
+        <div class="empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01"/>
+          </svg>
+          <p>Nenhum parceiro cadastrado ainda.<br>Adicione o primeiro parceiro acima.</p>
+        </div>`;
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'partners-grid';
+
+    parceiros.forEach(p => {
+      const url = `${BASE_URL}/indicacao?p=${encodeURIComponent(p.ref)}`;
+      const count = countLeads(p.ref);
+      const card = document.createElement('div');
+      card.className = 'partner-card';
+      card.dataset.ref = p.ref;
+      card.innerHTML = `
+        <div class="card-header">
+          <div>
+            <div class="partner-name">${escHtml(p.nome)}</div>
+            <div class="ref-code" style="margin-top:4px">${escHtml(p.ref)}</div>
+          </div>
+          <button class="btn-delete" onclick="deleteParceiro('${escHtml(p.ref)}')">Remover</button>
+        </div>
+        <div class="qr-wrap" id="qr-${escHtml(p.ref)}"></div>
+        <div class="card-url">${escHtml(url)}</div>
+        <div class="card-actions">
+          <button class="btn-action primary" onclick="downloadQr('${escHtml(p.ref)}','${escHtml(p.nome)}')">⬇ Baixar PNG</button>
+          <button class="btn-action" onclick="copyUrl('${escHtml(url)}')">⎘ Copiar URL</button>
+        </div>
+        <div class="lead-count">
+          <strong>${count}</strong> lead${count !== 1 ? 's' : ''} capturado${count !== 1 ? 's' : ''}
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    container.innerHTML = '';
+    container.appendChild(grid);
+
+    // Generate QR codes after DOM insertion
+    parceiros.forEach(p => {
+      const url = `${BASE_URL}/indicacao?p=${encodeURIComponent(p.ref)}`;
+      new QRCode(document.getElementById(`qr-${p.ref}`), {
+        text: url,
+        width: 160,
+        height: 160,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    });
+  }
+
+  function generateRef(nome) {
+    return nome
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9 ]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .slice(0, 30)
+      + '-' + Math.random().toString(36).slice(2, 6);
+  }
+
+  async function addParceiro() {
+    const nome = document.getElementById('inputNome').value.trim();
+    if (!nome) { showToast('Informe o nome do parceiro.'); return; }
+
+    let ref = document.getElementById('inputRef').value.trim();
+    if (!ref) ref = generateRef(nome);
+
+    if (parceiros.some(p => p.ref === ref)) {
+      showToast('Esse código já existe. Use outro código.');
+      return;
+    }
+
+    parceiros.push({ id: Date.now().toString(), nome, ref, criado: new Date().toISOString() });
+    await saveParceiros();
+    document.getElementById('inputNome').value = '';
+    document.getElementById('inputRef').value = '';
+    updateStats();
+    renderGrid();
+    showToast('Parceiro adicionado!');
+  }
+
+  async function deleteParceiro(ref) {
+    if (!confirm('Remover este parceiro? Os leads já cadastrados não serão afetados.')) return;
+    parceiros = parceiros.filter(p => p.ref !== ref);
+    await saveParceiros();
+    updateStats();
+    renderGrid();
+    showToast('Parceiro removido.');
+  }
+
+  async function saveParceiros() {
+    await fetch('/api/settings?key=parceiros', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: parceiros }),
+    });
+  }
+
+  function downloadQr(ref, nome) {
+    const container = document.getElementById(`qr-${ref}`);
+    const canvas = container?.querySelector('canvas');
+    if (!canvas) { showToast('QR code ainda gerando…'); return; }
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `qr-${ref}.png`;
+    a.click();
+  }
+
+  function copyUrl(url) {
+    navigator.clipboard.writeText(url).then(() => showToast('URL copiada!'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  load();
+</script>
+</body>
+</html>
