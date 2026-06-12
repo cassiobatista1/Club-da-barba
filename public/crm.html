@@ -1114,15 +1114,58 @@ function assignLeadToWa(leadId, instance) {
   renderWaTabs();
 }
 
+function openDddPicker(evt, leadId) {
+  evt.stopPropagation();
+  document.getElementById('dddPicker')?.remove();
+  const picker = document.createElement('div');
+  picker.id = 'dddPicker';
+  picker.style.cssText = 'position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.6)';
+  const rect = evt.currentTarget.getBoundingClientRect();
+  picker.style.top  = (rect.bottom + 4) + 'px';
+  picker.style.left = Math.min(rect.left, window.innerWidth - 170) + 'px';
+  const insts = waGetConnectedInstances();
+  const current = contaWaMap[String(leadId)] || '';
+  let html = `<div style="font-size:10px;color:var(--muted);padding:4px 8px 8px;letter-spacing:.5px;text-transform:uppercase;font-family:'DM Mono',monospace">Trocar DDD</div>`;
+  insts.forEach(inst => {
+    const c = getWaColor(inst);
+    const active = current === inst;
+    html += `<div onclick="selectDdd(${leadId},'${inst.replace(/'/g,"\\'")}')" style="padding:7px 10px;border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;font-weight:${active?'700':'400'};background:${active?c+'18':'transparent'};color:${active?c:'var(--fg)'}"><span style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></span>${escHtml(inst)}</div>`;
+  });
+  if (current) {
+    html += `<div style="height:1px;background:var(--border);margin:4px 0"></div><div onclick="selectDdd(${leadId},'')" style="padding:7px 10px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted)">✕ Remover DDD</div>`;
+  }
+  picker.innerHTML = html;
+  document.body.appendChild(picker);
+  setTimeout(() => document.addEventListener('click', function _c(){ picker.remove(); document.removeEventListener('click',_c); }), 0);
+}
+
+function selectDdd(leadId, inst) {
+  document.getElementById('dddPicker')?.remove();
+  if (inst) contaWaMap[String(leadId)] = inst;
+  else delete contaWaMap[String(leadId)];
+  saveContaWaMap();
+  renderWaTabs();
+  const activeId = document.querySelector('.page.active')?.id?.replace('page-','');
+  if (activeId === 'disparos') renderDisparos();
+  else if (activeId === 'leads') { refreshAllStatusSelects(); renderLeadsTable(); }
+  else if (activeId === 'pipeline') renderPipeline();
+  else if (activeId === 'followup') renderFollowup();
+}
+
 async function assignAllUntaggedLeads(instance) {
   if (!instance) return;
-  const untagged = leads.filter(l => !contaWaMap[String(l.id)]);
-  if (untagged.length === 0) {
+  // Só atribui leads que nunca foram contactados (sem lastContactedMap) E sem DDD
+  // Leads que têm lastContactedMap mas sem DDD foram contactados via outro canal — não tocar
+  const untagged = leads.filter(l => !contaWaMap[String(l.id)] && !lastContactedMap[String(l.id)]);
+  const warned   = leads.filter(l => !contaWaMap[String(l.id)] &&  lastContactedMap[String(l.id)]);
+  if (untagged.length === 0 && warned.length === 0) {
     alert('Todos os leads já têm conta atribuída.');
     return;
   }
-  const ok = confirm(`Atribuir ${untagged.length} lead${untagged.length!==1?'s':''} sem conta para 📱 ${instance}?`);
-  if (!ok) return;
+  let msg = `Atribuir ${untagged.length} lead${untagged.length!==1?'s':''} sem DDD para 📱 ${instance}?`;
+  if (warned.length > 0) msg += `\n\n⚠️ ${warned.length} lead${warned.length!==1?'s':''} já foram contactados mas sem DDD registrado — NÃO serão alterados (corrija manualmente clicando no badge deles).`;
+  if (!untagged.length) { alert(msg.replace(/^.*?\n\n/,'')); return; }
+  if (!confirm(msg)) return;
   untagged.forEach(l => { contaWaMap[String(l.id)] = instance; });
   await saveContaWaMap();
   renderWaTabs();
@@ -2835,8 +2878,8 @@ function renderDisparos() {
                   const waInst = contaWaMap[String(l.id)] || '';
                   const waColor = waInst ? getWaColor(waInst) : '#888';
                   const waBadge = waInst
-                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap" title="${escHtml(waInst)}">📱 ${escHtml(waInst)}</span>`
-                    : `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844;font-weight:600">❓ sem DDD</span>`;
+                    ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:${waColor}22;color:${waColor};border:1px solid ${waColor}55;font-weight:700;white-space:nowrap;cursor:pointer" title="Clique para trocar DDD" onclick="event.stopPropagation();openDddPicker(event,${l.id})">📱 ${escHtml(waInst)} ✎</span>`
+                    : `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:#88888818;color:#888;border:1px solid #88888844;font-weight:600;cursor:pointer" title="Clique para atribuir DDD" onclick="event.stopPropagation();openDddPicker(event,${l.id})">❓ sem DDD</span>`;
                   const lcTs = lastContactedMap[String(l.id)];
                   const lcBadge = lcTs
                     ? `<span style="font-size:8px;padding:2px 6px;border-radius:10px;background:rgba(90,120,255,0.12);color:#5A78FF;border:1px solid rgba(90,120,255,0.3);font-weight:600">📤 ${new Date(lcTs).toLocaleDateString('pt-BR')}</span>`
@@ -3123,6 +3166,7 @@ async function startDisparoAuto() {
       contaWaMap[String(lead.id)] = instance;
       lastContactedMap[String(lead.id)] = Date.now();
       addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: true });
+      if (dispState.sent.size % 5 === 0) { saveContaWaMap().catch(()=>{}); saveLastContactedMap().catch(()=>{}); }
     } catch(e) {
       failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
       addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: false, error: e.message });
