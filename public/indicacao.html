@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>LOOVI Seguros — Cupom 30% OFF</title>
+<title>LOOVI — 30% OFF nos 3 primeiros meses</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -18,551 +18,342 @@
   --green: #00C87A;
   --gold: #F5A623;
   --red: #FF3344;
-  --cyan: #54D9F3;
-  --lilac: #DAADFF;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--dark);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
+  font-family:'DM Sans',sans-serif;
+  background:var(--dark);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
-/* ── NOISE OVERLAY ── */
 body::before {
   content:'';
-  position:fixed;
-  inset:0;
+  position:fixed; inset:0;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:0;
+  pointer-events:none; z-index:0;
 }
 
 /* ── HERO ── */
 .hero {
-  position:relative;
-  text-align:center;
-  padding:48px 24px 32px;
-  overflow:hidden;
-  z-index:1;
+  position:relative; text-align:center;
+  padding:52px 24px 36px; overflow:hidden; z-index:1;
 }
-
 .hero::after {
-  content:'';
-  position:absolute;
-  top:-80px; left:50%;
+  content:''; position:absolute; top:-80px; left:50%;
   transform:translateX(-50%);
-  width:500px; height:500px;
-  background:radial-gradient(circle, rgba(90,120,255,0.15) 0%, transparent 70%);
+  width:600px; height:600px;
+  background:radial-gradient(circle, rgba(90,120,255,0.14) 0%, transparent 70%);
   pointer-events:none;
 }
-
 .logo {
-  font-family:'Syne',sans-serif;
-  font-size:28px;
-  font-weight:800;
-  letter-spacing:-1px;
-  color:#fff;
-  margin-bottom:32px;
-  display:inline-block;
+  font-family:'Syne',sans-serif; font-size:26px; font-weight:800;
+  letter-spacing:-1px; color:#fff; margin-bottom:36px; display:inline-block;
 }
-
 .logo span { color:var(--primary); }
 
 .badge {
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(90,120,255,0.12);
-  border:1px solid rgba(90,120,255,0.3);
-  border-radius:100px;
-  padding:6px 16px;
-  font-size:11px;
-  font-family:'DM Mono',monospace;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--primary);
-  margin-bottom:24px;
-  animation: fadeUp 0.6s ease both;
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(90,120,255,0.1); border:1px solid rgba(90,120,255,0.28);
+  border-radius:100px; padding:6px 16px;
+  font-size:10px; font-family:'DM Mono',monospace;
+  letter-spacing:2px; text-transform:uppercase; color:var(--primary);
+  margin-bottom:24px; animation:fadeUp .6s ease both;
 }
-
 .badge::before {
-  content:'';
-  width:6px; height:6px;
-  background:var(--primary);
-  border-radius:50%;
-  animation:pulse 2s infinite;
+  content:''; width:5px; height:5px;
+  background:var(--primary); border-radius:50%; animation:pulse 2s infinite;
 }
-
-@keyframes pulse {
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:0.5;transform:scale(1.4)}
-}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
 
 .hero-discount {
   font-family:'Syne',sans-serif;
-  font-size:clamp(72px,20vw,120px);
-  font-weight:800;
-  line-height:0.9;
-  color:#fff;
-  letter-spacing:-4px;
-  animation:fadeUp 0.5s ease both 0.1s;
+  font-size:clamp(72px,20vw,120px); font-weight:800;
+  line-height:.9; color:#fff; letter-spacing:-4px;
+  animation:fadeUp .5s ease both .1s;
 }
-
-.hero-discount span {
-  color:var(--primary);
-  display:block;
-}
-
+.hero-discount span { color:var(--primary); display:block; }
 .hero-sub {
-  font-size:16px;
-  color:var(--muted);
-  margin-top:16px;
-  font-weight:400;
-  animation:fadeUp 0.5s ease both 0.2s;
+  font-size:16px; color:var(--muted); margin-top:16px;
+  animation:fadeUp .5s ease both .2s;
 }
-
 .hero-sub strong { color:var(--text); font-weight:600; }
 
 /* ── PARCEIRO CARD ── */
 .parceiro-card {
-  margin:0 24px 24px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--border);
-  border-left:3px solid var(--gold);
-  border-radius:8px;
-  padding:14px 16px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  animation:fadeUp 0.5s ease both 0.3s;
-  z-index:1;
-  position:relative;
+  margin:0 20px 20px;
+  background:rgba(245,166,35,.06); border:1px solid rgba(245,166,35,.2);
+  border-radius:12px; padding:14px 18px;
+  display:flex; align-items:center; gap:12px;
+  animation:fadeUp .5s ease both .3s; z-index:1; position:relative;
 }
-
-.parceiro-icon {
-  font-size:24px;
-  flex-shrink:0;
+.parceiro-dot {
+  width:7px; height:7px; background:var(--gold);
+  border-radius:50%; flex-shrink:0; animation:pulse 2s infinite;
 }
-
 .parceiro-info { flex:1; }
 .parceiro-label {
-  font-size:9px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--muted);
-  font-family:'DM Mono',monospace;
+  font-size:9px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--gold); opacity:.7; font-family:'DM Mono',monospace;
 }
-.parceiro-name {
-  font-size:14px;
-  font-weight:600;
-  color:var(--gold);
-  margin-top:2px;
-}
-
+.parceiro-name { font-size:14px; font-weight:600; color:var(--gold); margin-top:2px; }
 .parceiro-code {
-  font-family:'DM Mono',monospace;
-  font-size:10px;
-  color:var(--muted);
-  background:var(--border);
-  padding:3px 8px;
-  border-radius:4px;
-}
-
-/* ── FORM ── */
-.form-container {
-  padding:0 24px 40px;
-  position:relative;
-  z-index:1;
-  animation:fadeUp 0.5s ease both 0.4s;
-}
-
-.form-title {
-  font-family:'Syne',sans-serif;
-  font-size:20px;
-  font-weight:700;
-  margin-bottom:6px;
-}
-
-.form-desc {
-  font-size:13px;
-  color:var(--muted);
-  margin-bottom:24px;
-  line-height:1.5;
-}
-
-.step-indicator {
-  display:flex;
-  gap:8px;
-  margin-bottom:28px;
-}
-
-.step-dot {
-  flex:1;
-  height:3px;
-  border-radius:2px;
-  background:var(--border);
-  transition:background 0.3s;
-}
-
-.step-dot.active { background:var(--primary); }
-.step-dot.done { background:var(--green); }
-
-.form-group {
-  margin-bottom:20px;
-}
-
-.form-label {
-  display:block;
-  font-size:10px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--muted);
-  font-family:'DM Mono',monospace;
-  margin-bottom:8px;
-}
-
-.form-input {
-  width:100%;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:14px 16px;
-  color:var(--text);
-  font-size:16px;
-  font-family:'DM Sans',sans-serif;
-  outline:none;
-  transition:border-color 0.2s, box-shadow 0.2s;
-  -webkit-appearance:none;
-}
-
-.form-input:focus {
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(90,120,255,0.1);
-}
-
-.form-input::placeholder { color:var(--muted); font-size:15px; }
-
-/* USO RADIO CARDS */
-.uso-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.uso-card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:16px 14px;
-  cursor:pointer;
-  transition:all 0.15s;
-  text-align:center;
-  user-select:none;
-}
-
-.uso-card:active { transform:scale(0.97); }
-
-.uso-card.selected {
-  border-color:var(--primary);
-  background:rgba(90,120,255,0.08);
-}
-
-.uso-icon { font-size:28px; margin-bottom:8px; }
-.uso-label { font-size:13px; font-weight:600; }
-.uso-sub { font-size:11px; color:var(--muted); margin-top:2px; }
-
-/* SUBMIT */
-.btn-submit {
-  width:100%;
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:16px;
-  font-size:16px;
-  font-weight:700;
-  font-family:'DM Sans',sans-serif;
-  cursor:pointer;
-  transition:all 0.15s;
-  margin-top:8px;
-  letter-spacing:0.5px;
-}
-
-.btn-submit:active { transform:scale(0.98); opacity:0.9; }
-.btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
-
-/* Spinner */
-.spin {
-  display:inline-block; width:18px; height:18px;
-  border:2px solid rgba(255,255,255,0.3); border-top-color:#fff;
-  border-radius:50%; animation:rot .6s linear infinite;
-  vertical-align:middle; margin-right:6px;
-}
-@keyframes rot { to { transform:rotate(360deg); } }
-
-/* ── SUCCESS ── */
-.success-screen {
-  display:none;
-  padding:48px 24px 40px;
-  text-align:center;
-  animation:fadeUp 0.5s ease both;
-  position:relative;
-  z-index:1;
-}
-
-.success-icon {
-  font-size:64px;
-  margin-bottom:24px;
-  display:block;
-  animation:bounceIn 0.6s ease;
-}
-
-@keyframes bounceIn {
-  0%{transform:scale(0)}
-  70%{transform:scale(1.15)}
-  100%{transform:scale(1)}
-}
-
-.success-title {
-  font-family:'Syne',sans-serif;
-  font-size:28px;
-  font-weight:800;
-  margin-bottom:12px;
-}
-
-.success-desc {
-  font-size:14px;
-  color:var(--muted);
-  line-height:1.7;
-  margin-bottom:28px;
-}
-
-.cupom-box {
-  background:rgba(0,200,122,0.08);
-  border:1px solid rgba(0,200,122,0.3);
-  border-radius:8px;
-  padding:20px;
-  margin-bottom:24px;
-}
-
-.cupom-label {
-  font-size:10px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--green);
-  font-family:'DM Mono',monospace;
-  margin-bottom:8px;
-}
-
-.cupom-value {
-  font-family:'Syne',sans-serif;
-  font-size:32px;
-  font-weight:800;
-  color:var(--green);
-}
-
-.cupom-sub { font-size:12px; color:var(--muted); margin-top:4px; }
-
-.btn-wha {
-  width:100%;
-  background:#25D366;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:16px;
-  font-size:15px;
-  font-weight:700;
-  font-family:'DM Sans',sans-serif;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.btn-site {
-  width:100%;
-  background:transparent;
-  color:var(--muted);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:14px;
-  font-size:14px;
-  font-family:'DM Sans',sans-serif;
-  cursor:pointer;
+  font-family:'DM Mono',monospace; font-size:10px;
+  color:var(--muted); background:var(--border); padding:3px 8px; border-radius:4px;
 }
 
 /* ── BENEFICIOS ── */
-.beneficios {
-  padding:0 24px 32px;
-  z-index:1;
-  position:relative;
-}
-
+.beneficios { padding:0 20px 28px; z-index:1; position:relative; }
 .benef-title {
-  font-size:11px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--muted);
-  font-family:'DM Mono',monospace;
-  margin-bottom:16px;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--muted); font-family:'DM Mono',monospace; margin-bottom:14px;
 }
-
-.benef-list {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
+.benef-list { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .benef-item {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:12px 14px;
-  font-size:12px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:var(--muted);
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:12px 14px; font-size:12px;
+  display:flex; align-items:center; gap:8px; color:var(--muted);
+}
+.benef-item span:first-child { font-size:16px; flex-shrink:0; }
+
+/* ── FORM WRAPPER ── */
+.form-wrapper {
+  padding:0 20px 56px; position:relative; z-index:1;
+  animation:fadeUp .5s ease both .4s;
 }
 
-.benef-item span:first-child { font-size:16px; }
+.step-header {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+}
+.step-counter {
+  font-size:11px; font-family:'DM Mono',monospace;
+  color:var(--muted); letter-spacing:1px;
+}
+.step-counter em { color:var(--primary); font-style:normal; font-weight:600; }
 
-/* ── FOOTER ── */
-.footer {
-  text-align:center;
-  padding:24px;
-  font-size:10px;
-  color:var(--muted);
-  border-top:1px solid var(--border);
-  z-index:1;
-  position:relative;
+.step-bar { display:flex; gap:6px; margin-bottom:32px; }
+.step-seg {
+  flex:1; height:3px; border-radius:2px; background:var(--border);
+  transition:background .4s ease; position:relative; overflow:hidden;
+}
+.step-seg.active { background:var(--border); }
+.step-seg.active::after {
+  content:''; position:absolute; inset:0; background:var(--primary);
+  animation:barGrow .4s ease both;
+}
+.step-seg.done { background:var(--green); }
+@keyframes barGrow {
+  from{transform:scaleX(0);transform-origin:left}
+  to{transform:scaleX(1);transform-origin:left}
 }
 
-@keyframes fadeUp {
-  from{opacity:0;transform:translateY(16px)}
+/* STEP CONTENT */
+.form-step { animation:stepIn .3s ease both; }
+@keyframes stepIn {
+  from{opacity:0;transform:translateY(8px)}
   to{opacity:1;transform:translateY(0)}
 }
 
-/* ── ADMIN PANEL ── */
+.step-title {
+  font-family:'Syne',sans-serif; font-size:22px; font-weight:800;
+  margin-bottom:6px; line-height:1.2;
+}
+.step-hint { font-size:13px; color:var(--muted); margin-bottom:26px; line-height:1.5; }
+
+/* FIELD */
+.field { margin-bottom:8px; }
+.field-label {
+  display:block; font-size:10px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted);
+  font-family:'DM Mono',monospace; margin-bottom:8px;
+}
+.field-input {
+  width:100%; background:var(--card); border:1.5px solid var(--border);
+  border-radius:12px; padding:15px 16px; color:var(--text);
+  font-size:16px; font-family:'DM Sans',sans-serif;
+  outline:none; transition:border-color .2s, box-shadow .2s; -webkit-appearance:none;
+}
+.field-input:focus {
+  border-color:var(--primary); box-shadow:0 0 0 3px rgba(90,120,255,.1);
+}
+.field-input.has-error {
+  border-color:var(--red); box-shadow:0 0 0 3px rgba(255,51,68,.1);
+  animation:shake .35s ease;
+}
+.field-input::placeholder { color:var(--muted); }
+.field-error {
+  font-size:12px; color:var(--red); margin-top:6px; display:none;
+}
+.field-error.show { display:block; animation:fadeUp .2s ease; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%,60%{transform:translateX(-5px)}
+  40%,80%{transform:translateX(5px)}
+}
+
+/* ── USO CARDS (premium) ── */
+.uso-list { display:flex; flex-direction:column; gap:10px; }
+
+.uso-card {
+  display:flex; align-items:center; gap:16px;
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:14px; padding:16px 18px;
+  cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+  transition:border-color .2s, background .2s, transform .1s;
+  position:relative; overflow:hidden;
+}
+.uso-card::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 0% 50%, rgba(90,120,255,.08) 0%, transparent 65%);
+  opacity:0; transition:opacity .3s;
+}
+.uso-card:active { transform:scale(.98); }
+.uso-card:hover { border-color:rgba(90,120,255,.35); }
+.uso-card.selected { border-color:var(--primary); }
+.uso-card.selected::before { opacity:1; }
+
+.uso-icon-bg {
+  width:46px; height:46px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0; transition:background .2s;
+  background:var(--border);
+}
+.uso-card.selected .uso-icon-bg { background:rgba(90,120,255,.15); }
+
+.uso-text { flex:1; position:relative; z-index:1; }
+.uso-label { font-size:15px; font-weight:600; color:var(--text); }
+.uso-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+
+.uso-radio {
+  width:20px; height:20px; border:2px solid var(--border);
+  border-radius:50%; flex-shrink:0; position:relative; z-index:1;
+  transition:all .2s; display:flex; align-items:center; justify-content:center;
+}
+.uso-card.selected .uso-radio { background:var(--primary); border-color:var(--primary); }
+.uso-radio-dot {
+  width:8px; height:8px; background:#fff; border-radius:50%;
+  transform:scale(0); transition:transform .2s cubic-bezier(.4,2,.6,1);
+}
+.uso-card.selected .uso-radio-dot { transform:scale(1); }
+
+/* ── BOTÃO PRINCIPAL ── */
+.btn-next {
+  width:100%; background:linear-gradient(135deg, var(--primary), var(--primary2));
+  color:#fff; border:none; border-radius:12px;
+  padding:17px 24px; font-size:16px; font-weight:700;
+  font-family:'DM Sans',sans-serif; cursor:pointer;
+  transition:all .2s; margin-top:20px; letter-spacing:.3px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 4px 28px rgba(90,120,255,.28);
+}
+.btn-next:active { transform:scale(.98); box-shadow:none; }
+.btn-next:disabled { opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* SPINNER */
+.spin {
+  display:inline-block; width:18px; height:18px;
+  border:2px solid rgba(255,255,255,.3); border-top-color:#fff;
+  border-radius:50%; animation:rot .6s linear infinite;
+}
+@keyframes rot { to{transform:rotate(360deg)} }
+
+/* ── SUCCESS ── */
+.success-screen {
+  display:none; padding:48px 24px 40px;
+  text-align:center; animation:fadeUp .5s ease both;
+  position:relative; z-index:1;
+}
+.success-icon {
+  font-size:64px; margin-bottom:24px; display:block;
+  animation:bounceIn .6s ease;
+}
+@keyframes bounceIn { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+.success-title {
+  font-family:'Syne',sans-serif; font-size:28px; font-weight:800; margin-bottom:12px;
+}
+.success-desc {
+  font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:28px;
+}
+.cupom-box {
+  background:rgba(0,200,122,.08); border:1px solid rgba(0,200,122,.25);
+  border-radius:12px; padding:20px; margin-bottom:24px;
+}
+.cupom-label {
+  font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--green); font-family:'DM Mono',monospace; margin-bottom:8px;
+}
+.cupom-value {
+  font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--green);
+}
+.cupom-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+.btn-wha {
+  width:100%; background:#25D366; color:#fff; border:none;
+  border-radius:12px; padding:16px; font-size:15px; font-weight:700;
+  font-family:'DM Sans',sans-serif; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;
+}
+.btn-site {
+  width:100%; background:transparent; color:var(--muted);
+  border:1px solid var(--border); border-radius:10px; padding:14px;
+  font-size:14px; font-family:'DM Sans',sans-serif; cursor:pointer;
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align:center; padding:24px; font-size:10px;
+  color:var(--muted); border-top:1px solid var(--border);
+  z-index:1; position:relative;
+}
+
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ── ADMIN ── */
 .admin-btn {
-  position:fixed;
-  bottom:24px;
-  right:24px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:50%;
-  width:44px;
-  height:44px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  z-index:100;
-  font-size:18px;
+  position:fixed; bottom:24px; right:24px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:50%; width:44px; height:44px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; z-index:100; font-size:18px;
 }
-
 .admin-panel {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.9);
-  z-index:200;
-  padding:24px;
-  overflow-y:auto;
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.92); z-index:200; padding:24px; overflow-y:auto;
 }
-
 .admin-panel.open { display:block; }
-
 .admin-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:24px;
+  display:flex; justify-content:space-between;
+  align-items:center; margin-bottom:24px;
 }
-
-.admin-title {
-  font-family:'Syne',sans-serif;
-  font-size:20px;
-  font-weight:700;
-}
-
+.admin-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; }
 .admin-close {
-  background:none;
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  font-family:'DM Sans',sans-serif;
+  background:none; border:1px solid var(--border); color:var(--text);
+  padding:6px 12px; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif;
 }
-
-.leads-table {
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-
+.leads-table { width:100%; border-collapse:collapse; font-size:12px; }
 .leads-table th {
-  background:var(--card);
-  border:1px solid var(--border);
-  padding:8px 10px;
-  text-align:left;
-  font-family:'DM Mono',monospace;
-  font-size:9px;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  color:var(--muted);
+  background:var(--card); border:1px solid var(--border); padding:8px 10px;
+  text-align:left; font-family:'DM Mono',monospace; font-size:9px;
+  letter-spacing:1px; text-transform:uppercase; color:var(--muted);
 }
-
-.leads-table td {
-  border:1px solid var(--border);
-  padding:8px 10px;
-  vertical-align:top;
-}
-
-.leads-table tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
-
+.leads-table td { border:1px solid var(--border); padding:8px 10px; vertical-align:top; }
+.leads-table tr:nth-child(even) td { background:rgba(255,255,255,.02); }
 .export-btn {
-  background:var(--green);
-  color:var(--dark);
-  border:none;
-  padding:10px 20px;
-  border-radius:6px;
-  font-weight:700;
-  cursor:pointer;
-  font-family:'DM Sans',sans-serif;
-  margin-bottom:16px;
+  background:var(--green); color:var(--dark); border:none;
+  padding:10px 20px; border-radius:6px; font-weight:700;
+  cursor:pointer; font-family:'DM Sans',sans-serif; margin-bottom:16px;
 }
-
-.stats-row {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-bottom:20px;
-}
-
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
 .stat-box {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:14px;
-  text-align:center;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:8px; padding:14px; text-align:center;
 }
-
-.stat-num {
-  font-family:'Syne',sans-serif;
-  font-size:28px;
-  font-weight:800;
-  color:var(--primary);
-}
-
+.stat-num { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--primary); }
 .stat-lbl { font-size:10px; color:var(--muted); margin-top:4px; }
 </style>
 </head>
@@ -571,14 +362,14 @@ body::before {
 <!-- HERO -->
 <div class="hero">
   <div class="logo">LOOVI<span>.</span></div>
-  <div class="badge">Oferta exclusiva do parceiro</div>
+  <div class="badge">Oferta exclusiva para você</div>
   <div class="hero-discount">30%<span>OFF</span></div>
   <p class="hero-sub">nos <strong>3 primeiros meses</strong> do seu seguro auto</p>
 </div>
 
-<!-- PARCEIRO INFO -->
+<!-- PARCEIRO -->
 <div class="parceiro-card" id="parceiroCard" style="display:none">
-  <div class="parceiro-icon">🚗</div>
+  <div class="parceiro-dot"></div>
   <div class="parceiro-info">
     <div class="parceiro-label">Parceiro LOOVI</div>
     <div class="parceiro-name" id="parceiroName">Carregando...</div>
@@ -588,7 +379,7 @@ body::before {
 
 <!-- BENEFICIOS -->
 <div class="beneficios">
-  <div class="benef-title">O que você leva</div>
+  <div class="benef-title">O que está incluído</div>
   <div class="benef-list">
     <div class="benef-item"><span>🛡️</span> Colisão e perda total</div>
     <div class="benef-item"><span>🚗</span> Condutor livre</div>
@@ -600,72 +391,100 @@ body::before {
 </div>
 
 <!-- FORM -->
-<div class="form-container" id="formContainer">
-  <div class="form-title">Garanta seu cupom agora</div>
-  <p class="form-desc">3 informações rápidas e seu desconto está garantido.</p>
+<div class="form-wrapper" id="formWrapper">
 
-  <div class="step-indicator">
-    <div class="step-dot active" id="step1"></div>
-    <div class="step-dot" id="step2"></div>
-    <div class="step-dot" id="step3"></div>
+  <div class="step-header">
+    <span class="step-counter">Passo <em id="stepNumLabel">1</em> de 3</span>
+  </div>
+  <div class="step-bar">
+    <div class="step-seg active" id="seg1"></div>
+    <div class="step-seg" id="seg2"></div>
+    <div class="step-seg" id="seg3"></div>
   </div>
 
   <!-- STEP 1 — NOME -->
-  <div id="formStep1">
-    <div class="form-group">
-      <label class="form-label">Seu nome completo</label>
-      <input class="form-input" id="inputNome" type="text" placeholder="Ex: João Silva"
+  <div id="formStep1" class="form-step">
+    <div class="step-title">Qual é o seu nome?</div>
+    <p class="step-hint">Preciso do seu nome completo para personalizar a proposta.</p>
+    <div class="field">
+      <label class="field-label">Nome completo</label>
+      <input class="field-input" id="inputNome" type="text"
+             placeholder="Ex: João Silva"
              autocomplete="name" autocapitalize="words" inputmode="text">
+      <div class="field-error" id="errNome">Digite nome e sobrenome completos.</div>
     </div>
-    <button class="btn-submit" onclick="goStep(2)">Continuar →</button>
+    <button class="btn-next" onclick="goStep(2)">
+      Continuar
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+    </button>
   </div>
 
   <!-- STEP 2 — USO -->
-  <div id="formStep2" style="display:none">
-    <div class="form-group">
-      <label class="form-label">Como você usa o carro?</label>
-      <div class="uso-grid">
-        <div class="uso-card" onclick="selectUso('pessoal', this)">
-          <div class="uso-icon">🏠</div>
-          <div class="uso-label">Pessoal</div>
-          <div class="uso-sub">Família e lazer</div>
+  <div id="formStep2" class="form-step" style="display:none">
+    <div class="step-title">Como você usa seu carro?</div>
+    <p class="step-hint">Isso define a cobertura ideal para o seu perfil.</p>
+    <div class="uso-list">
+      <div class="uso-card" onclick="selectUso('pessoal', this)">
+        <div class="uso-icon-bg">🏠</div>
+        <div class="uso-text">
+          <div class="uso-label">Uso Pessoal</div>
+          <div class="uso-sub">Família, lazer e dia a dia</div>
         </div>
-        <div class="uso-card" onclick="selectUso('trabalho', this)">
-          <div class="uso-icon">💼</div>
+        <div class="uso-radio"><div class="uso-radio-dot"></div></div>
+      </div>
+      <div class="uso-card" onclick="selectUso('trabalho', this)">
+        <div class="uso-icon-bg">💼</div>
+        <div class="uso-text">
           <div class="uso-label">Trabalho</div>
-          <div class="uso-sub">Ir ao trabalho</div>
+          <div class="uso-sub">Deslocamento para o trabalho</div>
         </div>
-        <div class="uso-card" onclick="selectUso('app', this)">
-          <div class="uso-icon">📱</div>
-          <div class="uso-label">App / Uber</div>
-          <div class="uso-sub">Motorista de app</div>
+        <div class="uso-radio"><div class="uso-radio-dot"></div></div>
+      </div>
+      <div class="uso-card" onclick="selectUso('app', this)">
+        <div class="uso-icon-bg">📱</div>
+        <div class="uso-text">
+          <div class="uso-label">Motorista de App</div>
+          <div class="uso-sub">Uber, 99, inDriver e similares</div>
         </div>
-        <div class="uso-card" onclick="selectUso('comercial', this)">
-          <div class="uso-icon">🏢</div>
-          <div class="uso-label">Comercial</div>
-          <div class="uso-sub">Entregas / frota</div>
+        <div class="uso-radio"><div class="uso-radio-dot"></div></div>
+      </div>
+      <div class="uso-card" onclick="selectUso('comercial', this)">
+        <div class="uso-icon-bg">🏢</div>
+        <div class="uso-text">
+          <div class="uso-label">Comercial / Frota</div>
+          <div class="uso-sub">Entregas, negócios e frotas</div>
         </div>
+        <div class="uso-radio"><div class="uso-radio-dot"></div></div>
       </div>
     </div>
-    <button class="btn-submit" id="btnStep2" onclick="goStep(3)" disabled>Continuar →</button>
   </div>
 
   <!-- STEP 3 — PLACA + WHATSAPP -->
-  <div id="formStep3" style="display:none">
-    <div class="form-group">
-      <label class="form-label">Placa do veículo</label>
-      <input class="form-input" id="inputPlaca" type="text" placeholder="Ex: ABC1234 ou ABC1D23"
-        oninput="formatPlaca(this)" maxlength="8" autocomplete="off"
-        style="text-transform:uppercase;letter-spacing:3px;font-family:'DM Mono',monospace;font-size:20px;text-align:center"
-        inputmode="text" autocapitalize="characters">
+  <div id="formStep3" class="form-step" style="display:none">
+    <div class="step-title">Quase lá! 🎉</div>
+    <p class="step-hint">Só mais dois dados e seu cupom está garantido.</p>
+    <div class="field">
+      <label class="field-label">Placa do veículo</label>
+      <input class="field-input" id="inputPlaca" type="text"
+             placeholder="ABC-1234"
+             oninput="formatPlaca(this)" maxlength="8"
+             autocomplete="off" inputmode="text" autocapitalize="characters"
+             style="text-transform:uppercase;letter-spacing:4px;font-family:'DM Mono',monospace;font-size:22px;text-align:center">
+      <div class="field-error" id="errPlaca">Digite a placa completa do veículo.</div>
     </div>
-    <div class="form-group">
-      <label class="form-label">WhatsApp (para receber sua proposta)</label>
-      <input class="form-input" id="inputWha" type="tel" placeholder="(XX) 9XXXX-XXXX"
-        oninput="formatPhone(this)" autocomplete="tel" inputmode="tel">
+    <div class="field">
+      <label class="field-label">WhatsApp com DDD</label>
+      <input class="field-input" id="inputWha" type="tel"
+             placeholder="(31) 99999-9999"
+             oninput="formatPhone(this)"
+             autocomplete="tel" inputmode="tel">
+      <div class="field-error" id="errWha">Digite seu WhatsApp com DDD.</div>
     </div>
-    <button class="btn-submit" id="btnSubmitFinal" onclick="submitForm()">🎉 Garantir meu cupom 30% OFF</button>
+    <button class="btn-next" id="btnSubmitFinal" onclick="submitForm()">
+      🎉 Garantir meu cupom 30% OFF
+    </button>
   </div>
+
 </div>
 
 <!-- SUCCESS -->
@@ -673,13 +492,11 @@ body::before {
   <span class="success-icon">🎉</span>
   <div class="success-title">Cupom garantido!</div>
   <p class="success-desc">O Cássio da LOOVI vai te chamar no WhatsApp em instantes com sua condição especial de seguro.</p>
-
   <div class="cupom-box">
     <div class="cupom-label">Seu desconto</div>
     <div class="cupom-value">30% OFF</div>
     <div class="cupom-sub">3 primeiros meses · Regulado pela SUSEP</div>
   </div>
-
   <button class="btn-wha" onclick="chamarWha()">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     Abrir WhatsApp
@@ -702,22 +519,14 @@ body::before {
     <div class="admin-title">📊 Painel de Leads</div>
     <button class="admin-close" onclick="toggleAdmin()">Fechar</button>
   </div>
-
   <div class="stats-row" id="adminStats"></div>
-
   <button class="export-btn" onclick="exportCSV()">⬇ Exportar CSV</button>
-
   <div style="overflow-x:auto">
     <table class="leads-table" id="leadsTable">
       <thead>
         <tr>
-          <th>Data</th>
-          <th>Nome</th>
-          <th>WhatsApp</th>
-          <th>Placa</th>
-          <th>Uso</th>
-          <th>Parceiro</th>
-          <th>Código</th>
+          <th>Data</th><th>Nome</th><th>WhatsApp</th>
+          <th>Placa</th><th>Uso</th><th>Parceiro</th>
         </tr>
       </thead>
       <tbody id="leadsBody"></tbody>
@@ -726,65 +535,102 @@ body::before {
 </div>
 
 <script>
-  // ── URL PARAMS ───────────────────────────────────────
   const parceiroCode = new URLSearchParams(location.search).get('p') || 'direto';
   let formData = {};
   let usoSelecionado = '';
+  let currentStep = 1;
 
-  // ── LOAD PARTNER NAME FROM CRM SETTINGS ─────────────
+  // ── PARCEIRO ──────────────────────────────────────────
   async function loadParceiro() {
     if (parceiroCode === 'direto') return;
     try {
       const res = await fetch('/api/settings?key=parceiros');
       if (!res.ok) return;
       const data = await res.json();
-      const lista = Array.isArray(data?.value) ? data.value : [];
+      const lista = Array.isArray(data?.value) ? data.value : Array.isArray(data) ? data : [];
       const parceiro = lista.find(p => p.ref === parceiroCode);
-      const nome = parceiro?.nome || parceiroCode;
-      document.getElementById('parceiroName').textContent = '🚗 ' + nome;
+      document.getElementById('parceiroName').textContent = parceiro?.nome || parceiroCode;
       document.getElementById('parceiroCode').textContent = parceiroCode;
       document.getElementById('parceiroCard').style.display = 'flex';
-    } catch { /* silently hide card */ }
+    } catch { /* hide silently */ }
   }
   loadParceiro();
 
-  // ── STEPS ────────────────────────────────────────────
+  // ── STEP NAVIGATION ───────────────────────────────────
   function goStep(n) {
     if (n === 2) {
       const nome = document.getElementById('inputNome').value.trim();
       if (!nome || nome.split(' ').filter(Boolean).length < 2) {
-        alert('Por favor insira seu nome completo.');
-        return;
+        showError('errNome', 'inputNome'); return;
       }
+      clearError('errNome', 'inputNome');
       formData.nome = nome;
     }
     if (n === 3) {
-      if (!usoSelecionado) { alert('Selecione como você usa o carro.'); return; }
+      if (!usoSelecionado) return;
       formData.uso = usoSelecionado;
     }
 
-    [1,2,3].forEach(i => document.getElementById('formStep'+i).style.display = 'none');
-    document.getElementById('formStep'+n).style.display = 'block';
+    document.getElementById('formStep' + currentStep).style.display = 'none';
+    const nextEl = document.getElementById('formStep' + n);
+    nextEl.style.display = 'block';
+    // Re-trigger animation
+    nextEl.classList.remove('form-step');
+    void nextEl.offsetWidth;
+    nextEl.classList.add('form-step');
+    currentStep = n;
 
+    // Update counter + bar
+    document.getElementById('stepNumLabel').textContent = n;
     [1,2,3].forEach(i => {
-      const dot = document.getElementById('step'+i);
-      if (i < n) { dot.classList.remove('active'); dot.classList.add('done'); }
-      else if (i === n) { dot.classList.add('active'); dot.classList.remove('done'); }
-      else { dot.classList.remove('active','done'); }
+      const seg = document.getElementById('seg' + i);
+      seg.className = 'step-seg';
+      if (i < n) seg.classList.add('done');
+      else if (i === n) seg.classList.add('active');
     });
 
-    scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to form top (NOT page top)
+    document.getElementById('formWrapper').scrollIntoView({ behavior:'smooth', block:'start' });
+
+    // Auto-focus first input
+    setTimeout(() => {
+      const inp = document.getElementById('formStep' + n)?.querySelector('.field-input');
+      if (inp) inp.focus();
+    }, 350);
   }
 
+  // ── USO SELECTION — auto-advance ──────────────────────
   function selectUso(uso, el) {
     document.querySelectorAll('.uso-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     usoSelecionado = uso;
-    document.getElementById('btnStep2').disabled = false;
+    setTimeout(() => goStep(3), 420);
   }
 
+  // ── VALIDATION ────────────────────────────────────────
+  function showError(errId, inputId) {
+    const err = document.getElementById(errId);
+    const inp = document.getElementById(inputId);
+    err.classList.add('show');
+    inp.classList.add('has-error');
+    inp.focus();
+    inp.addEventListener('input', () => {
+      err.classList.remove('show');
+      inp.classList.remove('has-error');
+    }, { once: true });
+  }
+
+  function clearError(errId, inputId) {
+    document.getElementById(errId).classList.remove('show');
+    document.getElementById(inputId).classList.remove('has-error');
+  }
+
+  // ── FORMAT ────────────────────────────────────────────
   function formatPlaca(el) {
-    el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);
+    let v = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (v.length > 7) v = v.slice(0, 7);
+    if (v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3);
+    el.value = v;
   }
 
   function formatPhone(el) {
@@ -794,61 +640,62 @@ body::before {
     el.value = v;
   }
 
+  // ── SUBMIT ────────────────────────────────────────────
   async function submitForm() {
-    const placa = document.getElementById('inputPlaca').value.trim().toUpperCase();
+    const placaRaw = document.getElementById('inputPlaca').value.replace(/-/g,'').trim().toUpperCase();
     const wha = document.getElementById('inputWha').value.replace(/\D/g,'');
+    let valid = true;
 
-    if (placa.length < 7) { alert('Digite a placa completa do veículo.'); return; }
-    if (wha.length < 10) { alert('Digite seu WhatsApp com DDD.'); return; }
+    if (placaRaw.length < 7) { showError('errPlaca', 'inputPlaca'); valid = false; }
+    else clearError('errPlaca', 'inputPlaca');
 
-    formData.placa = placa;
+    if (wha.length < 10) { showError('errWha', 'inputWha'); valid = false; }
+    else clearError('errWha', 'inputWha');
+
+    if (!valid) return;
+
+    formData.placa = placaRaw;
     formData.wha = wha;
     formData.p = parceiroCode;
     formData.data = new Date().toLocaleString('pt-BR');
 
     const btn = document.getElementById('btnSubmitFinal');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span>Salvando...';
+    btn.innerHTML = '<span class="spin"></span> Salvando...';
 
-    // Save to localStorage (offline / device fallback)
     const leads = JSON.parse(localStorage.getItem('loovi_qr_leads') || '[]');
     leads.unshift(formData);
     localStorage.setItem('loovi_qr_leads', JSON.stringify(leads));
 
-    // Save to Supabase via API (persistent, visible no CRM)
     try {
       await fetch('/api/indicacao', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: formData.nome,
-          placa: formData.placa,
-          uso: formData.uso,
-          tel: formData.wha,
-          p: parceiroCode,
-        }),
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ nome:formData.nome, placa:formData.placa, uso:formData.uso, tel:formData.wha, p:parceiroCode }),
       });
-    } catch { /* localStorage already saved, non-blocking */ }
+    } catch { /* localStorage saved */ }
 
-    // Show success
-    document.getElementById('formContainer').style.display = 'none';
+    document.getElementById('formWrapper').style.display = 'none';
     document.getElementById('parceiroCard').style.display = 'none';
     document.querySelector('.beneficios').style.display = 'none';
     document.getElementById('mainFooter').style.display = 'none';
     document.getElementById('successScreen').style.display = 'block';
-    scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top:0, behavior:'smooth' });
   }
 
   function chamarWha() {
-    const tel = '5531995235083';
     const parceiroNome = document.getElementById('parceiroName')?.textContent || parceiroCode;
     const msg = encodeURIComponent(
       `Oi Cássio! Vi o QR do parceiro ${parceiroNome} e quero saber minha condição de seguro. 🚗\n\nMeu nome: ${formData.nome}\nPlaca: ${formData.placa}\nUso: ${formData.uso}`
     );
-    window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/5531995235083?text=${msg}`, '_blank');
   }
 
-  // ── ADMIN PANEL ──────────────────────────────────────
+  // Enter key on step 1
+  document.getElementById('inputNome').addEventListener('keydown', e => {
+    if (e.key === 'Enter') goStep(2);
+  });
+
+  // ── ADMIN ─────────────────────────────────────────────
   function toggleAdmin() {
     const panel = document.getElementById('adminPanel');
     panel.classList.toggle('open');
@@ -857,17 +704,14 @@ body::before {
 
   function renderAdmin() {
     const leads = JSON.parse(localStorage.getItem('loovi_qr_leads') || '[]');
-
     const parceiros = {};
     leads.forEach(l => { parceiros[l.p] = (parceiros[l.p]||0)+1; });
-    const topParceiro = Object.entries(parceiros).sort((a,b)=>b[1]-a[1])[0];
-
+    const top = Object.entries(parceiros).sort((a,b)=>b[1]-a[1])[0];
     document.getElementById('adminStats').innerHTML = `
-      <div class="stat-box"><div class="stat-num">${leads.length}</div><div class="stat-lbl">Total Leads</div></div>
+      <div class="stat-box"><div class="stat-num">${leads.length}</div><div class="stat-lbl">Total</div></div>
       <div class="stat-box"><div class="stat-num">${Object.keys(parceiros).length}</div><div class="stat-lbl">Parceiros</div></div>
-      <div class="stat-box"><div class="stat-num" style="font-size:14px">${topParceiro ? topParceiro[0] : '—'}</div><div class="stat-lbl">Top Parceiro</div></div>
+      <div class="stat-box"><div class="stat-num" style="font-size:14px">${top?top[0]:'—'}</div><div class="stat-lbl">Top</div></div>
     `;
-
     document.getElementById('leadsBody').innerHTML = leads.map(l => `
       <tr>
         <td style="white-space:nowrap;color:var(--muted);font-size:10px">${l.data}</td>
@@ -875,18 +719,17 @@ body::before {
         <td><a href="https://wa.me/55${l.wha}" target="_blank" style="color:#25D366">${l.wha}</a></td>
         <td style="font-family:monospace;letter-spacing:2px">${l.placa}</td>
         <td>${l.uso}</td>
-        <td style="font-size:11px">${l.p}</td>
-        <td style="font-family:monospace;color:var(--primary)">${l.p}</td>
+        <td style="font-size:11px;color:var(--primary)">${l.p}</td>
       </tr>
-    `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum lead ainda</td></tr>';
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum lead ainda</td></tr>';
   }
 
   function exportCSV() {
     const leads = JSON.parse(localStorage.getItem('loovi_qr_leads') || '[]');
-    if (!leads.length) { alert('Nenhum lead para exportar.'); return; }
-    const header = ['Data','Nome','WhatsApp','Placa','Uso','Codigo'];
-    const rows = leads.map(l => [l.data, l.nome, l.wha, l.placa, l.uso, l.p]);
-    const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    if (!leads.length) return;
+    const csv = [['Data','Nome','WhatsApp','Placa','Uso','Codigo'],
+      ...leads.map(l => [l.data, l.nome, l.wha, l.placa, l.uso, l.p])
+    ].map(r => r.map(v=>`"${v}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
     a.download = `leads_qr_loovi_${new Date().toISOString().slice(0,10)}.csv`;
