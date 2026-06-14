@@ -266,14 +266,24 @@
   async function load() {
     try {
       const [pRes, lRes] = await Promise.all([
-        fetch('/api/settings?key=parceiros'),
+        fetch('/api/settings?key=parceiros', { cache: 'no-store' }),
         fetch('/api/leads'),
       ]);
       const pData = await pRes.json();
       allLeads = lRes.ok ? await lRes.json() : [];
-      parceiros = Array.isArray(pData?.value) ? pData.value : [];
+      // pData pode ser { value: [...] } (via settings API) ou array direto
+      if (Array.isArray(pData?.value)) {
+        parceiros = pData.value;
+      } else if (Array.isArray(pData)) {
+        parceiros = pData;
+      } else {
+        // Fallback: tenta localStorage
+        const cached = localStorage.getItem('parceiros_backup');
+        parceiros = cached ? JSON.parse(cached) : [];
+      }
     } catch {
-      parceiros = [];
+      const cached = localStorage.getItem('parceiros_backup');
+      parceiros = cached ? JSON.parse(cached) : [];
       allLeads = [];
     }
     updateStats();
@@ -399,11 +409,20 @@
   }
 
   async function saveParceiros() {
-    await fetch('/api/settings?key=parceiros', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value: parceiros }),
-    });
+    // Sempre salva em localStorage como backup
+    localStorage.setItem('parceiros_backup', JSON.stringify(parceiros));
+
+    try {
+      const res = await fetch('/api/settings?key=parceiros', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: parceiros }),
+      });
+      if (!res.ok) throw new Error('API retornou erro');
+    } catch (err) {
+      console.error('Erro ao salvar no Supabase:', err);
+      showToast('⚠️ Salvo localmente. Verifique conexão com banco.');
+    }
   }
 
   function downloadQr(ref, nome) {
