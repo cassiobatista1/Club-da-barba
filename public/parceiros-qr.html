@@ -10,28 +10,28 @@
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #0d0d0d;
-      color: #e0e0e0;
+      background: #0C0C14;
+      color: #E9EBFF;
       min-height: 100vh;
     }
 
     header {
-      background: #111;
-      border-bottom: 2px solid #c9a227;
+      background: #13131C;
+      border-bottom: 2px solid #5A78FF;
       padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
-    .brand { font-size: 18px; font-weight: 800; color: #c9a227; letter-spacing: 2px; text-transform: uppercase; }
-    .brand-sub { font-size: 9px; color: #555; letter-spacing: 3px; text-transform: uppercase; }
+    .brand { font-size: 18px; font-weight: 800; color: #5A78FF; letter-spacing: 2px; text-transform: uppercase; }
+    .brand-sub { font-size: 9px; color: #6868AA; letter-spacing: 3px; text-transform: uppercase; }
     .header-link {
-      font-size: 12px; color: #666; text-decoration: none;
-      border: 1px solid #2a2a2a; padding: 6px 12px; border-radius: 6px;
+      font-size: 12px; color: #6868AA; text-decoration: none;
+      border: 1px solid #26263A; padding: 6px 12px; border-radius: 6px;
       transition: color .2s, border-color .2s;
     }
-    .header-link:hover { color: #c9a227; border-color: #c9a227; }
+    .header-link:hover { color: #5A78FF; border-color: #5A78FF; }
 
     main { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
 
@@ -44,28 +44,28 @@
     }
     .stat-card {
       flex: 1; min-width: 120px;
-      background: #141414;
-      border: 1px solid #222;
+      background: #1A1A26;
+      border: 1px solid #26263A;
       border-radius: 10px;
       padding: 14px 18px;
     }
-    .stat-value { font-size: 28px; font-weight: 800; color: #c9a227; }
-    .stat-label { font-size: 11px; color: #666; margin-top: 2px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: #5A78FF; }
+    .stat-label { font-size: 11px; color: #6868AA; margin-top: 2px; }
 
     /* Add form */
     .add-section {
-      background: #141414;
-      border: 1px solid #222;
+      background: #1A1A26;
+      border: 1px solid #26263A;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 28px;
     }
-    .section-title { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .section-title { font-size: 13px; font-weight: 600; color: #6868AA; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
     .add-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .add-row input {
       flex: 1; min-width: 180px;
-      background: #1a1a1a;
-      border: 1.5px solid #2a2a2a;
+      background: #13131C;
+      border: 1.5px solid #26263A;
       border-radius: 8px;
       padding: 11px 14px;
       font-size: 14px;
@@ -73,12 +73,12 @@
       outline: none;
       transition: border-color .2s;
     }
-    .add-row input:focus { border-color: #c9a227; }
-    .add-row input::placeholder { color: #444; }
+    .add-row input:focus { border-color: #5A78FF; }
+    .add-row input::placeholder { color: #6868AA; }
     .btn-add {
       padding: 11px 20px;
-      background: #c9a227;
-      color: #0d0d0d;
+      background: #5A78FF;
+      color: #fff;
       border: none;
       border-radius: 8px;
       font-size: 13px;
@@ -87,8 +87,8 @@
       white-space: nowrap;
       transition: background .2s;
     }
-    .btn-add:hover { background: #d9b030; }
-    .hint { font-size: 11px; color: #555; margin-top: 8px; }
+    .btn-add:hover { background: #7B95FF; }
+    .hint { font-size: 11px; color: #6868AA; margin-top: 8px; }
 
     /* Partner cards */
     .partners-grid {
@@ -98,8 +98,8 @@
     }
 
     .partner-card {
-      background: #141414;
-      border: 1px solid #222;
+      background: #1A1A26;
+      border: 1px solid #26263A;
       border-radius: 12px;
       padding: 20px;
       display: flex;
@@ -111,8 +111,8 @@
     .partner-name { font-size: 15px; font-weight: 600; }
     .ref-code {
       font-size: 11px;
-      background: rgba(201,162,39,.1);
-      color: #c9a227;
+      background: rgba(90,120,255,.1);
+      color: #5A78FF;
       padding: 3px 8px;
       border-radius: 4px;
       font-family: monospace;
@@ -121,8 +121,8 @@
 
     .btn-delete {
       background: none;
-      border: 1px solid #2a2a2a;
-      color: #666;
+      border: 1px solid #26263A;
+      color: #6868AA;
       padding: 5px 10px;
       border-radius: 6px;
       font-size: 11px;
@@ -144,14 +144,14 @@
 
     .card-url {
       font-size: 11px;
-      color: #555;
+      color: #6868AA;
       font-family: monospace;
       word-break: break-all;
       line-height: 1.5;
-      background: #0d0d0d;
+      background: #0C0C14;
       padding: 8px 10px;
       border-radius: 6px;
-      border: 1px solid #1e1e1e;
+      border: 1px solid #26263A;
     }
 
     .card-actions { display: flex; gap: 8px; }
@@ -162,38 +162,38 @@
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid #2a2a2a;
-      background: #1a1a1a;
-      color: #aaa;
+      border: 1px solid #26263A;
+      background: #13131C;
+      color: #6868AA;
       transition: color .2s, border-color .2s, background .2s;
       text-align: center;
     }
-    .btn-action:hover { border-color: #c9a227; color: #c9a227; }
-    .btn-action.primary { background: rgba(201,162,39,.1); border-color: #c9a227; color: #c9a227; }
-    .btn-action.primary:hover { background: rgba(201,162,39,.2); }
+    .btn-action:hover { border-color: #5A78FF; color: #5A78FF; }
+    .btn-action.primary { background: rgba(90,120,255,.1); border-color: #5A78FF; color: #5A78FF; }
+    .btn-action.primary:hover { background: rgba(90,120,255,.2); }
 
     .lead-count {
       font-size: 11px;
-      color: #666;
+      color: #6868AA;
       text-align: center;
       padding-top: 2px;
     }
-    .lead-count strong { color: #c9a227; font-size: 14px; }
+    .lead-count strong { color: #5A78FF; font-size: 14px; }
 
     /* Empty state */
     .empty {
       text-align: center;
       padding: 48px 24px;
-      color: #444;
+      color: #6868AA;
     }
     .empty svg { margin-bottom: 12px; opacity: .3; }
     .empty p { font-size: 14px; }
 
     /* Loading */
-    .loading { text-align: center; padding: 60px; color: #444; font-size: 14px; }
+    .loading { text-align: center; padding: 60px; color: #6868AA; font-size: 14px; }
     .spin {
       display: inline-block; width: 20px; height: 20px;
-      border: 2px solid #2a2a2a; border-top-color: #c9a227;
+      border: 2px solid #26263A; border-top-color: #5A78FF;
       border-radius: 50%; animation: rot .7s linear infinite;
       margin-right: 8px; vertical-align: middle;
     }
@@ -202,7 +202,7 @@
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: #1e1e1e; border: 1px solid #333; color: #e0e0e0;
+      background: #1A1A26; border: 1px solid #26263A; color: #E9EBFF;
       padding: 10px 20px; border-radius: 8px; font-size: 13px;
       opacity: 0; transition: opacity .3s; pointer-events: none;
       white-space: nowrap; z-index: 999;
@@ -312,7 +312,7 @@
     if (!parceiros.length) {
       container.innerHTML = `
         <div class="empty">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6868AA" stroke-width="1.5">
             <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
             <rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01"/>
           </svg>
