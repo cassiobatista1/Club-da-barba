@@ -29,10 +29,14 @@ export async function POST(req) {
     });
     const data = await res.json();
     // Treat Evolution API application-level errors as failures even if HTTP was 200
-    if (res.ok && (data?.status === 'error' || data?.error)) {
+    if (!res.ok || data?.status === 'error' || data?.error || data?.response?.error) {
       return Response.json(data, { status: 400 });
     }
-    return Response.json(data, { status: res.ok ? 200 : 400 });
+    // A successful send always returns a key.id from Evolution API v2
+    if (res.ok && !data?.key?.id) {
+      return Response.json({ error: 'Resposta inesperada da API — mensagem pode não ter sido enviada', raw: data }, { status: 400 });
+    }
+    return Response.json(data);
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }

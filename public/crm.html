@@ -2537,8 +2537,9 @@ function changeDispAccount() {
   dispState.confirmedInstance = '';
   renderDisparos();
 }
-// ── DISPARO HISTORY (localStorage) ─────────────────────
+// ── DISPARO HISTORY (localStorage + Supabase backup) ───
 let dispHistory = [];
+let _dispHistorySaveTimer = null;
 
 function initDispHistory() {
   try {
@@ -2546,51 +2547,80 @@ function initDispHistory() {
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
     dispHistory = saved.filter(r => r.ts > cutoff);
   } catch { dispHistory = []; }
+  // Merge Supabase backup in background (recovery if localStorage was cleared)
+  api('/api/settings?key=dispHistory').then(remote => {
+    if (!Array.isArray(remote) || remote.length === 0) return;
+    const existingTs = new Set(dispHistory.map(r => r.ts + '_' + (r.leadId || '')));
+    const toMerge = remote.filter(r => !existingTs.has(r.ts + '_' + (r.leadId || '')));
+    if (toMerge.length === 0) return;
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    dispHistory = [...dispHistory, ...toMerge].filter(r => r.ts > cutoff).sort((a,b) => a.ts - b.ts).slice(-1000);
+    try { localStorage.setItem('dispHistory', JSON.stringify(dispHistory)); } catch {}
+    const activeId = document.querySelector('.page.active')?.id?.replace('page-','');
+    if (activeId === 'disparos') renderDisparos();
+  }).catch(() => {});
 }
 
 function addDispHistoryEntry(entry) {
   dispHistory.push({ ts: Date.now(), date: new Date().toLocaleDateString('pt-BR'), ...entry });
   if (dispHistory.length > 1000) dispHistory = dispHistory.slice(-1000);
-  localStorage.setItem('dispHistory', JSON.stringify(dispHistory));
+  try { localStorage.setItem('dispHistory', JSON.stringify(dispHistory)); } catch {}
+}
+
+function saveDispHistory() {
+  const toSave = dispHistory.slice(-200);
+  api('/api/settings?key=dispHistory', 'PUT', toSave).catch(() => {});
 }
 
 function renderDispHistory() {
-  const today = new Date().toLocaleDateString('pt-BR');
-  const todayEntries = dispHistory.filter(r => r.date === today);
-  if (todayEntries.length === 0) return '';
+  if (dispHistory.length === 0) return '';
+  // Group by date (show last 3 days)
+  const cutoff3d = Date.now() - 3 * 24 * 60 * 60 * 1000;
+  const recent = dispHistory.filter(r => r.ts > cutoff3d);
+  if (recent.length === 0) return '';
 
-  const byInst = {};
-  todayEntries.forEach(r => {
-    if (!byInst[r.instance]) byInst[r.instance] = { ok: [], fail: [] };
-    if (r.success) byInst[r.instance].ok.push(r);
-    else byInst[r.instance].fail.push(r);
+  const byDate = {};
+  recent.forEach(r => {
+    const d = r.date || new Date(r.ts).toLocaleDateString('pt-BR');
+    if (!byDate[d]) byDate[d] = {};
+    if (!byDate[d][r.instance]) byDate[d][r.instance] = { ok: [], fail: [] };
+    if (r.success) byDate[d][r.instance].ok.push(r);
+    else byDate[d][r.instance].fail.push(r);
   });
+
+  const today = new Date().toLocaleDateString('pt-BR');
+  const dateLabel = d => d === today ? 'Hoje' : d;
 
   return `<div class="disp-panel" style="margin-top:20px">
     <div class="disp-panel-header">
-      <span class="disp-panel-title">Histórico de hoje</span>
-      <span style="font-size:11px;color:var(--muted)">${todayEntries.length} disparos</span>
+      <span class="disp-panel-title">Histórico de disparos</span>
+      <span style="font-size:11px;color:var(--muted)">${recent.length} nos últimos 3 dias</span>
     </div>
-    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">
-      ${Object.entries(byInst).map(([inst, data]) => {
-        const c = getWaColor(inst);
-        return `<div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <span style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></span>
-            <span style="font-size:12px;font-weight:700;color:${c}">${inst}</span>
-            <span style="font-size:11px;color:var(--green);margin-left:4px">✓ ${data.ok.length} enviados</span>
-            ${data.fail.length > 0 ? `<span style="font-size:11px;color:var(--red)">✗ ${data.fail.length} falhas</span>` : ''}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:3px;max-height:160px;overflow-y:auto">
-            ${[...data.ok, ...data.fail].sort((a,b)=>b.ts-a.ts).map(r => `
-              <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:4px 8px;border-radius:6px;background:${r.success?'rgba(0,200,122,0.05)':'rgba(255,51,68,0.05)'}">
-                <span style="color:${r.success?'var(--green)':'var(--red)'};flex-shrink:0">${r.success?'✓':'✗'}</span>
-                <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">${r.leadName}</span>
-                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;white-space:nowrap">${new Date(r.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
-              </div>`).join('')}
-          </div>
-        </div>`;
-      }).join('')}
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:18px">
+      ${Object.entries(byDate).sort((a,b) => b[0].split('/').reverse().join('') - a[0].split('/').reverse().join('')).map(([date, instMap]) => `
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px">${dateLabel(date)}</div>
+          ${Object.entries(instMap).map(([inst, data]) => {
+            const c = getWaColor(inst);
+            return `<div style="margin-bottom:10px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></span>
+                <span style="font-size:12px;font-weight:700;color:${c}">${inst}</span>
+                <span style="font-size:11px;color:var(--green);margin-left:4px">✓ ${data.ok.length} enviados</span>
+                ${data.fail.length > 0 ? `<span style="font-size:11px;color:var(--red)">✗ ${data.fail.length} falhas</span>` : ''}
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px;max-height:180px;overflow-y:auto">
+                ${[...data.ok, ...data.fail].sort((a,b)=>b.ts-a.ts).map(r => `
+                  <div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:4px 8px;border-radius:6px;background:${r.success?'rgba(0,200,122,0.05)':'rgba(255,51,68,0.05)'}">
+                    <span style="color:${r.success?'var(--green)':'var(--red)'};flex-shrink:0">${r.success?'✓':'✗'}</span>
+                    <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">${escHtml(r.leadName||'')}</span>
+                    ${r.error ? `<span style="color:var(--red);font-size:9px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(r.error)}">${escHtml(r.error.slice(0,30))}</span>` : ''}
+                    <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;white-space:nowrap">${new Date(r.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+                  </div>`).join('')}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`).join('')}
     </div>
   </div>`;
 }
@@ -3099,6 +3129,17 @@ async function startDisparoAuto() {
     return;
   }
   const instance = dispState.confirmedInstance;
+  // Verifica se a instância está conectada antes de disparar
+  try {
+    const statusRes = await api(`/api/whatsapp/instances/${encodeURIComponent(instance)}?action=status`);
+    const state = statusRes?.instance?.state || statusRes?.state;
+    if (state !== 'open') {
+      alert(`⚠️ A conta "${instance}" está desconectada (estado: ${state || 'desconhecido'}).\n\nConecte-a na aba WhatsApp antes de disparar.`);
+      return;
+    }
+  } catch(e) {
+    if (!confirm(`Não foi possível verificar o status da conta "${instance}".\n\nDeseja disparar assim mesmo? (as mensagens podem não ser entregues)`)) return;
+  }
   const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 10);
   if (queue.length === 0) return;
 
@@ -3194,6 +3235,7 @@ async function startDisparoAuto() {
 
   if (cdTimer) clearInterval(cdTimer);
   if (dispState.sent.size > 0) { await saveContaWaMap(); await saveLastContactedMap(); renderWaTabs(); }
+  saveDispHistory();
   const failedHtml = failedLeads.length > 0 ? `
     <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
       <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
@@ -3381,9 +3423,11 @@ async function dispSendViaApi(leadId) {
     lastContactedMap[String(leadId)] = Date.now();
     await Promise.all([saveContaWaMap(), saveLastContactedMap()]);
     addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: true });
+    saveDispHistory();
     markDisparoSent(leadId);
   } catch(e) {
     addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: false, error: e.message });
+    saveDispHistory();
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
     alert('Erro ao enviar: ' + (e.message || 'tente novamente'));
   }
