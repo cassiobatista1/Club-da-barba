@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Parceiros – Club da Barba</title>
+  <title>QR Parceiros – LOOVI</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,10 +19,7 @@
       background: #13131C;
       border-bottom: 2px solid #5A78FF;
       padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
     }
     .brand { font-size: 18px; font-weight: 800; color: #5A78FF; letter-spacing: 2px; text-transform: uppercase; }
     .brand-sub { font-size: 9px; color: #6868AA; letter-spacing: 3px; text-transform: uppercase; }
@@ -35,57 +32,34 @@
 
     main { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
 
-    /* Stats bar */
-    .stats {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
+    .stats { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
     .stat-card {
       flex: 1; min-width: 120px;
-      background: #1A1A26;
-      border: 1px solid #26263A;
-      border-radius: 10px;
-      padding: 14px 18px;
+      background: #1A1A26; border: 1px solid #26263A;
+      border-radius: 10px; padding: 14px 18px;
     }
     .stat-value { font-size: 28px; font-weight: 800; color: #5A78FF; }
     .stat-label { font-size: 11px; color: #6868AA; margin-top: 2px; }
 
     /* Add form */
     .add-section {
-      background: #1A1A26;
-      border: 1px solid #26263A;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 28px;
+      background: #1A1A26; border: 1px solid #26263A;
+      border-radius: 12px; padding: 20px; margin-bottom: 28px;
     }
     .section-title { font-size: 13px; font-weight: 600; color: #6868AA; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
     .add-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .add-row input {
-      flex: 1; min-width: 180px;
-      background: #13131C;
-      border: 1.5px solid #26263A;
-      border-radius: 8px;
-      padding: 11px 14px;
-      font-size: 14px;
-      color: #fff;
-      outline: none;
-      transition: border-color .2s;
+      flex: 1; min-width: 160px;
+      background: #13131C; border: 1.5px solid #26263A;
+      border-radius: 8px; padding: 11px 14px;
+      font-size: 14px; color: #fff; outline: none; transition: border-color .2s;
     }
     .add-row input:focus { border-color: #5A78FF; }
     .add-row input::placeholder { color: #6868AA; }
     .btn-add {
-      padding: 11px 20px;
-      background: #5A78FF;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background .2s;
+      padding: 11px 20px; background: #5A78FF; color: #fff;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: background .2s;
     }
     .btn-add:hover { background: #7B95FF; }
     .hint { font-size: 11px; color: #6868AA; margin-top: 8px; }
@@ -96,100 +70,98 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
     }
-
     .partner-card {
-      background: #1A1A26;
-      border: 1px solid #26263A;
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      background: #1A1A26; border: 1px solid #26263A;
+      border-radius: 12px; padding: 20px;
+      display: flex; flex-direction: column; gap: 14px;
     }
+    .partner-card.editing { border-color: #5A78FF; }
 
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-info { flex: 1; min-width: 0; }
     .partner-name { font-size: 15px; font-weight: 600; }
+    .partner-plate {
+      font-size: 12px; font-family: monospace; letter-spacing: 2px;
+      color: #E9EBFF; margin-top: 3px;
+      background: #26263A; display: inline-block; padding: 2px 8px; border-radius: 4px;
+    }
     .ref-code {
-      font-size: 11px;
-      background: rgba(90,120,255,.1);
-      color: #5A78FF;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-family: monospace;
-      white-space: nowrap;
+      font-size: 10px; background: rgba(90,120,255,.1); color: #5A78FF;
+      padding: 2px 6px; border-radius: 4px; font-family: monospace;
+      display: inline-block; margin-top: 4px;
     }
 
-    .btn-delete {
-      background: none;
-      border: 1px solid #26263A;
-      color: #6868AA;
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: color .2s, border-color .2s;
-      flex-shrink: 0;
+    .card-btns { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+    .btn-edit {
+      background: rgba(90,120,255,.1); border: 1px solid #5A78FF; color: #5A78FF;
+      padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: background .2s; white-space: nowrap;
     }
-    .btn-delete:hover { color: #e05050; border-color: #e05050; }
+    .btn-edit:hover { background: rgba(90,120,255,.2); }
+    .btn-delete {
+      background: none; border: 1px solid #26263A; color: #6868AA;
+      padding: 5px 10px; border-radius: 6px; font-size: 11px;
+      cursor: pointer; transition: color .2s, border-color .2s; white-space: nowrap;
+    }
+    .btn-delete:hover { color: #FF3344; border-color: #FF3344; }
+
+    /* Edit mode */
+    .edit-form { display: none; flex-direction: column; gap: 8px; }
+    .partner-card.editing .edit-form { display: flex; }
+    .partner-card.editing .view-mode { display: none; }
+
+    .edit-input {
+      width: 100%; background: #13131C; border: 1.5px solid #26263A;
+      border-radius: 8px; padding: 10px 12px; font-size: 14px;
+      color: #fff; outline: none; transition: border-color .2s;
+      font-family: inherit;
+    }
+    .edit-input:focus { border-color: #5A78FF; }
+    .edit-input::placeholder { color: #6868AA; }
+    .edit-plate {
+      text-transform: uppercase; letter-spacing: 3px;
+      font-family: monospace; font-size: 16px; text-align: center;
+    }
+    .edit-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-save {
+      flex: 1; background: #5A78FF; color: #fff; border: none;
+      border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-save:hover { background: #7B95FF; }
+    .btn-cancel {
+      flex: 1; background: #13131C; color: #6868AA; border: 1px solid #26263A;
+      border-radius: 8px; padding: 10px; font-size: 13px;
+      cursor: pointer; transition: color .2s;
+    }
+    .btn-cancel:hover { color: #E9EBFF; }
 
     .qr-wrap {
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: fit-content;
+      background: #fff; padding: 10px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; width: fit-content;
     }
-
     .card-url {
-      font-size: 11px;
-      color: #6868AA;
-      font-family: monospace;
-      word-break: break-all;
-      line-height: 1.5;
-      background: #0C0C14;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #26263A;
+      font-size: 11px; color: #6868AA; font-family: monospace;
+      word-break: break-all; line-height: 1.5; background: #0C0C14;
+      padding: 8px 10px; border-radius: 6px; border: 1px solid #26263A;
     }
-
     .card-actions { display: flex; gap: 8px; }
     .btn-action {
-      flex: 1;
-      padding: 9px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid #26263A;
-      background: #13131C;
-      color: #6868AA;
-      transition: color .2s, border-color .2s, background .2s;
-      text-align: center;
+      flex: 1; padding: 9px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer; border: 1px solid #26263A; background: #13131C; color: #6868AA;
+      transition: color .2s, border-color .2s, background .2s; text-align: center;
     }
     .btn-action:hover { border-color: #5A78FF; color: #5A78FF; }
     .btn-action.primary { background: rgba(90,120,255,.1); border-color: #5A78FF; color: #5A78FF; }
     .btn-action.primary:hover { background: rgba(90,120,255,.2); }
 
-    .lead-count {
-      font-size: 11px;
-      color: #6868AA;
-      text-align: center;
-      padding-top: 2px;
-    }
+    .lead-count { font-size: 11px; color: #6868AA; text-align: center; padding-top: 2px; }
     .lead-count strong { color: #5A78FF; font-size: 14px; }
 
-    /* Empty state */
-    .empty {
-      text-align: center;
-      padding: 48px 24px;
-      color: #6868AA;
-    }
+    .empty { text-align: center; padding: 48px 24px; color: #6868AA; }
     .empty svg { margin-bottom: 12px; opacity: .3; }
     .empty p { font-size: 14px; }
 
-    /* Loading */
     .loading { text-align: center; padding: 60px; color: #6868AA; font-size: 14px; }
     .spin {
       display: inline-block; width: 20px; height: 20px;
@@ -199,7 +171,6 @@
     }
     @keyframes rot { to { transform: rotate(360deg); } }
 
-    /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       background: #1A1A26; border: 1px solid #26263A; color: #E9EBFF;
@@ -240,14 +211,19 @@
   <div class="add-section">
     <div class="section-title">Adicionar parceiro</div>
     <div class="add-row">
-      <input type="text" id="inputNome" placeholder="Nome do parceiro / carro (ex: João – Gol Prata)"
+      <input type="text" id="inputNome" placeholder="Nome do parceiro (ex: João Silva)"
              autocomplete="off" autocapitalize="words">
-      <input type="text" id="inputRef" placeholder="Código (ex: joao-gol) – opcional"
+      <input type="text" id="inputPlaca" placeholder="Placa do carro (ex: ABC-1234)"
+             autocomplete="off" autocapitalize="characters" maxlength="8"
+             oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/^([A-Z]{3})([0-9A-Z]+)$/,'$1-$2').slice(0,8)"
+             style="font-family:monospace;letter-spacing:2px;max-width:160px">
+      <input type="text" id="inputRef" placeholder="Código único – opcional"
              autocomplete="off" autocapitalize="none"
-             oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-{2,}/g,'-')">
+             oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-{2,}/g,'-')"
+             style="max-width:200px">
       <button class="btn-add" onclick="addParceiro()">+ Adicionar</button>
     </div>
-    <div class="hint">O código deve ser único. Se deixado em branco, será gerado automaticamente.</div>
+    <div class="hint">Código gerado automaticamente se deixado em branco. A placa pode ser atualizada depois.</div>
   </div>
 
   <div id="gridContainer">
@@ -271,13 +247,9 @@
       ]);
       const pData = await pRes.json();
       allLeads = lRes.ok ? await lRes.json() : [];
-      // pData pode ser { value: [...] } (via settings API) ou array direto
-      if (Array.isArray(pData?.value)) {
-        parceiros = pData.value;
-      } else if (Array.isArray(pData)) {
-        parceiros = pData;
-      } else {
-        // Fallback: tenta localStorage
+      if (Array.isArray(pData?.value)) parceiros = pData.value;
+      else if (Array.isArray(pData)) parceiros = pData;
+      else {
         const cached = localStorage.getItem('parceiros_backup');
         parceiros = cached ? JSON.parse(cached) : [];
       }
@@ -327,17 +299,46 @@
     parceiros.forEach(p => {
       const url = `${BASE_URL}/indicacao.html?p=${encodeURIComponent(p.ref)}`;
       const count = countLeads(p.ref);
+      const placaHtml = p.placa
+        ? `<div class="partner-plate">${escHtml(p.placa)}</div>`
+        : `<div class="partner-plate" style="color:#6868AA;font-style:italic;letter-spacing:0">sem placa</div>`;
+
       const card = document.createElement('div');
       card.className = 'partner-card';
+      card.id = `card-${escHtml(p.ref)}`;
       card.dataset.ref = p.ref;
       card.innerHTML = `
-        <div class="card-header">
-          <div>
+        <!-- VIEW MODE -->
+        <div class="card-header view-mode">
+          <div class="card-info">
             <div class="partner-name">${escHtml(p.nome)}</div>
-            <div class="ref-code" style="margin-top:4px">${escHtml(p.ref)}</div>
+            ${placaHtml}
+            <div class="ref-code">${escHtml(p.ref)}</div>
           </div>
-          <button class="btn-delete" onclick="deleteParceiro('${escHtml(p.ref)}')">Remover</button>
+          <div class="card-btns">
+            <button class="btn-edit" onclick="startEdit('${escHtml(p.ref)}')">✏ Editar</button>
+            <button class="btn-delete" onclick="deleteParceiro('${escHtml(p.ref)}')">Remover</button>
+          </div>
         </div>
+
+        <!-- EDIT MODE -->
+        <div class="edit-form">
+          <input class="edit-input" id="editNome-${escHtml(p.ref)}" type="text"
+                 value="${escHtml(p.nome)}" placeholder="Nome do parceiro"
+                 autocapitalize="words">
+          <input class="edit-input edit-plate" id="editPlaca-${escHtml(p.ref)}" type="text"
+                 value="${escHtml(p.placa || '')}" placeholder="ABC-1234"
+                 maxlength="8" autocapitalize="characters"
+                 oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')">
+          <div style="font-size:10px;color:#6868AA;font-family:monospace;letter-spacing:1px">
+            Código (URL): ${escHtml(p.ref)} — não editável
+          </div>
+          <div class="edit-actions">
+            <button class="btn-save" onclick="saveEdit('${escHtml(p.ref)}')">✓ Salvar</button>
+            <button class="btn-cancel" onclick="cancelEdit('${escHtml(p.ref)}')">Cancelar</button>
+          </div>
+        </div>
+
         <div class="qr-wrap" id="qr-${escHtml(p.ref)}"></div>
         <div class="card-url">${escHtml(url)}</div>
         <div class="card-actions">
@@ -353,28 +354,51 @@
     container.innerHTML = '';
     container.appendChild(grid);
 
-    // Generate QR codes after DOM insertion
+    // Generate QR codes
     parceiros.forEach(p => {
       const url = `${BASE_URL}/indicacao.html?p=${encodeURIComponent(p.ref)}`;
       new QRCode(document.getElementById(`qr-${p.ref}`), {
-        text: url,
-        width: 160,
-        height: 160,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
+        text: url, width: 160, height: 160,
+        colorDark: '#000000', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M,
       });
     });
   }
 
+  // ── EDIT ────────────────────────────────────────────────
+  function startEdit(ref) {
+    document.getElementById(`card-${ref}`)?.classList.add('editing');
+    document.getElementById(`editNome-${ref}`)?.focus();
+  }
+
+  function cancelEdit(ref) {
+    document.getElementById(`card-${ref}`)?.classList.remove('editing');
+  }
+
+  async function saveEdit(ref) {
+    const nomeEl = document.getElementById(`editNome-${ref}`);
+    const placaEl = document.getElementById(`editPlaca-${ref}`);
+    const nome = nomeEl?.value.trim();
+    const placa = placaEl?.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    if (!nome) { showToast('O nome não pode estar em branco.'); nomeEl?.focus(); return; }
+
+    const idx = parceiros.findIndex(p => p.ref === ref);
+    if (idx === -1) return;
+
+    parceiros[idx] = { ...parceiros[idx], nome, placa: placa || '' };
+    await saveParceiros();
+    updateStats();
+    renderGrid();
+    showToast('Parceiro atualizado!');
+  }
+
+  // ── ADD ─────────────────────────────────────────────────
   function generateRef(nome) {
-    return nome
-      .toLowerCase()
+    return nome.toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9 ]/g, '')
-      .trim()
-      .replace(/\s+/g, '-')
-      .slice(0, 30)
+      .replace(/[^a-z0-9 ]/g, '').trim()
+      .replace(/\s+/g, '-').slice(0, 20)
       + '-' + Math.random().toString(36).slice(2, 6);
   }
 
@@ -382,17 +406,18 @@
     const nome = document.getElementById('inputNome').value.trim();
     if (!nome) { showToast('Informe o nome do parceiro.'); return; }
 
+    const placa = document.getElementById('inputPlaca').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
     let ref = document.getElementById('inputRef').value.trim();
     if (!ref) ref = generateRef(nome);
 
     if (parceiros.some(p => p.ref === ref)) {
-      showToast('Esse código já existe. Use outro código.');
-      return;
+      showToast('Esse código já existe. Use outro código.'); return;
     }
 
-    parceiros.push({ id: Date.now().toString(), nome, ref, criado: new Date().toISOString() });
+    parceiros.push({ id: Date.now().toString(), nome, ref, placa: placa || '', criado: new Date().toISOString() });
     await saveParceiros();
     document.getElementById('inputNome').value = '';
+    document.getElementById('inputPlaca').value = '';
     document.getElementById('inputRef').value = '';
     updateStats();
     renderGrid();
@@ -409,25 +434,20 @@
   }
 
   async function saveParceiros() {
-    // Sempre salva em localStorage como backup
     localStorage.setItem('parceiros_backup', JSON.stringify(parceiros));
-
     try {
       const res = await fetch('/api/settings?key=parceiros', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: parceiros }),
       });
-      if (!res.ok) throw new Error('API retornou erro');
-    } catch (err) {
-      console.error('Erro ao salvar no Supabase:', err);
+      if (!res.ok) throw new Error('API error');
+    } catch {
       showToast('⚠️ Salvo localmente. Verifique conexão com banco.');
     }
   }
 
   function downloadQr(ref, nome) {
-    const container = document.getElementById(`qr-${ref}`);
-    const canvas = container?.querySelector('canvas');
+    const canvas = document.getElementById(`qr-${ref}`)?.querySelector('canvas');
     if (!canvas) { showToast('QR code ainda gerando…'); return; }
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
