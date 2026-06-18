@@ -381,6 +381,11 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 
 #loadingBar { position: fixed; top: 0; left: 0; height: 2px; background: var(--primary); z-index: 999; transition: width 0.3s ease, opacity 0.3s; width: 0; opacity: 0; }
 
+/* ── Floating auto-disparo status bar ── */
+#autoDisparoBar { display:none;position:fixed;bottom:24px;right:24px;z-index:8888;background:var(--card);border:1px solid rgba(0,200,122,0.35);border-radius:14px;padding:12px 16px;min-width:270px;max-width:320px;box-shadow:0 8px 32px rgba(0,200,122,0.12),0 2px 12px rgba(0,0,0,0.5);flex-direction:column;gap:8px; }
+@keyframes autoBarPulse { 0%,100%{opacity:1}50%{opacity:0.35} }
+.auto-bar-pulse { animation:autoBarPulse 1.6s ease-in-out infinite; }
+
 /* Sidebar collapses on tablet + mobile */
 @media (max-width: 1024px) {
   .sidebar { transform: translateX(-100%); }
@@ -1174,15 +1179,17 @@ async function assignAllUntaggedLeads(instance) {
   if (activeId === 'pipeline') renderPipeline();
   if (activeId === 'followup') renderFollowup();
   if (activeId === 'disparos') renderDisparos();
-  const c = getWaColor(instance);
-  // show inline toast
-  const toast = document.createElement('div');
-  toast.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:${c};color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3)`;
-  toast.textContent = `✓ ${untagged.length} leads atribuídos a ${instance}`;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+  showToast(`✓ ${untagged.length} lead${untagged.length!==1?'s':''} atribuídos a ${instance}`, getWaColor(instance));
 }
 let currentPage = 'dashboard';
+
+function showToast(msg, color) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${color||'#1A1A26'};color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:9997;box-shadow:0 4px 20px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);white-space:nowrap`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+}
 
 // ── API HELPER ─────────────────────────────────────────
 async function api(url, method = 'GET', body = null, _attempt = 0) {
@@ -2696,6 +2703,7 @@ function deleteDispTemplate(id) {
 
 function renderDisparos() {
   const root = document.getElementById('disparos-root');
+  if (_autoRunning) return; // auto-disparo em andamento — não sobrescrever o progresso
   if (dispState.step === 'queue') { renderDisparoQueue(); return; }
 
   const statusOpts = getPipelineCols();
@@ -3120,8 +3128,32 @@ function fmtSecs(s) {
 }
 
 let _autoStopFlag = false;
+let _autoRunning  = false;
 
 function stopDisparoAuto() { _autoStopFlag = true; }
+
+function _showAutoBar(sent, total, instance, statusText) {
+  const bar = document.getElementById('autoDisparoBar');
+  if (!bar) return;
+  bar.style.display = 'flex';
+  const pct = total > 0 ? Math.round((sent / total) * 100) : 0;
+  document.getElementById('autoBarProgress').textContent = `${sent}/${total}`;
+  document.getElementById('autoBarInst').textContent    = instance ? `📱 ${instance}` : '';
+  document.getElementById('autoBarFill').style.width    = pct + '%';
+  document.getElementById('autoBarStatus').textContent  = statusText || 'Enviando...';
+}
+
+function _hideAutoBar() {
+  const bar = document.getElementById('autoDisparoBar');
+  if (bar) bar.style.display = 'none';
+}
+
+window.addEventListener('beforeunload', e => {
+  if (_autoRunning) {
+    e.preventDefault();
+    e.returnValue = 'Um disparo automático está em andamento. Fechar agora vai interromper o envio.';
+  }
+});
 
 async function startDisparoAuto() {
   if (!dispState.instanceConfirmed || !dispState.confirmedInstance) {
@@ -3146,6 +3178,8 @@ async function startDisparoAuto() {
   dispState.queue = queue;
   dispState.sent  = new Set();
   _autoStopFlag   = false;
+  _autoRunning    = true;
+  _showAutoBar(0, queue.length, instance, 'Iniciando...');
 
   const root = document.getElementById('disparos-root');
   let cdTimer = null;
@@ -3154,6 +3188,8 @@ async function startDisparoAuto() {
   function renderAutoProgress(i, lead, msg, countdown, waiting) {
     const pct = Math.round((dispState.sent.size / queue.length) * 100);
     const modeLabel = { '30':'30s fixo', '60':'1 min fixo', '120':'2 min fixo', '300':'5 min fixo', 'rand1':'Aleatório 30–90s', 'rand2':'Aleatório 1–3 min' }[dispState.intervalMode||'rand1'];
+    _showAutoBar(dispState.sent.size, queue.length, instance,
+      waiting ? `⏱ ${fmtSecs(countdown)} — próximo envio` : `Enviando p/ ${lead.nome}...`);
     root.innerHTML = `
       <div style="max-width:560px;margin:24px auto;display:flex;flex-direction:column;gap:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -3234,8 +3270,17 @@ async function startDisparoAuto() {
   }
 
   if (cdTimer) clearInterval(cdTimer);
+  _autoRunning = false;
+  _hideAutoBar();
   if (dispState.sent.size > 0) { await saveContaWaMap(); await saveLastContactedMap(); renderWaTabs(); }
   saveDispHistory();
+  // Notify user if they navigated away during the disparo
+  if (currentPage !== 'disparos') {
+    const _ok = dispState.sent.size;
+    const _fail = failedLeads.length;
+    const _icon = _autoStopFlag ? '⏹' : _fail > 0 ? '⚠️' : '✅';
+    showToast(`${_icon} Disparo concluído — ${_ok} enviados${_fail > 0 ? `, ${_fail} falhas` : ''} via ${instance}`);
+  }
   const failedHtml = failedLeads.length > 0 ? `
     <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
       <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
@@ -3923,5 +3968,29 @@ initDispHistory();
 loadData();
 </script>
 <div class="uf-picker" id="ufPicker"></div>
+
+<!-- Floating auto-disparo status bar — visible in all sections while sending -->
+<div id="autoDisparoBar">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div style="display:flex;align-items:center;gap:7px">
+      <span class="auto-bar-pulse" style="font-size:15px">⚡</span>
+      <span style="font-size:12px;font-weight:700;color:var(--green)">Disparando em fundo</span>
+    </div>
+    <span id="autoBarProgress" style="font-family:'DM Mono',monospace;font-size:12px;font-weight:800;color:var(--green)">0/0</span>
+  </div>
+  <div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px">
+      <span id="autoBarInst"></span>
+      <span id="autoBarStatus">Enviando...</span>
+    </div>
+    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+      <div id="autoBarFill" style="height:100%;background:var(--green);border-radius:2px;transition:width 0.4s ease;width:0%"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;justify-content:flex-end">
+    <button onclick="nav('disparos')" style="background:var(--border);border:none;border-radius:7px;color:var(--fg);font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:600">📋 Ver progresso</button>
+    <button onclick="stopDisparoAuto()" style="background:rgba(255,51,68,0.12);border:1px solid rgba(255,51,68,0.3);border-radius:7px;color:var(--red);font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit;font-weight:600">⏹ Parar</button>
+  </div>
+</div>
 </body>
 </html>
