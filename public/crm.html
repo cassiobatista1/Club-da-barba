@@ -1239,15 +1239,30 @@ async function loadData() {
     ]);
     leads  = leadsData  || [];
     vendas = vendasData || [];
-    // Supabase is source of truth; fall back to localStorage if DB returns empty
+    // Merge helpers — combine Supabase + localStorage, never discard recent data
     const _lsWa  = () => { try { return JSON.parse(localStorage.getItem('contaWaMap_bk')  || 'null'); } catch { return null; } };
     const _lsLc  = () => { try { return JSON.parse(localStorage.getItem('lastContactedMap_bk') || 'null'); } catch { return null; } };
-    const _isMap = v => v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length > 0;
-    contaWaMap      = _isMap(waMapData)  ? waMapData  : (_isMap(_lsWa())  ? _lsWa()  : {});
-    lastContactedMap = _isMap(lcMapData) ? lcMapData  : (_isMap(_lsLc())  ? _lsLc()  : {});
-    // Back-fill: if Supabase was empty but we recovered from localStorage, save back immediately
-    if (!_isMap(waMapData)  && _isMap(contaWaMap))      saveContaWaMap();
-    if (!_isMap(lcMapData)  && _isMap(lastContactedMap)) saveLastContactedMap();
+    const _isMap = v => v && typeof v === 'object' && !Array.isArray(v);
+    // contaWaMap: union — localStorage fills gaps in Supabase (recent unsynced assignments)
+    const _mergeWa = (db, ls) => {
+      const a = _isMap(db) ? db : {};
+      const b = _isMap(ls) ? ls : {};
+      return { ...b, ...a }; // Supabase wins on conflict, localStorage fills missing entries
+    };
+    // lastContactedMap: per-lead max timestamp — never lose a send record
+    const _mergeLc = (db, ls) => {
+      const a = _isMap(db) ? db : {};
+      const b = _isMap(ls) ? ls : {};
+      const m = { ...a };
+      Object.keys(b).forEach(k => { if (!(k in m) || (typeof b[k] === 'number' && b[k] > (m[k]||0))) m[k] = b[k]; });
+      return m;
+    };
+    contaWaMap       = _mergeWa(waMapData, _lsWa());
+    lastContactedMap = _mergeLc(lcMapData, _lsLc());
+    // If merge produced more data than Supabase had alone, sync it back
+    const _waLen  = v => _isMap(v) ? Object.keys(v).length : 0;
+    if (_waLen(contaWaMap)       > _waLen(waMapData))  saveContaWaMap();
+    if (_waLen(lastContactedMap) > _waLen(lcMapData))  saveLastContactedMap();
     // Sync pipeline cols from DB → overwrites localStorage (single source of truth)
     if (dbCols && Array.isArray(dbCols) && dbCols.length > 0) {
       localStorage.setItem('pipelineCols', JSON.stringify(dbCols));
@@ -2528,7 +2543,7 @@ function renderRelatorios() {
 }
 
 // ── RENDER DISPAROS ───────────────────────────────────
-let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '', filterWa: '', filterFu: '' };
+let dispState = { step: 'config', selected: new Set(), template: '', queue: [], current: 0, sent: new Set(), interval: 5, instanceConfirmed: false, confirmedInstance: '', filterWa: '', filterFu: '', filterSent: 'new' };
 
 function confirmDispAccount() {
   const sel = document.getElementById('dispWaInstance');
@@ -2713,8 +2728,9 @@ function renderDisparos() {
   const sfVal = dispState.filterStatus || '';
   const ofVal = dispState.filterOrigem || '';
   const efVal = dispState.filterExec   || '';
-  const wfVal = dispState.filterWa     || '';
-  const ffVal = dispState.filterFu     || '';
+  const wfVal  = dispState.filterWa    || '';
+  const ffVal  = dispState.filterFu    || '';
+  const stVal  = dispState.filterSent  || 'new';
   const today = new Date(); today.setHours(0,0,0,0);
 
   const filtered = leads.filter(l => {
@@ -2725,6 +2741,10 @@ function renderDisparos() {
     // Filtro estrito: quando DDD selecionado mostra apenas leads daquele DDD
     if (wfVal && (contaWaMap[String(l.id)] || '') !== wfVal) return false;
     if (ffVal === 'pending' && !(l.followup && new Date(l.followup + 'T00:00:00') <= today && !isTerminal(l.status))) return false;
+    // Filtro de envio: 'new' = nunca enviados, 'sent' = já enviados, '' = todos
+    const wasContacted = !!lastContactedMap[String(l.id)];
+    if (stVal === 'new'  &&  wasContacted) return false;
+    if (stVal === 'sent' && !wasContacted) return false;
     return true;
   }).sort((a,b) => (lastContactedMap[String(a.id)] || 0) - (lastContactedMap[String(b.id)] || 0));
 
@@ -2902,6 +2922,13 @@ function renderDisparos() {
               <button onclick="setDispFilterFu('')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:${ffVal===''?'var(--accent)':'transparent'};color:${ffVal===''?'#fff':'var(--text)'};cursor:pointer;font-weight:${ffVal===''?700:400}">Todos</button>
               <button onclick="setDispFilterFu('pending')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--gold);background:${ffVal==='pending'?'var(--gold)':'transparent'};color:${ffVal==='pending'?'#000':'var(--gold)'};cursor:pointer;font-weight:${ffVal==='pending'?700:500}">⏰ A partir do 1º Follow-up</button>
             </div>
+            <!-- Filtro de envio: novo / já enviado -->
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px">Envio:</span>
+              <button onclick="setDispFilterSent('new')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--green)66;background:${stVal==='new'?'var(--green)':'transparent'};color:${stVal==='new'?'#000':'var(--green)'};cursor:pointer;font-weight:${stVal==='new'?700:500}">✨ Nunca enviados</button>
+              <button onclick="setDispFilterSent('')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:${stVal===''?'var(--accent)':'transparent'};color:${stVal===''?'#fff':'var(--text)'};cursor:pointer;font-weight:${stVal===''?700:400}">Todos</button>
+              <button onclick="setDispFilterSent('sent')" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid #5A78FF66;background:${stVal==='sent'?'#5A78FF':'transparent'};color:${stVal==='sent'?'#fff':'#5A78FF'};cursor:pointer;font-weight:${stVal==='sent'?700:500}">📤 Já enviados</button>
+            </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispSelectAll(${JSON.stringify(filtered.map(l=>l.id))})">✓ Sel. todos</button>
               <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;flex:1" onclick="dispClearAll()">✕ Limpar</button>
@@ -3040,6 +3067,7 @@ function saveDispFilters() {
       filterStatus: dispState.filterStatus || '',
       filterOrigem: dispState.filterOrigem || '',
       filterExec: dispState.filterExec || '',
+      filterSent: dispState.filterSent || 'new',
     }));
   } catch {}
 }
@@ -3053,8 +3081,16 @@ function restoreDispFilters() {
       if (f.filterStatus) dispState.filterStatus = f.filterStatus;
       if (f.filterOrigem) dispState.filterOrigem = f.filterOrigem;
       if (f.filterExec)   dispState.filterExec   = f.filterExec;
+      dispState.filterSent = f.filterSent || 'new';
     }
   } catch {}
+}
+
+function setDispFilterSent(val) {
+  dispState.filterSent = val;
+  dispState.selected.clear();
+  saveDispFilters();
+  renderDisparos();
 }
 
 function dispToggle(id) {
@@ -3175,6 +3211,13 @@ async function startDisparoAuto() {
   const queue = leads.filter(l => dispState.selected.has(l.id) && l.tel && l.tel.replace(/\D/g,'').length >= 10);
   if (queue.length === 0) return;
 
+  // Aviso se há leads que já foram contactados antes — evita re-envio acidental
+  const jaEnviados = queue.filter(l => lastContactedMap[String(l.id)]);
+  if (jaEnviados.length > 0) {
+    const nomes = jaEnviados.slice(0,3).map(l=>l.nome.split(' ')[0]).join(', ') + (jaEnviados.length > 3 ? ` e mais ${jaEnviados.length-3}` : '');
+    if (!confirm(`⚠️ ${jaEnviados.length} lead${jaEnviados.length>1?'s':''} já receberam mensagem antes:\n${nomes}\n\nDeseja enviar novamente para todos os ${queue.length} selecionados?`)) return;
+  }
+
   dispState.queue = queue;
   dispState.sent  = new Set();
   _autoStopFlag   = false;
@@ -3242,7 +3285,11 @@ async function startDisparoAuto() {
       dispState.sent.add(lead.id);
       contaWaMap[String(lead.id)] = instance;
       lastContactedMap[String(lead.id)] = Date.now();
+      // Salvar no localStorage IMEDIATAMENTE após cada envio (sem rede, sem falha)
+      try { localStorage.setItem('contaWaMap_bk', JSON.stringify(contaWaMap)); } catch {}
+      try { localStorage.setItem('lastContactedMap_bk', JSON.stringify(lastContactedMap)); } catch {}
       addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: true });
+      // Supabase sync: a cada 5 envios (fire-and-forget, já temos localStorage como segurança)
       if (dispState.sent.size % 5 === 0) { saveContaWaMap().catch(()=>{}); saveLastContactedMap().catch(()=>{}); }
     } catch(e) {
       failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
