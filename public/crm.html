@@ -77,6 +77,8 @@ body {
 .user-info { flex: 1; overflow: hidden; }
 .user-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-role { font-size: 10px; color: var(--muted); }
+.btn-logout { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 4px; border-radius: 4px; transition: color 0.15s; flex-shrink: 0; }
+.btn-logout:hover { color: var(--danger); }
 
 .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
@@ -549,6 +551,7 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
       <div class="user-name">Cássio Junior</div>
       <div class="user-role">Executivo LOOVI</div>
     </div>
+    <button class="btn-logout" onclick="logout()" title="Sair">⏏</button>
   </div>
 </aside>
 
@@ -1182,6 +1185,12 @@ async function assignAllUntaggedLeads(instance) {
   showToast(`✓ ${untagged.length} lead${untagged.length!==1?'s':''} atribuídos a ${instance}`, getWaColor(instance));
 }
 let currentPage = 'dashboard';
+
+async function logout() {
+  if (!confirm('Deseja sair do painel?')) return;
+  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+  window.location.href = '/login.html';
+}
 
 function showToast(msg, color) {
   const t = document.createElement('div');
