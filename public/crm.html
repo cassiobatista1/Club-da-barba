@@ -3158,6 +3158,22 @@ function getDispInterval() {
   return parseInt(m) || 60;
 }
 
+// Traduz erros da Evolution API para mensagem amigável
+function _evoErrMsg(rawMsg) {
+  try {
+    const d = typeof rawMsg === 'string' ? JSON.parse(rawMsg) : rawMsg;
+    const inner = d?.response?.message || d?.message || d?.error || '';
+    if (/connection closed/i.test(inner) || /not connected/i.test(inner) || /closed/i.test(inner))
+      return 'Conta WhatsApp desconectada.\n\nVá em "Contas WA" → conecte a conta antes de disparar.';
+    if (/rate.?limit|too many/i.test(inner))
+      return 'Muitas mensagens em pouco tempo (rate limit). Aumente o intervalo entre envios.';
+    if (/invalid|not exist/i.test(inner))
+      return 'Número inválido ou não existe no WhatsApp.';
+    if (inner) return inner;
+  } catch {}
+  return rawMsg || 'Erro desconhecido';
+}
+
 function fmtSecs(s) {
   if (s < 60) return `${s}s`;
   return `${Math.floor(s/60)}m ${s%60}s`;
@@ -3292,9 +3308,15 @@ async function startDisparoAuto() {
       // Supabase sync: a cada 5 envios (fire-and-forget, já temos localStorage como segurança)
       if (dispState.sent.size % 5 === 0) { saveContaWaMap().catch(()=>{}); saveLastContactedMap().catch(()=>{}); }
     } catch(e) {
-      failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: e.message });
-      addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: false, error: e.message });
-      console.warn('Erro ao enviar para', lead.nome, e.message);
+      const friendlyErr = _evoErrMsg(e.message);
+      failedLeads.push({ nome: lead.nome, tel: lead.tel, erro: friendlyErr });
+      addDispHistoryEntry({ instance, leadId: lead.id, leadName: lead.nome, tel: lead.tel, success: false, error: friendlyErr });
+      console.warn('Erro ao enviar para', lead.nome, friendlyErr);
+      // Se a conta desconectou, para o loop — não adianta tentar os próximos
+      if (/desconectada|connection closed|not connected/i.test(friendlyErr)) {
+        _autoStopFlag = true;
+        showToast('⚠️ Conta WA desconectada — disparo pausado. Reconecte em Contas WA.', '#CC4400');
+      }
     }
 
     if (i < queue.length - 1 && !_autoStopFlag) {
@@ -3518,10 +3540,11 @@ async function dispSendViaApi(leadId) {
     saveDispHistory();
     markDisparoSent(leadId);
   } catch(e) {
-    addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: false, error: e.message });
+    const friendlyMsg = _evoErrMsg(e.message);
+    addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: false, error: friendlyMsg });
     saveDispHistory();
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
-    alert('Erro ao enviar: ' + (e.message || 'tente novamente'));
+    alert('⚠️ Erro ao enviar para ' + lead.nome + ':\n\n' + friendlyMsg);
   }
 }
 
