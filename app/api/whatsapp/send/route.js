@@ -4,11 +4,8 @@ function evoHeaders() {
   return { 'Content-Type': 'application/json', 'apikey': EVO_KEY };
 }
 
-// Normalize Brazilian phone to E.164 format (55XXXXXXXXXXX)
-// Handles numbers stored with or without the 55 country code
 function normalizeBrPhone(phone) {
   let n = phone.replace(/\D/g, '').replace(/^0+/, '');
-  // >= 12 digits means country code already present (55 + DDD + number)
   if (n.length >= 12) return n;
   return '55' + n;
 }
@@ -27,13 +24,16 @@ export async function POST(req) {
       headers: evoHeaders(),
       body: JSON.stringify({ number, text: message }),
     });
-    const data = await res.json();
-    // Falha: HTTP não-ok OU resposta com campos de erro explícitos
-    if (!res.ok || data?.status === 'error' || data?.error || data?.response?.error) {
-      return Response.json(data, { status: res.ok ? 400 : res.status });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      // Repassa o corpo da resposta junto com o status HTTP original
+      return Response.json(
+        { ...data, _httpStatus: res.status, _instance: instance, _number: number },
+        { status: res.status }
+      );
     }
     return Response.json(data);
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: e.message, _instance: instance, _number: number }, { status: 500 });
   }
 }

@@ -29,36 +29,47 @@ async function verifyToken(token, secret) {
 }
 
 export async function middleware(request) {
-  const { pathname } = request.nextUrl;
+  try {
+    const { pathname } = request.nextUrl;
 
-  // Pass through: login page, auth API, Next.js internals, static files
-  if (
-    pathname === '/login.html' ||
-    pathname.startsWith('/api/auth/') ||
-    pathname.startsWith('/_next/') ||
-    pathname === '/favicon.ico'
-  ) {
+    // Sempre passa: login, rotas de auth, assets Next.js e arquivos estáticos comuns
+    if (
+      pathname === '/login.html' ||
+      pathname.startsWith('/api/auth/') ||
+      pathname.startsWith('/_next/') ||
+      pathname === '/favicon.ico' ||
+      pathname.endsWith('.ico') ||
+      pathname.endsWith('.png') ||
+      pathname.endsWith('.jpg') ||
+      pathname.endsWith('.svg') ||
+      pathname.endsWith('.css') ||
+      pathname.endsWith('.js') && !pathname.startsWith('/api/')
+    ) {
+      return NextResponse.next();
+    }
+
+    // Se as variáveis de auth não estiverem configuradas, passa sem verificar
+    const secret   = process.env.CRM_SESSION_SECRET;
+    const password = process.env.CRM_PASSWORD;
+    if (!secret || !password) return NextResponse.next();
+
+    const token = request.cookies.get(SESSION_COOKIE)?.value;
+    const valid = token ? await verifyToken(token, secret) : false;
+
+    if (!valid) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Não autorizado — faça login em /login.html' }, { status: 401 });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = '/login.html';
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next();
+  } catch {
+    // Em qualquer erro inesperado no middleware, deixa passar (fail-open)
     return NextResponse.next();
   }
-
-  // If auth is not configured, skip (backward compatible)
-  const secret   = process.env.CRM_SESSION_SECRET;
-  const password = process.env.CRM_PASSWORD;
-  if (!secret || !password) return NextResponse.next();
-
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const valid = token ? await verifyToken(token, secret) : false;
-
-  if (!valid) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-    const url = request.nextUrl.clone();
-    url.pathname = '/login.html';
-    return NextResponse.redirect(url);
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {

@@ -3171,16 +3171,24 @@ function getDispInterval() {
 function _evoErrMsg(rawMsg) {
   try {
     const d = typeof rawMsg === 'string' ? JSON.parse(rawMsg) : rawMsg;
-    const inner = d?.response?.message || d?.message || d?.error || '';
-    if (/connection closed/i.test(inner) || /not connected/i.test(inner) || /closed/i.test(inner))
-      return 'Conta WhatsApp desconectada.\n\nVá em "Contas WA" → conecte a conta antes de disparar.';
+    // Extrai mensagem de erro do corpo — pode ser array ou string
+    const rawInner = d?.response?.message || d?.message || d?.error || '';
+    const inner = Array.isArray(rawInner) ? rawInner.join('; ') : String(rawInner || '');
+    const http = d?._httpStatus ? ` [HTTP ${d._httpStatus}]` : '';
+
+    if (/connection closed|not connected|closed/i.test(inner))
+      return 'Conta WhatsApp desconectada.\n\nVá em "Contas WA" → reconecte a conta e tente novamente.';
     if (/rate.?limit|too many/i.test(inner))
       return 'Muitas mensagens em pouco tempo (rate limit). Aumente o intervalo entre envios.';
-    if (/invalid|not exist/i.test(inner))
-      return 'Número inválido ou não existe no WhatsApp.';
-    if (inner) return inner;
+    if (/invalid.*number|not.*whatsapp|not exist/i.test(inner))
+      return 'Número inválido ou não cadastrado no WhatsApp.';
+    if (/unauthorized|not authorized|apikey/i.test(inner))
+      return 'Chave de API inválida. Verifique EVOLUTION_API_KEY nas configurações.';
+    if (/não autorizado|login/i.test(inner))
+      return 'Sessão expirada. Recarregue a página e faça login novamente.';
+    if (inner) return inner + http;
   } catch {}
-  return rawMsg || 'Erro desconhecido';
+  return (rawMsg ? String(rawMsg).slice(0, 300) : '') || 'Erro desconhecido';
 }
 
 function fmtSecs(s) {
@@ -3532,7 +3540,6 @@ function dispGoto(i) { dispState.current = i; renderDisparoQueue(); }
 async function dispSendViaApi(leadId) {
   const lead = dispState.queue.find(l => l.id === leadId);
   if (!lead) return;
-  // always read the live dropdown in case user changed it
   const sel = document.getElementById('queueWaInstance');
   const instance = (sel ? sel.value : dispState.instance) || dispState.instance;
   if (!instance) { alert('Selecione uma conta WhatsApp conectada'); return; }
@@ -3553,7 +3560,9 @@ async function dispSendViaApi(leadId) {
     addDispHistoryEntry({ instance, leadId, leadName: lead.nome, tel: lead.tel, success: false, error: friendlyMsg });
     saveDispHistory();
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar agora'; }
-    alert('⚠️ Erro ao enviar para ' + lead.nome + ':\n\n' + friendlyMsg);
+    // Mostra erro com detalhes para diagnóstico
+    const detail = e.message && e.message !== friendlyMsg ? `\n\n[Detalhe técnico: ${e.message.slice(0,200)}]` : '';
+    alert('⚠️ Erro ao enviar para ' + lead.nome + ':\n\n' + friendlyMsg + detail);
   }
 }
 
