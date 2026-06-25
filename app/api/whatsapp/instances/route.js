@@ -42,12 +42,15 @@ export async function DELETE(req) {
   if (!name) return Response.json({ error: 'Nome obrigatório' }, { status: 400 });
   try {
     // Tenta logout primeiro (ignora erro — pode já estar desconectada)
-    await fetch(`${EVO_URL}/instance/logout/${name}`, {
+    await fetch(`${EVO_URL}/instance/logout/${encodeURIComponent(name)}`, {
       method: 'DELETE', headers: evoHeaders(),
     }).catch(() => {});
 
+    // Aguarda um momento para o servidor processar o logout
+    await new Promise(r => setTimeout(r, 1000));
+
     // Deleta a instância
-    const res = await fetch(`${EVO_URL}/instance/delete/${name}`, {
+    const res = await fetch(`${EVO_URL}/instance/delete/${encodeURIComponent(name)}`, {
       method: 'DELETE', headers: evoHeaders(),
     });
     const data = await res.json().catch(() => ({}));

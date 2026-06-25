@@ -50,7 +50,7 @@ export async function POST(req, { params }) {
   const phone = (body.phone || '').replace(/\D/g, '');
   if (!phone) return Response.json({ error: 'phone obrigatório' }, { status: 400 });
   try {
-    const res = await fetch(`${EVO_URL}/instance/pairingCode/${name}`, {
+    const res = await fetch(`${EVO_URL}/instance/pairingCode/${encodeURIComponent(name)}`, {
       method: 'POST',
       headers: evoHeaders(),
       body: JSON.stringify({ number: phone }),
