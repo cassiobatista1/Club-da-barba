@@ -4041,46 +4041,29 @@ async function waPairingCode(name) {
   const digits = phone.replace(/\D/g,'');
   if (digits.length < 10) { alert('Número inválido. Digite DDD + número (ex: 11999998888)'); return; }
   const fullPhone = digits.startsWith('55') ? digits : '55' + digits;
-  if (!confirm(`Reconectar "${name}" com o número ${fullPhone}?\n\nA conta será desconectada e reconfigurada.`)) return;
+  if (!confirm(`Reconectar "${waDisplayName(name)}" com o número ${fullPhone}?\n\nA conta será desconectada para gerar um novo código.`)) return;
 
   if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Desconectando conta...</div>`;
   try {
-    // 1. Logout
+    // 1. Logout (ignora erro — pode já estar desconectada)
     await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=disconnect`).catch(() => {});
+    await new Promise(r => setTimeout(r, 2500));
+
+    // 2. Coloca a instância em modo "connecting" para gerar QR/código
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Iniciando conexão...</div>`;
+    const connectRes = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=qrcode`);
+    // Salva QR como fallback caso pairing code não funcione
+    const fallbackBase64 = connectRes?.base64 || null;
     await new Promise(r => setTimeout(r, 2000));
 
-    // 2. Delete
-    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Removendo instância...</div>`;
-    await api(`/api/whatsapp/instances?name=${encodeURIComponent(name)}`, 'DELETE').catch(() => {});
-    await new Promise(r => setTimeout(r, 3000));
-
-    // 3. Verifica se foi realmente removida
-    const instances = await api('/api/whatsapp/instances').catch(() => []);
-    const stillExists = (Array.isArray(instances) ? instances : []).some(inst => {
-      const n = inst.instance?.instanceName || inst.instanceName || inst.name || '';
-      return n.toLowerCase() === name.toLowerCase();
-    });
-
-    if (stillExists) {
-      if (qrEl) qrEl.innerHTML = `
-        <div class="wa-qr-msg" style="color:var(--danger)">
-          ⚠️ Não foi possível remover esta instância do servidor.<br><br>
-          <b>Solução:</b> Clique em <b>📷 Reconectar / QR Code</b> (na mesma carta) e peça para outra pessoa escanear o QR com o celular.<br><br>
-          <button class="btn btn-primary" style="font-size:12px;margin-top:8px" onclick="waConnect('${name}')">📷 Gerar QR Code agora</button>
-        </div>`;
-      return;
-    }
-
-    // 4. Cria com número vinculado
-    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Criando nova instância com número vinculado...</div>`;
-    const created = await api('/api/whatsapp/instances', 'POST', { name, phone: fullPhone });
-    if (created.error && !created.instance) throw new Error(created.error);
-
-    // 5. Aguarda inicialização e busca código
+    // 3. Tenta obter código de pareamento (número de telefone em vez de câmera)
     if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
-    await new Promise(r => setTimeout(r, 3000));
-    const res = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=qrcode`);
-    const code = res.pairingCode;
+    let code = null;
+    try {
+      const pairRes = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}`, 'POST', { phone: fullPhone });
+      code = pairRes?.pairingCode || pairRes?.code || null;
+    } catch(_) { /* endpoint pode não existir nesta versão da API */ }
+
     if (code) {
       if (qrEl) qrEl.innerHTML = `
         <div style="text-align:center;padding:16px">
@@ -4092,14 +4075,27 @@ async function waPairingCode(name) {
           </div>
         </div>`;
       waStartPolling(name);
-    } else if (res.base64) {
-      const src = res.base64.startsWith('data:') ? res.base64 : `data:image/png;base64,${res.base64}`;
+    } else if (fallbackBase64) {
+      // Pairing code não disponível — usa QR code que já foi gerado
+      const src = fallbackBase64.startsWith('data:') ? fallbackBase64 : `data:image/png;base64,${fallbackBase64}`;
       if (qrEl) qrEl.innerHTML = `
-        <div class="wa-qr-msg" style="color:var(--gold);margin-bottom:8px">⚠ Use o QR Code abaixo:</div>
+        <div class="wa-qr-msg" style="color:var(--gold);margin-bottom:6px">📷 Escaneie o QR Code com o celular:</div>
         <div class="wa-qr"><img src="${src}" alt="QR Code"/></div>`;
       waStartPolling(name);
+    } else if (connectRes?.pairingCode) {
+      // A própria resposta do connect já tinha código
+      if (qrEl) qrEl.innerHTML = `
+        <div style="text-align:center;padding:16px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">CÓDIGO DE PAREAMENTO</div>
+          <div style="font-size:36px;font-weight:900;letter-spacing:8px;font-family:'DM Mono',monospace;color:var(--primary)">${escHtml(connectRes.pairingCode)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
+            WhatsApp → <b>Configurações</b> → <b>Dispositivos conectados</b><br>
+            → <b>Conectar dispositivo</b> → <b>Conectar com número de telefone</b>
+          </div>
+        </div>`;
+      waStartPolling(name);
     } else {
-      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Sem código na resposta. Tente "📷 Reconectar / QR Code".</div>`;
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Sem código ou QR Code na resposta do servidor. Tente novamente.</div>`;
     }
   } catch(e) {
     if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">${escHtml(_evoErrMsg(e.message).split('\n')[0])}</div>`;
