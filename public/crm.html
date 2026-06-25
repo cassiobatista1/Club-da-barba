@@ -4092,7 +4092,6 @@ async function waPairingCode(name) {
           </div>
         </div>`;
       waStartPolling(name);
-      await waLoadInstances();
     } else if (res.base64) {
       const src = res.base64.startsWith('data:') ? res.base64 : `data:image/png;base64,${res.base64}`;
       if (qrEl) qrEl.innerHTML = `
@@ -4112,16 +4111,16 @@ function waStartPolling(name) {
   let tries = 0;
   _waQrPollers[name] = setInterval(async () => {
     tries++;
-    if (tries > 30) { clearInterval(_waQrPollers[name]); return; }
+    if (tries > 60) { clearInterval(_waQrPollers[name]); return; }
     try {
-      const res = await api(`/api/whatsapp/instances/${name}?action=status`);
+      const res = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=status`);
       const state = res.instance?.state || res.state;
       if (state === 'open') {
         clearInterval(_waQrPollers[name]);
         await waLoadInstances();
       }
     } catch(e) {}
-  }, 4000);
+  }, 5000);
 }
 
 async function waDisconnect(name) {
