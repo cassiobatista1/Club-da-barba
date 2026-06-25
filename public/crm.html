@@ -3935,7 +3935,8 @@ function waRenderGrid() {
       </div>
       <div id="waQr-${name}">${state === 'open' ? `<div class="wa-qr-msg" style="color:var(--green)">✅ WhatsApp conectado e pronto para uso</div>` : `<div class="wa-qr-msg">Clique em "Conectar" para gerar o QR Code</div>`}</div>
       <div class="wa-actions">
-        ${state !== 'open' ? `<button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Conectar / QR Code</button><button class="wa-btn-sm wa-btn-connect" onclick="waPairingCode('${name}')" style="background:var(--accent2,#7c5cbf)">📱 Código (sem câmera)</button>` : ''}
+        <button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Reconectar / QR Code</button>
+        <button class="wa-btn-sm wa-btn-connect" onclick="waPairingCode('${name}')" style="background:var(--accent2,#7c5cbf)">📱 Código (sem câmera)</button>
         ${state === 'open' ? `<button class="wa-btn-sm wa-btn-disconnect" onclick="waDisconnect('${name}')">⏏ Desconectar</button>` : ''}
         <button class="wa-btn-sm wa-btn-delete" onclick="waDelete('${name}')">🗑 Remover</button>
       </div>
@@ -4049,16 +4050,24 @@ async function waDisconnect(name) {
   try {
     await api(`/api/whatsapp/instances/${name}?action=disconnect`);
     showToast(`✓ Conta "${name}" desconectada`, '#CC6600');
-    await waLoadInstances();
   } catch(e) {
-    // "Connection Closed" = já estava desconectada internamente — tratar como sucesso
-    if (/connection closed|error connection/i.test(e.message)) {
-      showToast(`ℹ️ Conta "${name}" já estava desconectada — atualizando...`, '#CC6600');
-      await waLoadInstances();
-    } else {
+    // "Connection Closed" = conexão já estava morta internamente — tudo bem, já está desconectada
+    if (!/connection closed|error connection/i.test(e.message)) {
       alert('Erro ao desconectar:\n\n' + _evoErrMsg(e.message));
+      return;
     }
+    showToast(`ℹ️ Conta "${name}" já estava desconectada`, '#CC6600');
   }
+  // Força estado local para 'close' imediatamente sem esperar o servidor (que pode ter estado desatualizado)
+  _waInstances = _waInstances.map(inst => {
+    const n = inst.instance?.instanceName || inst.instanceName || inst.name;
+    if (n !== name) return inst;
+    if (inst.instance) return { ...inst, instance: { ...inst.instance, state: 'close' } };
+    return { ...inst, connectionStatus: 'close' };
+  });
+  waRenderGrid();
+  // Sincroniza com o servidor em background
+  setTimeout(() => waLoadInstances(), 2000);
 }
 
 async function waDelete(name) {
