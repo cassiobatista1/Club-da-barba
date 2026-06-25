@@ -41,10 +41,17 @@ export async function DELETE(req) {
   const name = searchParams.get('name');
   if (!name) return Response.json({ error: 'Nome obrigatório' }, { status: 400 });
   try {
+    // Tenta logout primeiro (ignora erro — pode já estar desconectada)
+    await fetch(`${EVO_URL}/instance/logout/${name}`, {
+      method: 'DELETE', headers: evoHeaders(),
+    }).catch(() => {});
+
+    // Deleta a instância
     const res = await fetch(`${EVO_URL}/instance/delete/${name}`, {
       method: 'DELETE', headers: evoHeaders(),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return Response.json(data, { status: res.status });
     return Response.json(data);
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });

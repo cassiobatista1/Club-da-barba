@@ -4071,11 +4071,20 @@ async function waDisconnect(name) {
 }
 
 async function waDelete(name) {
-  if (!confirm(`Remover a conta "${name}" permanentemente?`)) return;
+  if (!confirm(`Remover a conta "${name}" permanentemente?\n\nIsso vai desconectar e apagar a instância do servidor.`)) return;
+  // Remove da lista local imediatamente para feedback visual
+  _waInstances = _waInstances.filter(inst => {
+    const n = inst.instance?.instanceName || inst.instanceName || inst.name;
+    return n !== name;
+  });
+  waRenderGrid();
   try {
     await api(`/api/whatsapp/instances?name=${encodeURIComponent(name)}`, 'DELETE');
     await waLoadInstances();
-  } catch(e) { alert('Erro: ' + e.message); }
+  } catch(e) {
+    showToast(`⚠️ Erro ao remover "${name}": ${_evoErrMsg(e.message).split('\n')[0]}`, '#CC4400');
+    await waLoadInstances(); // recarrega estado real
+  }
 }
 
 function waGetConnectedInstances() {
