@@ -3367,11 +3367,27 @@ async function startDisparoAuto() {
     const _icon = _autoStopFlag ? '⏹' : _fail > 0 ? '⚠️' : '✅';
     showToast(`${_icon} Disparo concluído — ${_ok} enviados${_fail > 0 ? `, ${_fail} falhas` : ''} via ${instance}`);
   }
-  const failedHtml = failedLeads.length > 0 ? `
-    <div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
+  const failedHtml = failedLeads.length > 0 ? (() => {
+    // Traduz cada erro na hora de exibir (garante mensagem amigável mesmo se _evoErrMsg falhou antes)
+    const rows = failedLeads.map(f => {
+      const msg = _evoErrMsg(f.erro);
+      const isDisconnect = /desconectada|connection closed|not connected/i.test(f.erro + msg);
+      return `<div style="font-size:11px;margin-bottom:8px;border-bottom:1px solid rgba(255,51,68,0.1);padding-bottom:8px">
+        <span style="font-weight:600">${escHtml(f.nome)}</span>
+        <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;margin-left:6px">${f.tel}</span>
+        <div style="color:var(--red);font-size:11px;margin-top:3px;line-height:1.4">${escHtml(msg.split('\n')[0])}</div>
+        ${isDisconnect ? `<div style="margin-top:4px"><button class="btn btn-ghost" style="font-size:10px;padding:3px 8px" onclick="nav('whatsapp')">📱 Ir para Contas WA</button></div>` : ''}
+      </div>`;
+    });
+    const hasDisconnect = failedLeads.some(f => /connection closed|closed/i.test(f.erro));
+    const reconnectNote = hasDisconnect
+      ? `<div style="font-size:11px;color:var(--gold);margin-bottom:10px">⚡ Reconecte a conta em <b>Contas WA</b> e tente novamente.</div>`
+      : '';
+    return `<div style="margin-top:16px;background:rgba(255,51,68,0.08);border:1px solid rgba(255,51,68,0.25);border-radius:10px;padding:14px 16px;text-align:left;max-width:440px;width:100%">
       <div style="font-size:11px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠️ ${failedLeads.length} falha${failedLeads.length>1?'s':''} no envio</div>
-      ${failedLeads.map(f=>`<div style="font-size:11px;margin-bottom:6px;border-bottom:1px solid rgba(255,51,68,0.1);padding-bottom:6px"><span style="font-weight:600">${escHtml(f.nome)}</span><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;margin-left:6px">${f.tel}</span><div style="color:var(--red);font-size:10px;margin-top:2px">${escHtml(f.erro)}</div></div>`).join('')}
-    </div>` : '';
+      ${reconnectNote}${rows.join('')}
+    </div>`;
+  })() : '';
   root.innerHTML = `
     <div class="disp-panel" style="max-width:480px;margin:40px auto">
       <div class="disp-summary">
