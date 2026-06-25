@@ -4041,12 +4041,22 @@ async function waPairingCode(name) {
   const digits = phone.replace(/\D/g,'');
   if (digits.length < 10) { alert('Número inválido. Digite DDD + número (ex: 11999998888)'); return; }
   const fullPhone = digits.startsWith('55') ? digits : '55' + digits;
+  if (!confirm(`Reconectar "${name}" com o número ${fullPhone}?\n\nA conta será desconectada e reconfigurada para gerar o código de pareamento.`)) return;
 
-  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
+  if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Desconectando conta...</div>`;
   try {
-    // Usa a instância existente diretamente — sem deletar/recriar
-    const res = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}`, 'POST', { phone: fullPhone });
-    if (res.error && !res.pairingCode) throw new Error(JSON.stringify(res));
+    // DELETE faz logout + delete (nossa rota já trata isso)
+    await api(`/api/whatsapp/instances?name=${encodeURIComponent(name)}`, 'DELETE').catch(() => {});
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Recriando instância com número vinculado...</div>`;
+    await new Promise(r => setTimeout(r, 1500));
+
+    const created = await api('/api/whatsapp/instances', 'POST', { name, phone: fullPhone });
+    if (created.error && !created.instance) throw new Error(created.error);
+
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
+    await new Promise(r => setTimeout(r, 2500));
+
+    const res = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=qrcode`);
     const code = res.pairingCode;
     if (code) {
       if (qrEl) qrEl.innerHTML = `
@@ -4062,7 +4072,7 @@ async function waPairingCode(name) {
     } else if (res.base64) {
       const src = res.base64.startsWith('data:') ? res.base64 : `data:image/png;base64,${res.base64}`;
       if (qrEl) qrEl.innerHTML = `
-        <div class="wa-qr-msg" style="color:var(--gold);margin-bottom:8px">⚠ Código não disponível — escaneie o QR:</div>
+        <div class="wa-qr-msg" style="color:var(--gold);margin-bottom:8px">⚠ Use o QR Code abaixo:</div>
         <div class="wa-qr"><img src="${src}" alt="QR Code"/></div>`;
       waStartPolling(name);
     } else {
