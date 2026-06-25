@@ -13,12 +13,29 @@ export async function GET(req, { params }) {
 
   try {
     let url;
-    if (action === 'qrcode') url = `${EVO_URL}/instance/connect/${encodeURIComponent(name)}`;
-    else if (action === 'disconnect') url = `${EVO_URL}/instance/logout/${encodeURIComponent(name)}`;
-    else url = `${EVO_URL}/instance/connectionState/${encodeURIComponent(name)}`;
+    let method = 'GET';
+    if (action === 'qrcode') {
+      url = `${EVO_URL}/instance/connect/${encodeURIComponent(name)}`;
+    } else if (action === 'disconnect') {
+      // Evolution API v2 usa DELETE para logout
+      url = `${EVO_URL}/instance/logout/${encodeURIComponent(name)}`;
+      method = 'DELETE';
+    } else {
+      url = `${EVO_URL}/instance/connectionState/${encodeURIComponent(name)}`;
+    }
 
-    const res = await fetch(url, { headers: evoHeaders() });
-    const data = await res.json();
+    const res = await fetch(url, { method, headers: evoHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      // No logout: "Connection Closed" significa que já estava desconectada — tratar como sucesso
+      if (action === 'disconnect') {
+        const msg = JSON.stringify(data?.response?.message || data?.message || '');
+        if (/connection closed|error connection/i.test(msg)) {
+          return Response.json({ ok: true, alreadyDisconnected: true });
+        }
+      }
+      return Response.json(data, { status: res.status });
+    }
     return Response.json(data);
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });

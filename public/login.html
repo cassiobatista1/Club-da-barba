@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOOVI CRM — Login</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --primary: #5A78FF;
+  --dark: #0C0C14;
+  --mid: #13131C;
+  --card: #1A1A26;
+  --border: #26263A;
+  --text: #E9EBFF;
+  --muted: #6868AA;
+  --green: #00C87A;
+  --danger: #FF3344;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(90,120,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(90,120,255,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.logo h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+.logo h1 span { color: var(--primary); }
+.logo p {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+.form-input {
+  width: 100%;
+  background: var(--mid);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus {
+  border-color: var(--primary);
+}
+.form-input::placeholder { color: var(--muted); }
+
+.btn-login {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.15s, transform 0.1s;
+  position: relative;
+}
+.btn-login:hover { opacity: 0.9; }
+.btn-login:active { transform: scale(0.98); }
+.btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error-msg {
+  background: rgba(255,51,68,0.12);
+  border: 1px solid rgba(255,51,68,0.3);
+  color: #FF6677;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 14px;
+  display: none;
+}
+.error-msg.visible { display: block; }
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.footer-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 24px;
+}
+</style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="logo">
+    <h1>L<span>OO</span>VI</h1>
+    <p>CRM — Gestão de Leads</p>
+  </div>
+
+  <form id="loginForm" onsubmit="doLogin(event)">
+    <div class="form-group">
+      <label class="form-label" for="password">Senha de acesso</label>
+      <input
+        class="form-input"
+        type="password"
+        id="password"
+        placeholder="Digite sua senha..."
+        autocomplete="current-password"
+        autofocus
+      >
+    </div>
+
+    <button class="btn-login" type="submit" id="btnLogin">Entrar no painel</button>
+  </form>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <p class="footer-note">Acesso restrito • LOOVI CRM</p>
+</div>
+
+<script>
+async function doLogin(e) {
+  e.preventDefault();
+  const password = document.getElementById('password').value.trim();
+  const btn      = document.getElementById('btnLogin');
+  const errEl    = document.getElementById('errorMsg');
+
+  if (!password) {
+    errEl.textContent = 'Digite a senha.';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verificando...';
+  errEl.classList.remove('visible');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+
+    if (res.ok) {
+      btn.innerHTML = '✓ Acesso liberado!';
+      window.location.href = '/crm.html';
+    } else {
+      const data = await res.json().catch(() => ({}));
+      errEl.textContent = data.error || 'Senha incorreta. Tente novamente.';
+      errEl.classList.add('visible');
+      btn.disabled = false;
+      btn.textContent = 'Entrar no painel';
+      document.getElementById('password').value = '';
+      document.getElementById('password').focus();
+    }
+  } catch {
+    errEl.textContent = 'Erro de conexão. Verifique sua internet.';
+    errEl.classList.add('visible');
+    btn.disabled = false;
+    btn.textContent = 'Entrar no painel';
+  }
+}
+</script>
+</body>
+</html>
