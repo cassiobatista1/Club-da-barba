@@ -13,12 +13,20 @@ export async function GET(req, { params }) {
 
   try {
     let url;
-    if (action === 'qrcode') url = `${EVO_URL}/instance/connect/${encodeURIComponent(name)}`;
-    else if (action === 'disconnect') url = `${EVO_URL}/instance/logout/${encodeURIComponent(name)}`;
-    else url = `${EVO_URL}/instance/connectionState/${encodeURIComponent(name)}`;
+    let method = 'GET';
+    if (action === 'qrcode') {
+      url = `${EVO_URL}/instance/connect/${encodeURIComponent(name)}`;
+    } else if (action === 'disconnect') {
+      // Evolution API v2 usa DELETE para logout
+      url = `${EVO_URL}/instance/logout/${encodeURIComponent(name)}`;
+      method = 'DELETE';
+    } else {
+      url = `${EVO_URL}/instance/connectionState/${encodeURIComponent(name)}`;
+    }
 
-    const res = await fetch(url, { headers: evoHeaders() });
-    const data = await res.json();
+    const res = await fetch(url, { method, headers: evoHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return Response.json(data, { status: res.status });
     return Response.json(data);
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
