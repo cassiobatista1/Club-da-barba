@@ -3883,6 +3883,53 @@ async function syncWonLeadsToVendas() {
 // ── WHATSAPP INSTANCES ────────────────────────────────
 let _waInstances = [];
 let _waQrPollers = {};
+let _waAliases = {}; // { instanceName: displayName }
+
+function waDisplayName(name) { return _waAliases[name] || name; }
+
+async function loadWaAliases() {
+  try {
+    const d = await api('/api/settings?key=waAliases');
+    if (d && typeof d === 'object' && !Array.isArray(d)) _waAliases = d;
+  } catch {}
+}
+async function saveWaAliases() {
+  await api('/api/settings?key=waAliases', 'PUT', _waAliases).catch(() => {});
+}
+
+function waOpenEdit(name) {
+  document.getElementById('waEditModal')?.remove();
+  const display = waDisplayName(name);
+  const modal = document.createElement('div');
+  modal.id = 'waEditModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px 28px 22px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,0.5)">
+      <div style="font-size:14px;font-weight:700;margin-bottom:18px">✏️ Editar conta — <span style="color:var(--primary)">${name}</span></div>
+      <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Nome exibido no painel</label>
+      <input id="waEditAlias" class="form-input" style="margin-top:6px;margin-bottom:16px;width:100%" placeholder="Ex: DDD Minas, Vendas, WhatsApp 1..." value="${escHtml(display)}">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px">
+        <b style="color:var(--text)">Trocar número conectado:</b><br>
+        Feche esta janela e clique em <b>📷 Reconectar / QR Code</b> ou <b>📱 Código (sem câmera)</b> — o WhatsApp atual desconecta automaticamente quando um novo aparelho conectar.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="document.getElementById('waEditModal').remove()">Cancelar</button>
+        <button class="btn btn-primary" onclick="waSaveEdit('${name}')">Salvar nome</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  setTimeout(() => document.getElementById('waEditAlias')?.focus(), 50);
+}
+
+async function waSaveEdit(name) {
+  const alias = (document.getElementById('waEditAlias')?.value || '').trim();
+  if (alias && alias !== name) _waAliases[name] = alias;
+  else delete _waAliases[name];
+  await saveWaAliases();
+  document.getElementById('waEditModal')?.remove();
+  waRenderGrid();
+}
 
 async function renderWaPage() {
   const root = document.getElementById('wa-root');
@@ -3895,7 +3942,7 @@ async function renderWaPage() {
       <button class="btn btn-primary" onclick="waAddInstance()">+ Nova Conta</button>
     </div>
     <div class="wa-grid" id="waGrid"><div style="color:var(--muted);font-size:13px;padding:24px">Carregando...</div></div>`;
-  await waLoadInstances();
+  await Promise.all([loadWaAliases(), waLoadInstances()]);
 }
 
 async function waLoadInstances() {
@@ -3925,11 +3972,17 @@ function waRenderGrid() {
     const state = inst.instance?.state || inst.connectionStatus || 'close';
     const stateLabel = state === 'open' ? '● CONECTADO' : state === 'connecting' ? '◌ CONECTANDO...' : '○ DESCONECTADO';
     const stateCls = state === 'open' ? 'open' : state === 'connecting' ? 'connecting' : 'close';
+    const displayName = waDisplayName(name);
+    const hasAlias = displayName !== name;
     return `<div class="wa-card" id="waCard-${name}">
       <div class="wa-card-header">
         <div class="wa-avatar">📱</div>
-        <div>
-          <div class="wa-name">${name}</div>
+        <div style="flex:1;min-width:0">
+          <div class="wa-name" style="display:flex;align-items:center;gap:6px">
+            <span>${escHtml(displayName)}</span>
+            <button onclick="waOpenEdit('${name}')" title="Editar nome" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0;line-height:1">✏️</button>
+          </div>
+          ${hasAlias ? `<div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">${name}</div>` : ''}
           <div class="wa-status ${stateCls}">${stateLabel}</div>
         </div>
       </div>
@@ -3938,6 +3991,7 @@ function waRenderGrid() {
         <button class="wa-btn-sm wa-btn-connect" onclick="waConnect('${name}')">📷 Reconectar / QR Code</button>
         <button class="wa-btn-sm wa-btn-connect" onclick="waPairingCode('${name}')" style="background:var(--accent2,#7c5cbf)">📱 Código (sem câmera)</button>
         ${state === 'open' ? `<button class="wa-btn-sm wa-btn-disconnect" onclick="waDisconnect('${name}')">⏏ Desconectar</button>` : ''}
+        <button class="wa-btn-sm" style="background:rgba(90,120,255,0.15);color:var(--primary);border:1px solid rgba(90,120,255,0.3)" onclick="waOpenEdit('${name}')">✏️ Editar</button>
         <button class="wa-btn-sm wa-btn-delete" onclick="waDelete('${name}')">🗑 Remover</button>
       </div>
     </div>`;
