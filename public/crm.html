@@ -4041,64 +4041,69 @@ async function waPairingCode(name) {
   const digits = phone.replace(/\D/g,'');
   if (digits.length < 10) { alert('Número inválido. Digite DDD + número (ex: 11999998888)'); return; }
   const fullPhone = digits.startsWith('55') ? digits : '55' + digits;
-  if (!confirm(`Reconectar "${waDisplayName(name)}" com o número ${fullPhone}?\n\nA conta será desconectada para gerar um novo código.`)) return;
+  if (!confirm(`Reconectar "${waDisplayName(name)}" com o número ${fullPhone}?\n\nA conta será desconectada para gerar o código de pareamento.`)) return;
+
+  const showCode = (code) => {
+    if (qrEl) qrEl.innerHTML = `
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Código de Pareamento</div>
+        <div style="font-size:38px;font-weight:900;letter-spacing:10px;font-family:monospace;color:var(--primary);background:rgba(90,120,255,0.08);border-radius:10px;padding:12px 8px">${escHtml(code)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7">
+          No celular: <b>WhatsApp → ⋮ → Dispositivos conectados</b><br>
+          → <b>Conectar dispositivo</b> → <b>Conectar com número de telefone</b><br>
+          <span style="color:var(--danger);font-size:11px">⏱ O código expira em ~60 segundos</span>
+        </div>
+      </div>`;
+    waStartPolling(name);
+  };
 
   if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Desconectando conta...</div>`;
   try {
     // 1. Logout (ignora erro — pode já estar desconectada)
     await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=disconnect`).catch(() => {});
-    await new Promise(r => setTimeout(r, 2500));
+    await new Promise(r => setTimeout(r, 3000));
 
-    // 2. Coloca a instância em modo "connecting" para gerar QR/código
-    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Iniciando conexão...</div>`;
+    // 2. Inicia sessão WhatsApp Web (coloca em estado "connecting")
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Iniciando sessão...</div>`;
     const connectRes = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}?action=qrcode`);
-    // Salva QR como fallback caso pairing code não funcione
-    const fallbackBase64 = connectRes?.base64 || null;
-    await new Promise(r => setTimeout(r, 2000));
 
-    // 3. Tenta obter código de pareamento (número de telefone em vez de câmera)
+    // Se a resposta do connect já tiver o código de pareamento, usa imediatamente
+    if (connectRes?.pairingCode) { showCode(connectRes.pairingCode); return; }
+
+    // Salva base64 como fallback QR
+    const fallbackBase64 = connectRes?.base64 || null;
+
+    // 3. Aguarda o servidor estabilizar antes de pedir o código
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Aguardando sessão iniciar (${fullPhone})...</div>`;
+    await new Promise(r => setTimeout(r, 4000));
+
+    // 4. Pede o código de pareamento com o número vinculado
     if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg">⏳ Gerando código de pareamento...</div>`;
     let code = null;
+    let pairError = null;
     try {
       const pairRes = await api(`/api/whatsapp/instances/${encodeURIComponent(name)}`, 'POST', { phone: fullPhone });
       code = pairRes?.pairingCode || pairRes?.code || null;
-    } catch(_) { /* endpoint pode não existir nesta versão da API */ }
+      if (!code) pairError = pairRes?.message || pairRes?.error || JSON.stringify(pairRes);
+    } catch(e) { pairError = e.message; }
 
     if (code) {
-      if (qrEl) qrEl.innerHTML = `
-        <div style="text-align:center;padding:16px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">CÓDIGO DE PAREAMENTO</div>
-          <div style="font-size:36px;font-weight:900;letter-spacing:8px;font-family:'DM Mono',monospace;color:var(--primary)">${escHtml(code)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
-            WhatsApp → <b>Configurações</b> → <b>Dispositivos conectados</b><br>
-            → <b>Conectar dispositivo</b> → <b>Conectar com número de telefone</b>
-          </div>
-        </div>`;
-      waStartPolling(name);
+      showCode(code);
     } else if (fallbackBase64) {
-      // Pairing code não disponível — usa QR code que já foi gerado
+      // Pairing code não disponível nesta versão da API — mostra QR como alternativa
       const src = fallbackBase64.startsWith('data:') ? fallbackBase64 : `data:image/png;base64,${fallbackBase64}`;
       if (qrEl) qrEl.innerHTML = `
-        <div class="wa-qr-msg" style="color:var(--gold);margin-bottom:6px">📷 Escaneie o QR Code com o celular:</div>
-        <div class="wa-qr"><img src="${src}" alt="QR Code"/></div>`;
-      waStartPolling(name);
-    } else if (connectRes?.pairingCode) {
-      // A própria resposta do connect já tinha código
-      if (qrEl) qrEl.innerHTML = `
-        <div style="text-align:center;padding:16px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">CÓDIGO DE PAREAMENTO</div>
-          <div style="font-size:36px;font-weight:900;letter-spacing:8px;font-family:'DM Mono',monospace;color:var(--primary)">${escHtml(connectRes.pairingCode)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
-            WhatsApp → <b>Configurações</b> → <b>Dispositivos conectados</b><br>
-            → <b>Conectar dispositivo</b> → <b>Conectar com número de telefone</b>
-          </div>
+        <div style="text-align:center">
+          <div class="wa-qr-msg" style="color:var(--gold);margin-bottom:8px">⚠ Código não disponível — escaneie o QR Code:</div>
+          <div class="wa-qr"><img src="${src}" alt="QR Code"/></div>
+          ${pairError ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;word-break:break-all">Detalhe: ${escHtml(pairError)}</div>` : ''}
         </div>`;
       waStartPolling(name);
     } else {
-      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Sem código ou QR Code na resposta do servidor. Tente novamente.</div>`;
+      if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">Sem resposta do servidor.${pairError ? '<br><small>' + escHtml(pairError) + '</small>' : ''}<br><br><button class="btn btn-primary" style="font-size:12px" onclick="waPairingCode('${name}')">↺ Tentar novamente</button></div>`;
     }
   } catch(e) {
-    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">${escHtml(_evoErrMsg(e.message).split('\n')[0])}</div>`;
+    if (qrEl) qrEl.innerHTML = `<div class="wa-qr-msg" style="color:var(--danger)">${escHtml(_evoErrMsg(e.message).split('\n')[0])}<br><br><button class="btn btn-primary" style="font-size:12px" onclick="waPairingCode('${name}')">↺ Tentar novamente</button></div>`;
   }
 }
 

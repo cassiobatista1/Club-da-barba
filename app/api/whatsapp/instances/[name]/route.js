@@ -55,8 +55,10 @@ export async function POST(req, { params }) {
       headers: evoHeaders(),
       body: JSON.stringify({ number: phone }),
     });
-    const data = await res.json();
-    return Response.json(data, { status: res.ok ? 200 : 400 });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { error: text.slice(0, 200) }; }
+    return Response.json(data, { status: res.ok ? 200 : res.status });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
