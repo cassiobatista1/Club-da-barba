@@ -26,7 +26,16 @@ export async function GET(req, { params }) {
 
     const res = await fetch(url, { method, headers: evoHeaders() });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) return Response.json(data, { status: res.status });
+    if (!res.ok) {
+      // No logout: "Connection Closed" significa que já estava desconectada — tratar como sucesso
+      if (action === 'disconnect') {
+        const msg = JSON.stringify(data?.response?.message || data?.message || '');
+        if (/connection closed|error connection/i.test(msg)) {
+          return Response.json({ ok: true, alreadyDisconnected: true });
+        }
+      }
+      return Response.json(data, { status: res.status });
+    }
     return Response.json(data);
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });

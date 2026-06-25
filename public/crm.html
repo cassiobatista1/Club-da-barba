@@ -4048,8 +4048,17 @@ async function waDisconnect(name) {
   if (!confirm(`Desconectar a conta "${name}"?`)) return;
   try {
     await api(`/api/whatsapp/instances/${name}?action=disconnect`);
+    showToast(`✓ Conta "${name}" desconectada`, '#CC6600');
     await waLoadInstances();
-  } catch(e) { alert('Erro: ' + e.message); }
+  } catch(e) {
+    // "Connection Closed" = já estava desconectada internamente — tratar como sucesso
+    if (/connection closed|error connection/i.test(e.message)) {
+      showToast(`ℹ️ Conta "${name}" já estava desconectada — atualizando...`, '#CC6600');
+      await waLoadInstances();
+    } else {
+      alert('Erro ao desconectar:\n\n' + _evoErrMsg(e.message));
+    }
+  }
 }
 
 async function waDelete(name) {
