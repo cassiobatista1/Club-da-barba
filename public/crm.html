@@ -522,6 +522,11 @@ tbody td { padding: 12px 14px; vertical-align: middle; }
 <body>
 
 <div id="loadingBar"></div>
+<div id="dbErrorBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a0a0e;border-bottom:2px solid #ff3344;padding:10px 20px;gap:12px;align-items:center;font-size:13px;color:#ff8899">
+  <span style="font-size:16px">⚠</span>
+  <span class="db-err-msg" style="flex:1"></span>
+  <button onclick="document.getElementById('dbErrorBanner').style.display='none';loadData()" style="background:#ff3344;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">↺ Tentar novamente</button>
+</div>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
@@ -1236,6 +1241,14 @@ function hideLoading() {
 }
 
 // ── LOAD DATA ──────────────────────────────────────────
+const LS_LEADS_KEY  = 'loovi_leads_cache';
+const LS_VENDAS_KEY = 'loovi_vendas_cache';
+
+function _cacheLeads(l)  { try { localStorage.setItem(LS_LEADS_KEY,  JSON.stringify(l)); } catch {} }
+function _cacheVendas(v) { try { localStorage.setItem(LS_VENDAS_KEY, JSON.stringify(v)); } catch {} }
+function _cachedLeads()  { try { return JSON.parse(localStorage.getItem(LS_LEADS_KEY)  || 'null'); } catch { return null; } }
+function _cachedVendas() { try { return JSON.parse(localStorage.getItem(LS_VENDAS_KEY) || 'null'); } catch { return null; } }
+
 async function loadData() {
   showLoading();
   try {
@@ -1246,8 +1259,11 @@ async function loadData() {
       api('/api/settings?key=contaWaMap').catch(()=>null),
       api('/api/settings?key=lastContactedMap').catch(()=>null),
     ]);
-    leads  = leadsData  || [];
-    vendas = vendasData || [];
+    leads  = Array.isArray(leadsData)  ? leadsData  : [];
+    vendas = Array.isArray(vendasData) ? vendasData : [];
+    // Atualiza cache local sempre que o banco responder
+    if (leads.length)  _cacheLeads(leads);
+    if (vendas.length) _cacheVendas(vendas);
     // Merge helpers — combine Supabase + localStorage, never discard recent data
     const _lsWa  = () => { try { return JSON.parse(localStorage.getItem('contaWaMap_bk')  || 'null'); } catch { return null; } };
     const _lsLc  = () => { try { return JSON.parse(localStorage.getItem('lastContactedMap_bk') || 'null'); } catch { return null; } };
@@ -1282,7 +1298,22 @@ async function loadData() {
     }
   } catch(e) {
     console.error('Erro ao carregar dados:', e);
-    leads = []; vendas = [];
+    // Tenta usar cache local para não deixar a tela vazia
+    const cachedL = _cachedLeads();
+    const cachedV = _cachedVendas();
+    if (cachedL) {
+      leads  = cachedL;
+      vendas = cachedV || [];
+      showToast('⚠ Banco offline — exibindo dados em cache', '#CC6600');
+    } else {
+      leads = []; vendas = [];
+      // Mostra erro visível com botão de retry
+      const errBanner = document.getElementById('dbErrorBanner');
+      if (errBanner) {
+        errBanner.style.display = 'flex';
+        errBanner.querySelector('.db-err-msg').textContent = 'Erro ao conectar ao banco de dados: ' + (e.message || 'verifique as configurações do Supabase');
+      }
+    }
   }
   hideLoading();
   refreshAllStatusSelects();
